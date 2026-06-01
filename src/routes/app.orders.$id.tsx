@@ -41,11 +41,13 @@ const STATUS_FLOW = ["pending", "accepted", "picked_up", "in_transit", "delivere
 
 function OrderDetail() {
   const { id } = Route.useParams();
-  const nav = useNavigate();
   const { user, isDriver, isAdmin } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [body, setBody] = useState("");
+  const [myRating, setMyRating] = useState<number | null>(null);
+  const [stars, setStars] = useState(5);
+  const [comment, setComment] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Load order + messages, subscribe to realtime
