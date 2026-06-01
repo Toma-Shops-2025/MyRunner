@@ -26,6 +26,7 @@ import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -35,6 +36,11 @@ import { Route as AppReportRouteImport } from './routes/app.report'
 import { Route as AppOrdersRouteImport } from './routes/app.orders'
 import { Route as AppNewDeliveryRouteImport } from './routes/app.new-delivery'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
+import { Route as AppOrdersIdRouteImport } from './routes/app.orders.$id'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -121,6 +127,11 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccessibilityRoute = AccessibilityRouteImport.update({
   id: '/accessibility',
   path: '/accessibility',
@@ -166,11 +177,37 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AppOrdersIdRoute = AppOrdersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppOrdersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
@@ -188,17 +225,23 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/new-delivery': typeof AppNewDeliveryRoute
-  '/app/orders': typeof AppOrdersRoute
+  '/app/orders': typeof AppOrdersRouteWithChildren
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
+  '/app/orders/$id': typeof AppOrdersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
@@ -216,18 +259,24 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/new-delivery': typeof AppNewDeliveryRoute
-  '/app/orders': typeof AppOrdersRoute
+  '/app/orders': typeof AppOrdersRouteWithChildren
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
+  '/app/orders/$id': typeof AppOrdersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
@@ -245,12 +294,17 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/new-delivery': typeof AppNewDeliveryRoute
-  '/app/orders': typeof AppOrdersRoute
+  '/app/orders': typeof AppOrdersRouteWithChildren
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
+  '/app/orders/$id': typeof AppOrdersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -258,6 +312,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/accessibility'
+    | '/admin'
     | '/app'
     | '/community-guidelines'
     | '/contact'
@@ -275,17 +330,23 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin/applications'
+    | '/admin/dashboard'
+    | '/admin/orders'
+    | '/admin/reports'
     | '/app/dashboard'
     | '/app/new-delivery'
     | '/app/orders'
     | '/app/report'
     | '/app/settings'
     | '/driver/dashboard'
+    | '/app/orders/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/accessibility'
+    | '/admin'
     | '/app'
     | '/community-guidelines'
     | '/contact'
@@ -303,17 +364,23 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin/applications'
+    | '/admin/dashboard'
+    | '/admin/orders'
+    | '/admin/reports'
     | '/app/dashboard'
     | '/app/new-delivery'
     | '/app/orders'
     | '/app/report'
     | '/app/settings'
     | '/driver/dashboard'
+    | '/app/orders/$id'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/accessibility'
+    | '/admin'
     | '/app'
     | '/community-guidelines'
     | '/contact'
@@ -331,18 +398,24 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin/applications'
+    | '/admin/dashboard'
+    | '/admin/orders'
+    | '/admin/reports'
     | '/app/dashboard'
     | '/app/new-delivery'
     | '/app/orders'
     | '/app/report'
     | '/app/settings'
     | '/driver/dashboard'
+    | '/app/orders/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccessibilityRoute: typeof AccessibilityRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
   ContactRoute: typeof ContactRoute
@@ -483,6 +556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/accessibility': {
       id: '/accessibility'
       path: '/accessibility'
@@ -546,13 +626,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/applications': {
+      id: '/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AdminApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/app/orders/$id': {
+      id: '/app/orders/$id'
+      path: '/$id'
+      fullPath: '/app/orders/$id'
+      preLoaderRoute: typeof AppOrdersIdRouteImport
+      parentRoute: typeof AppOrdersRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminApplicationsRoute: typeof AdminApplicationsRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminApplicationsRoute: AdminApplicationsRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
+  AdminReportsRoute: AdminReportsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface AppOrdersRouteChildren {
+  AppOrdersIdRoute: typeof AppOrdersIdRoute
+}
+
+const AppOrdersRouteChildren: AppOrdersRouteChildren = {
+  AppOrdersIdRoute: AppOrdersIdRoute,
+}
+
+const AppOrdersRouteWithChildren = AppOrdersRoute._addFileChildren(
+  AppOrdersRouteChildren,
+)
 
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppNewDeliveryRoute: typeof AppNewDeliveryRoute
-  AppOrdersRoute: typeof AppOrdersRoute
+  AppOrdersRoute: typeof AppOrdersRouteWithChildren
   AppReportRoute: typeof AppReportRoute
   AppSettingsRoute: typeof AppSettingsRoute
 }
@@ -560,7 +703,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppNewDeliveryRoute: AppNewDeliveryRoute,
-  AppOrdersRoute: AppOrdersRoute,
+  AppOrdersRoute: AppOrdersRouteWithChildren,
   AppReportRoute: AppReportRoute,
   AppSettingsRoute: AppSettingsRoute,
 }
@@ -582,6 +725,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccessibilityRoute: AccessibilityRoute,
+  AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   CommunityGuidelinesRoute: CommunityGuidelinesRoute,
   ContactRoute: ContactRoute,
