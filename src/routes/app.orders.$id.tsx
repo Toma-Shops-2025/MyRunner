@@ -1,8 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Flag, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Send, Flag, CheckCircle2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
@@ -40,11 +41,13 @@ const STATUS_FLOW = ["pending", "accepted", "picked_up", "in_transit", "delivere
 
 function OrderDetail() {
   const { id } = Route.useParams();
-  const nav = useNavigate();
   const { user, isDriver, isAdmin } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [body, setBody] = useState("");
+  const [myRating, setMyRating] = useState<number | null>(null);
+  const [stars, setStars] = useState(5);
+  const [comment, setComment] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Load order + messages, subscribe to realtime
@@ -81,6 +84,26 @@ function OrderDetail() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
+
+  // Load existing rating I left on this order
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("ratings").select("stars").eq("order_id", id).eq("rater_id", user.id).maybeSingle()
+      .then(({ data }) => setMyRating((data as { stars: number } | null)?.stars ?? null));
+  }, [id, user]);
+
+  async function submitRating() {
+    if (!user || !order) return;
+    const rateeId = user.id === order.customer_id ? order.driver_id : order.customer_id;
+    if (!rateeId) return toast.error("No counterparty to rate");
+    const { error } = await supabase.from("ratings").insert({
+      order_id: id, rater_id: user.id, ratee_id: rateeId, stars, comment: comment.trim() || null,
+    });
+    if (error) return toast.error(error.message);
+    setMyRating(stars);
+    toast.success("Thanks for your rating");
+  }
+
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
@@ -250,6 +273,37 @@ function OrderDetail() {
       {!order.driver_id && (
         <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
           Waiting for a Runner to accept this order. Chat opens once a Runner is assigned.
+        </div>
+      )}
+
+      {/* Rating */}
+      {order.status === "delivered" && (isCustomer || isAssignedDriver) && (
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-serif text-xl">{isCustomer ? "Rate your Runner" : "Rate the customer"}</h2>
+          {myRating ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              You rated this delivery {myRating} {myRating === 1 ? "star" : "stars"}. Thanks for the feedback.
+            </p>
+          ) : (
+            <div className="mt-3 space-y-3">
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button key={n} type="button" onClick={() => setStars(n)} aria-label={`${n} stars`}>
+                    <Star className={`size-7 ${n <= stars ? "fill-gold text-gold" : "text-muted-foreground"}`} />
+                  </button>
+                ))}
+              </div>
+              <Textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Optional: leave a short comment"
+                rows={3}
+              />
+              <Button onClick={submitRating} className="bg-gold text-primary-foreground hover:bg-gold/90">
+                Submit rating
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

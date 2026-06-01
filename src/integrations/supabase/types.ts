@@ -205,6 +205,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          order_id: string
+          ratee_id: string
+          rater_id: string
+          stars: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id: string
+          ratee_id: string
+          rater_id: string
+          stars: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          ratee_id?: string
+          rater_id?: string
+          stars?: number
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           category: string
@@ -269,7 +299,14 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_rating_stats: {
+        Row: {
+          avg_stars: number | null
+          review_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
