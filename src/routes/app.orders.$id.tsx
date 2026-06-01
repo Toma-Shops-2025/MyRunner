@@ -85,6 +85,26 @@ function OrderDetail() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
+  // Load existing rating I left on this order
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("ratings").select("stars").eq("order_id", id).eq("rater_id", user.id).maybeSingle()
+      .then(({ data }) => setMyRating((data as { stars: number } | null)?.stars ?? null));
+  }, [id, user]);
+
+  async function submitRating() {
+    if (!user || !order) return;
+    const rateeId = user.id === order.customer_id ? order.driver_id : order.customer_id;
+    if (!rateeId) return toast.error("No counterparty to rate");
+    const { error } = await supabase.from("ratings").insert({
+      order_id: id, rater_id: user.id, ratee_id: rateeId, stars, comment: comment.trim() || null,
+    });
+    if (error) return toast.error(error.message);
+    setMyRating(stars);
+    toast.success("Thanks for your rating");
+  }
+
+
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!body.trim() || !user) return;
