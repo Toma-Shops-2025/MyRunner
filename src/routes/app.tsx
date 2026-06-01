@@ -1,10 +1,10 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Home, ListOrdered, PlusCircle, Settings, Flag, LogOut } from "lucide-react";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
-import { store, type User } from "@/lib/local-store";
 import { Button } from "@/components/ui/button";
+import { useAuth, signOut } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/app")({
   component: AppLayout,
@@ -21,13 +21,11 @@ const tabs = [
 function AppLayout() {
   const nav = useNavigate();
   const router = useRouterState();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const u = store.getUser();
-    if (!u) nav({ to: "/login" });
-    else setUser(u);
-  }, [nav]);
+    if (!loading && !user) nav({ to: "/login" });
+  }, [loading, user, nav]);
 
   if (!user) return null;
 
@@ -38,7 +36,7 @@ function AppLayout() {
         <aside className="space-y-1 lg:sticky lg:top-24 lg:self-start">
           <div className="mb-4 rounded-xl border border-border bg-card p-4">
             <p className="text-xs uppercase tracking-widest text-muted-foreground">Signed in</p>
-            <p className="mt-1 font-serif text-lg">{user.name}</p>
+            <p className="mt-1 font-serif text-lg">{user.user_metadata?.full_name ?? user.email?.split("@")[0]}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
           {tabs.map((t) => {
@@ -60,7 +58,7 @@ function AppLayout() {
             variant="ghost"
             size="sm"
             className="mt-2 w-full justify-start text-muted-foreground"
-            onClick={() => { store.setUser(null); nav({ to: "/" }); }}
+            onClick={async () => { await signOut(); nav({ to: "/" }); }}
           >
             <LogOut className="mr-2 size-4" /> Sign out
           </Button>

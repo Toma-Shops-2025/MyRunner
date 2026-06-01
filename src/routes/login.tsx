@@ -3,16 +3,16 @@ import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { store } from "@/lib/local-store";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — MyRunner" },
       { name: "description", content: "Sign in to your MyRunner account to send and track deliveries." },
-      { property: "og:title", content: "Sign in — MyRunner" },
-      { property: "og:url", content: "/login" },
       { name: "robots", content: "noindex" },
     ],
     links: [{ rel: "canonical", href: "/login" }],
@@ -22,23 +22,29 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const nav = useNavigate();
+  const [busy, setBusy] = useState(false);
+
+  async function google() {
+    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app/dashboard" });
+    if (res.error) toast.error("Google sign-in failed.");
+  }
+
   return (
     <PageShell>
       <section className="container-app grid min-h-[80vh] place-items-center py-16">
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
+            setBusy(true);
             const fd = new FormData(e.currentTarget);
-            const existing = store.getUser();
-            store.setUser({
-              id: existing?.id ?? crypto.randomUUID(),
+            const { error } = await supabase.auth.signInWithPassword({
               email: String(fd.get("email")),
-              name: existing?.name ?? String(fd.get("email")).split("@")[0],
-              role: existing?.role ?? "customer",
-              createdAt: existing?.createdAt ?? Date.now(),
+              password: String(fd.get("password")),
             });
+            setBusy(false);
+            if (error) return toast.error(error.message);
             toast.success("Welcome back.");
-            nav({ to: existing?.role === "driver" ? "/driver/dashboard" : "/app/dashboard" });
+            nav({ to: "/app/dashboard" });
           }}
           className="w-full max-w-md rounded-2xl border border-border bg-card p-8"
         >
@@ -47,7 +53,8 @@ function Login() {
           <div className="mt-6 space-y-4">
             <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" required /></div>
             <div className="grid gap-2"><Label htmlFor="password">Password</Label><Input id="password" name="password" type="password" required /></div>
-            <Button type="submit" className="w-full bg-gold text-primary-foreground hover:bg-gold/90">Sign in</Button>
+            <Button type="submit" disabled={busy} className="w-full bg-gold text-primary-foreground hover:bg-gold/90">Sign in</Button>
+            <Button type="button" variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             New here? <Link to="/signup" className="text-gold underline">Create an account</Link>

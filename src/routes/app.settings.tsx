@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2, ShieldOff, Star } from "lucide-react";
-import { store } from "@/lib/local-store";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth, signOut } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
@@ -12,29 +13,65 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/app/settings")({
-  head: () => ({
-    meta: [
-      { title: "Account settings — MyRunner" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Account settings — MyRunner" }, { name: "robots", content: "noindex" }] }),
   component: Settings,
 });
 
+type Pref = { id: string; driver_id: string; preference: "blocked" | "preferred" };
+
 function Settings() {
   const nav = useNavigate();
-  const user = store.getUser();
-  const [blocked, setBlocked] = useState<string[]>([]);
-  const [preferred, setPreferred] = useState<string[]>([]);
+  const { user } = useAuth();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [prefs, setPrefs] = useState<Pref[]>([]);
   const [newBlock, setNewBlock] = useState("");
   const [newPref, setNewPref] = useState("");
 
   useEffect(() => {
-    setBlocked(store.blockedDrivers());
-    setPreferred(store.preferredDrivers());
-  }, []);
+    if (!user) return;
+    supabase.from("profiles").select("full_name,phone").eq("id", user.id).single().then(({ data }) => {
+      setName(data?.full_name ?? "");
+      setPhone(data?.phone ?? "");
+    });
+    supabase.from("driver_preferences").select("id,driver_id,preference").then(({ data }) => setPrefs((data ?? []) as Pref[]));
+  }, [user]);
 
   if (!user) return null;
+  const blocked = prefs.filter((p) => p.preference === "blocked");
+  const preferred = prefs.filter((p) => p.preference === "preferred");
+
+  async function saveProfile() {
+    const { error } = await supabase.from("profiles").update({ full_name: name, phone }).eq("id", user!.id);
+    if (error) return toast.error(error.message);
+    toast.success("Profile saved.");
+  }
+
+  async function addPref(driver_id: string, preference: "blocked" | "preferred") {
+    if (!driver_id) return;
+    const { data, error } = await supabase.from("driver_preferences").insert({ customer_id: user!.id, driver_id, preference }).select().single();
+    if (error) return toast.error(error.message);
+    setPrefs((p) => [...p, data as Pref]);
+    if (preference === "blocked") setNewBlock(""); else setNewPref("");
+    toast.success(preference === "blocked" ? "Runner blocked." : "Preferred Runner added.");
+  }
+
+  async function removePref(id: string) {
+    const { error } = await supabase.from("driver_preferences").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    setPrefs((p) => p.filter((x) => x.id !== id));
+  }
+
+  async function deleteAccount() {
+    // Best-effort: wipe user-owned rows; final account deletion requires admin function.
+    await supabase.from("driver_preferences").delete().eq("customer_id", user!.id);
+    await supabase.from("reports").delete().eq("reporter_id", user!.id);
+    await supabase.from("orders").delete().eq("customer_id", user!.id);
+    await supabase.from("profiles").delete().eq("id", user!.id);
+    await signOut();
+    toast.success("Account deletion submitted. Final removal completes within 30 days.");
+    nav({ to: "/" });
+  }
 
   return (
     <div className="space-y-8">
@@ -43,52 +80,35 @@ function Settings() {
       <section className="rounded-2xl border border-border bg-card p-6">
         <h2 className="font-serif text-2xl">Profile</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Field label="Full name" defaultValue={user.name} />
-          <Field label="Email" defaultValue={user.email} />
+          <div className="grid gap-2"><Label>Full name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div className="grid gap-2"><Label>Email</Label><Input value={user.email ?? ""} disabled /></div>
+          <div className="grid gap-2"><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
         </div>
-        <Button className="mt-4 bg-gold text-primary-foreground hover:bg-gold/90" onClick={() => toast.success("Profile saved.")}>Save changes</Button>
+        <Button className="mt-4 bg-gold text-primary-foreground hover:bg-gold/90" onClick={saveProfile}>Save changes</Button>
       </section>
 
-      {/* Preferred drivers */}
       <section className="rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center gap-2">
           <Star className="size-5 text-gold" />
           <h2 className="font-serif text-2xl">Preferred Runners</h2>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">Drivers you'd like to request first. They see a "Requested You" badge on your orders.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Drivers you'd like to request first.</p>
         <div className="mt-4 flex gap-2">
-          <Input value={newPref} onChange={(e) => setNewPref(e.target.value)} placeholder="Driver code (e.g. RUN‑8421)" />
-          <Button
-            onClick={() => {
-              if (!newPref) return;
-              const next = Array.from(new Set([...preferred, newPref.trim()]));
-              store.setPreferredDrivers(next);
-              setPreferred(next);
-              setNewPref("");
-              toast.success("Preferred Runner added.");
-            }}
-          >Add</Button>
+          <Input value={newPref} onChange={(e) => setNewPref(e.target.value)} placeholder="Driver user ID" />
+          <Button onClick={() => addPref(newPref.trim(), "preferred")}>Add</Button>
         </div>
         {preferred.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
-            {preferred.map((c) => (
-              <li key={c} className="flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs">
-                {c}
-                <button
-                  onClick={() => {
-                    const next = preferred.filter((x) => x !== c);
-                    store.setPreferredDrivers(next);
-                    setPreferred(next);
-                  }}
-                  aria-label={`Remove ${c}`}
-                >×</button>
+            {preferred.map((p) => (
+              <li key={p.id} className="flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs">
+                {p.driver_id.slice(0, 8)}
+                <button onClick={() => removePref(p.id)} aria-label="Remove">×</button>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      {/* Blocked drivers */}
       <section className="rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center gap-2">
           <ShieldOff className="size-5 text-destructive" />
@@ -96,37 +116,21 @@ function Settings() {
         </div>
         <p className="mt-1 text-sm text-muted-foreground">These drivers will never be matched to your orders.</p>
         <div className="mt-4 flex gap-2">
-          <Input value={newBlock} onChange={(e) => setNewBlock(e.target.value)} placeholder="Driver code (e.g. RUN‑1234)" />
-          <Button
-            variant="destructive"
-            onClick={() => {
-              if (!newBlock) return;
-              store.blockDriver(newBlock.trim());
-              setBlocked(store.blockedDrivers());
-              setNewBlock("");
-              toast.success("Runner blocked.");
-            }}
-          >Block</Button>
+          <Input value={newBlock} onChange={(e) => setNewBlock(e.target.value)} placeholder="Driver user ID" />
+          <Button variant="destructive" onClick={() => addPref(newBlock.trim(), "blocked")}>Block</Button>
         </div>
         {blocked.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
-            {blocked.map((c) => (
-              <li key={c} className="flex items-center gap-2 rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-xs">
-                {c}
-                <button
-                  onClick={() => {
-                    store.unblockDriver(c);
-                    setBlocked(store.blockedDrivers());
-                  }}
-                  aria-label={`Unblock ${c}`}
-                >×</button>
+            {blocked.map((p) => (
+              <li key={p.id} className="flex items-center gap-2 rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-xs">
+                {p.driver_id.slice(0, 8)}
+                <button onClick={() => removePref(p.id)} aria-label="Unblock">×</button>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      {/* Delete account */}
       <section className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6">
         <div className="flex items-center gap-2">
           <Trash2 className="size-5 text-destructive" />
@@ -150,27 +154,13 @@ function Settings() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => {
-                  store.wipeAll();
-                  toast.success("Account deletion submitted.");
-                  nav({ to: "/" });
-                }}
-              >Yes, delete</AlertDialogAction>
+              <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={deleteAccount}>
+                Yes, delete
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </section>
-    </div>
-  );
-}
-
-function Field({ label, defaultValue }: { label: string; defaultValue: string }) {
-  return (
-    <div className="grid gap-2">
-      <Label>{label}</Label>
-      <Input defaultValue={defaultValue} />
     </div>
   );
 }

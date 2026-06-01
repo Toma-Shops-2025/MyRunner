@@ -5,24 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LegalConsent } from "@/components/site/legal-consent";
-import { store, priceQuote, fmtUSD } from "@/lib/local-store";
+import { priceQuote, fmtUSD } from "@/lib/pricing";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/new-delivery")({
-  head: () => ({
-    meta: [
-      { title: "New delivery — MyRunner" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "New delivery — MyRunner" }, { name: "robots", content: "noindex" }] }),
   component: NewDelivery,
 });
 
 function NewDelivery() {
   const nav = useNavigate();
   const [miles, setMiles] = useState(3);
-  const [type, setType] = useState<"standard" | "multi-pickup" | "multi-dropoff">("standard");
+  const [type, setType] = useState<"standard" | "multi_pickup" | "multi_dropoff">("standard");
   const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
   const extraStops = type === "standard" ? 0 : 1;
   const total = useMemo(() => priceQuote(miles, extraStops), [miles, extraStops]);
 
@@ -33,23 +30,25 @@ function NewDelivery() {
         <p className="text-muted-foreground">Tell us what to move and where.</p>
       </div>
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           if (!agree) return toast.error("Please confirm the order checkbox.");
+          setBusy(true);
           const fd = new FormData(e.currentTarget);
-          const user = store.getUser()!;
-          store.addOrder({
-            id: crypto.randomUUID(),
-            customerId: user.id,
-            pickup: String(fd.get("pickup")),
-            dropoff: String(fd.get("dropoff")),
-            item: String(fd.get("item")),
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) { setBusy(false); return toast.error("Please sign in again."); }
+          const { error } = await supabase.from("orders").insert({
+            customer_id: user.id,
+            pickup_address: String(fd.get("pickup")),
+            dropoff_address: String(fd.get("dropoff")),
+            item_description: String(fd.get("item")),
             type,
-            status: "pending",
-            priceCents: total,
-            tipCents: Math.round(Number(fd.get("tip") || 0) * 100),
-            createdAt: Date.now(),
+            price_cents: total,
+            tip_cents: Math.round(Number(fd.get("tip") || 0) * 100),
+            distance_miles: miles,
           });
+          setBusy(false);
+          if (error) return toast.error(error.message);
           toast.success("Order placed. Finding you a Runner…");
           nav({ to: "/app/orders" });
         }}
@@ -70,7 +69,7 @@ function NewDelivery() {
         <div className="grid gap-2">
           <Label>Delivery type</Label>
           <div className="grid gap-2 sm:grid-cols-3">
-            {(["standard", "multi-pickup", "multi-dropoff"] as const).map((t) => (
+            {(["standard", "multi_pickup", "multi_dropoff"] as const).map((t) => (
               <button
                 type="button"
                 key={t}
@@ -79,7 +78,7 @@ function NewDelivery() {
                   type === t ? "border-gold bg-gold/10 text-gold" : "border-border bg-card hover:border-gold/40"
                 }`}
               >
-                {t.replace("-", " ")}
+                {t.replace("_", " ")}
               </button>
             ))}
           </div>
@@ -104,7 +103,7 @@ function NewDelivery() {
         </div>
 
         <LegalConsent id="order-consent" checked={agree} onCheckedChange={setAgree} variant="order" />
-        <Button type="submit" className="bg-gold text-primary-foreground hover:bg-gold/90">Place order — {fmtUSD(total)}</Button>
+        <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">Place order — {fmtUSD(total)}</Button>
       </form>
     </div>
   );

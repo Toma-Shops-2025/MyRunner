@@ -1,21 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { store, fmtUSD, type Order } from "@/lib/local-store";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { fmtUSD } from "@/lib/pricing";
+
+type Order = {
+  id: string;
+  pickup_address: string;
+  dropoff_address: string;
+  item_description: string;
+  type: string;
+  status: string;
+  price_cents: number;
+  tip_cents: number;
+};
 
 export const Route = createFileRoute("/app/orders")({
-  head: () => ({
-    meta: [
-      { title: "My orders — MyRunner" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "My orders — MyRunner" }, { name: "robots", content: "noindex" }] }),
   component: Orders,
 });
 
 function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
-  useEffect(() => setOrders(store.getOrders()), []);
+  useEffect(() => {
+    supabase.from("orders").select("*").order("created_at", { ascending: false }).then(({ data }) => setOrders((data ?? []) as Order[]));
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -33,12 +42,12 @@ function Orders() {
             <li key={o.id} className="rounded-2xl border border-border bg-card p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-medium">{o.item}</p>
-                  <p className="text-xs text-muted-foreground">{o.pickup} → {o.dropoff}</p>
-                  <p className="mt-1 text-xs text-muted-foreground capitalize">{o.type.replace("-", " ")}</p>
+                  <p className="font-medium">{o.item_description}</p>
+                  <p className="text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}</p>
+                  <p className="mt-1 text-xs text-muted-foreground capitalize">{o.type.replace("_", " ")}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-serif text-2xl text-gold">{fmtUSD(o.priceCents + o.tipCents)}</p>
+                  <p className="font-serif text-2xl text-gold">{fmtUSD(o.price_cents + o.tip_cents)}</p>
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">{o.status}</p>
                 </div>
               </div>
