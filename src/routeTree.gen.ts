@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
@@ -38,6 +39,11 @@ import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/new-delivery': typeof AppNewDeliveryRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/new-delivery': typeof AppNewDeliveryRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/new-delivery': typeof AppNewDeliveryRoute
@@ -264,6 +273,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/safety'
     | '/signup'
+    | '/sitemap.xml'
     | '/terms'
     | '/app/dashboard'
     | '/app/new-delivery'
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/safety'
     | '/signup'
+    | '/sitemap.xml'
     | '/terms'
     | '/app/dashboard'
     | '/app/new-delivery'
@@ -318,6 +329,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/safety'
     | '/signup'
+    | '/sitemap.xml'
     | '/terms'
     | '/app/dashboard'
     | '/app/new-delivery'
@@ -346,6 +358,7 @@ export interface RootRouteChildren {
   RefundPolicyRoute: typeof RefundPolicyRoute
   SafetyRoute: typeof SafetyRoute
   SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
 }
 
@@ -356,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -577,6 +597,7 @@ const rootRouteChildren: RootRouteChildren = {
   RefundPolicyRoute: RefundPolicyRoute,
   SafetyRoute: SafetyRoute,
   SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
