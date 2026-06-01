@@ -94,7 +94,7 @@ function OrderDetail() {
   }
 
   async function advanceStatus(next: string) {
-    const { error } = await supabase.from("orders").update({ status: next as Order["status"] }).eq("id", id);
+    const { error } = await supabase.from("orders").update({ status: next } as never).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(`Status: ${next.replace("_", " ")}`);
   }
