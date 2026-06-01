@@ -4,19 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LegalConsent } from "@/components/site/legal-consent";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/report")({
-  head: () => ({
-    meta: [
-      { title: "Report an issue — MyRunner" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Report an issue — MyRunner" }, { name: "robots", content: "noindex" }] }),
   component: ReportPage,
 });
 
@@ -37,6 +31,7 @@ function ReportPage() {
   const nav = useNavigate();
   const [reason, setReason] = useState<string | undefined>();
   const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -47,10 +42,21 @@ function ReportPage() {
         </p>
       </div>
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           if (!reason) return toast.error("Please choose a reason.");
           if (!agree) return toast.error("Please confirm the report is truthful.");
+          setBusy(true);
+          const fd = new FormData(e.currentTarget);
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) { setBusy(false); return toast.error("Please sign in again."); }
+          const { error } = await supabase.from("reports").insert({
+            reporter_id: user.id,
+            category: reason,
+            details: `${String(fd.get("target"))}\n\n${String(fd.get("details"))}`,
+          });
+          setBusy(false);
+          if (error) return toast.error(error.message);
           toast.success("Report submitted. Thank you for keeping MyRunner safe.");
           nav({ to: "/app/dashboard" });
         }}
@@ -58,7 +64,7 @@ function ReportPage() {
       >
         <div className="grid gap-2">
           <Label htmlFor="target">Who are you reporting?</Label>
-          <Input id="target" placeholder="Order # or driver/customer code" required />
+          <Input id="target" name="target" placeholder="Order # or driver/customer code" required />
         </div>
         <div className="grid gap-2">
           <Label>Reason</Label>
@@ -71,17 +77,13 @@ function ReportPage() {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="details">What happened?</Label>
-          <Textarea id="details" rows={6} required placeholder="Tell us as much as you can. Include dates, times, and any specifics." />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="evidence">Evidence (optional)</Label>
-          <Input id="evidence" type="file" multiple accept="image/*" />
+          <Textarea id="details" name="details" rows={6} required placeholder="Tell us as much as you can. Include dates, times, and any specifics." />
         </div>
         <LegalConsent id="report-consent" checked={agree} onCheckedChange={setAgree} variant="report" />
         <p className="text-xs text-muted-foreground">
           In immediate danger? Call your local emergency services first, then file a report here.
         </p>
-        <Button type="submit" className="bg-gold text-primary-foreground hover:bg-gold/90">Submit report</Button>
+        <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">Submit report</Button>
       </form>
     </div>
   );

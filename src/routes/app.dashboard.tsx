@@ -1,25 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Package, Star, Wallet, Clock } from "lucide-react";
-import { store, fmtUSD, type Order } from "@/lib/local-store";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { fmtUSD } from "@/lib/pricing";
+
+type Order = {
+  id: string;
+  pickup_address: string;
+  dropoff_address: string;
+  item_description: string;
+  status: string;
+  price_cents: number;
+  tip_cents: number;
+};
 
 export const Route = createFileRoute("/app/dashboard")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — MyRunner" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Dashboard — MyRunner" }, { name: "robots", content: "noindex" }] }),
   component: Dashboard,
 });
 
 function Dashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
-  useEffect(() => setOrders(store.getOrders()), []);
+  useEffect(() => {
+    supabase.from("orders").select("id,pickup_address,dropoff_address,item_description,status,price_cents,tip_cents").order("created_at", { ascending: false }).then(({ data }) => setOrders((data ?? []) as Order[]));
+  }, []);
   const active = orders.filter((o) => !["delivered", "cancelled"].includes(o.status));
   const completed = orders.filter((o) => o.status === "delivered");
-  const spent = orders.reduce((s, o) => s + o.priceCents + o.tipCents, 0);
+  const spent = orders.reduce((s, o) => s + o.price_cents + o.tip_cents, 0);
 
   return (
     <div className="space-y-8">
@@ -47,11 +55,11 @@ function Dashboard() {
             {orders.slice(0, 5).map((o) => (
               <li key={o.id} className="flex items-center justify-between py-3 text-sm">
                 <div>
-                  <p className="font-medium">{o.item}</p>
-                  <p className="text-xs text-muted-foreground">{o.pickup} → {o.dropoff}</p>
+                  <p className="font-medium">{o.item_description}</p>
+                  <p className="text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">{fmtUSD(o.priceCents)}</p>
+                  <p className="font-medium">{fmtUSD(o.price_cents)}</p>
                   <p className="text-xs uppercase tracking-widest text-gold">{o.status}</p>
                 </div>
               </li>

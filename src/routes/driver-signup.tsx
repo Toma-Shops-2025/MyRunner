@@ -5,16 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LegalConsent } from "@/components/site/legal-consent";
-import { store } from "@/lib/local-store";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/driver-signup")({
   head: () => ({
     meta: [
       { title: "Become a Runner — Apply to drive for MyRunner" },
-      { name: "description", content: "Apply to drive for MyRunner. Submit your license, insurance, vehicle info, and pass a Checkr background check." },
-      { property: "og:title", content: "Apply to drive — MyRunner" },
-      { property: "og:url", content: "/driver-signup" },
+      { name: "description", content: "Apply to drive for MyRunner. Submit your license, insurance, vehicle info, and pass a background check." },
     ],
     links: [{ rel: "canonical", href: "/driver-signup" }],
   }),
@@ -24,35 +22,64 @@ export const Route = createFileRoute("/driver-signup")({
 function DriverSignup() {
   const nav = useNavigate();
   const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
+
   return (
     <PageShell>
       <section className="container-app py-16">
         <p className="text-xs uppercase tracking-widest text-gold">Driver application</p>
         <h1 className="mt-3 font-serif text-5xl">Apply to drive</h1>
-        <p className="mt-3 max-w-xl text-muted-foreground">It takes about 5 minutes. You can start accepting deliveries while your background check processes.</p>
+        <p className="mt-3 max-w-xl text-muted-foreground">It takes about 5 minutes. You'll create an account first, then we'll review your documents.</p>
 
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             if (!agree) return toast.error("Please accept the policies and background check consent.");
+            setBusy(true);
             const fd = new FormData(e.currentTarget);
-            store.setUser({
-              id: crypto.randomUUID(),
-              email: String(fd.get("email")),
-              name: String(fd.get("name")),
-              role: "driver",
-              createdAt: Date.now(),
-            });
+
+            // Ensure user is signed in (sign up if not)
+            let { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+              const password = String(fd.get("password") || "");
+              if (password.length < 8) { setBusy(false); return toast.error("Create a password of 8+ characters."); }
+              const { data, error } = await supabase.auth.signUp({
+                email: String(fd.get("email")),
+                password,
+                options: {
+                  emailRedirectTo: `${window.location.origin}/driver/dashboard`,
+                  data: { full_name: String(fd.get("name")) },
+                },
+              });
+              if (error) { setBusy(false); return toast.error(error.message); }
+              user = data.user;
+            }
+            if (!user) { setBusy(false); return toast.error("Could not create account."); }
+
+            // Driver application
+            const { error: appErr } = await supabase.from("driver_applications").upsert({
+              user_id: user.id,
+              vehicle_make: String(fd.get("make")),
+              vehicle_model: String(fd.get("model")),
+              vehicle_year: Number(fd.get("year")) || null,
+              license_number: String(fd.get("plate") || ""),
+            }, { onConflict: "user_id" });
+            if (appErr) { setBusy(false); return toast.error(appErr.message); }
+
+            // Driver role
+            await supabase.from("user_roles").insert({ user_id: user.id, role: "driver" });
+
+            setBusy(false);
             toast.success("Application submitted. Welcome aboard.");
             nav({ to: "/driver/dashboard" });
           }}
           className="mt-10 grid max-w-3xl gap-6 rounded-2xl border border-border bg-card p-8"
         >
-          <Section title="About you">
+          <Section title="Account">
             <Field id="name" label="Full name" />
             <Field id="email" label="Email" type="email" />
+            <Field id="password" label="Create password (8+ chars)" type="password" />
             <Field id="phone" label="Phone" type="tel" />
-            <Field id="dob" label="Date of birth" type="date" />
           </Section>
           <Section title="Your vehicle">
             <Field id="make" label="Make" placeholder="Toyota" />
@@ -64,11 +91,8 @@ function DriverSignup() {
             <Field id="license" label="Driver's license" type="file" />
             <Field id="insurance" label="Proof of insurance" type="file" />
           </Section>
-          <Section title="Optional">
-            <Field id="referral" label="Referral code" placeholder="Friend's code" />
-          </Section>
           <LegalConsent id="driver-consent" checked={agree} onCheckedChange={setAgree} variant="driver" />
-          <Button type="submit" className="bg-gold text-primary-foreground hover:bg-gold/90">Submit application</Button>
+          <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">Submit application</Button>
         </form>
       </section>
     </PageShell>
@@ -87,7 +111,7 @@ function Field({ id, label, type = "text", placeholder }: { id: string; label: s
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} name={id} type={type} placeholder={placeholder} required={type !== "file" && id !== "referral"} />
+      <Input id={id} name={id} type={type} placeholder={placeholder} required={type !== "file"} />
     </div>
   );
 }
