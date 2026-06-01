@@ -9,17 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SafetyRouteImport } from './routes/safety'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DriversRouteImport } from './routes/drivers'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
+import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SafetyRoute = SafetyRouteImport.update({
   id: '/safety',
   path: '/safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -32,14 +54,34 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DriversRoute = DriversRouteImport.update({
   id: '/drivers',
   path: '/drivers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityGuidelinesRoute = CommunityGuidelinesRouteImport.update({
+  id: '/community-guidelines',
+  path: '/community-guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccessibilityRoute = AccessibilityRouteImport.update({
+  id: '/accessibility',
+  path: '/accessibility',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -56,78 +98,148 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/drivers': typeof DriversRoute
+  '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/drivers': typeof DriversRoute
+  '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/drivers': typeof DriversRoute
+  '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/accessibility'
+    | '/community-guidelines'
     | '/contact'
+    | '/cookies'
     | '/drivers'
+    | '/faq'
     | '/how-it-works'
     | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/safety'
+    | '/terms'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/accessibility'
+    | '/community-guidelines'
     | '/contact'
+    | '/cookies'
     | '/drivers'
+    | '/faq'
     | '/how-it-works'
     | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/safety'
+    | '/terms'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/accessibility'
+    | '/community-guidelines'
     | '/contact'
+    | '/cookies'
     | '/drivers'
+    | '/faq'
     | '/how-it-works'
     | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/safety'
+    | '/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccessibilityRoute: typeof AccessibilityRoute
+  CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
   ContactRoute: typeof ContactRoute
+  CookiesRoute: typeof CookiesRoute
   DriversRoute: typeof DriversRoute
+  FaqRoute: typeof FaqRoute
   HowItWorksRoute: typeof HowItWorksRoute
   PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   SafetyRoute: typeof SafetyRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/safety': {
       id: '/safety'
       path: '/safety'
       fullPath: '/safety'
       preLoaderRoute: typeof SafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -144,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/drivers': {
       id: '/drivers'
       path: '/drivers'
@@ -151,11 +270,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DriversRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community-guidelines': {
+      id: '/community-guidelines'
+      path: '/community-guidelines'
+      fullPath: '/community-guidelines'
+      preLoaderRoute: typeof CommunityGuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accessibility': {
+      id: '/accessibility'
+      path: '/accessibility'
+      fullPath: '/accessibility'
+      preLoaderRoute: typeof AccessibilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -178,11 +318,18 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccessibilityRoute: AccessibilityRoute,
+  CommunityGuidelinesRoute: CommunityGuidelinesRoute,
   ContactRoute: ContactRoute,
+  CookiesRoute: CookiesRoute,
   DriversRoute: DriversRoute,
+  FaqRoute: FaqRoute,
   HowItWorksRoute: HowItWorksRoute,
   PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   SafetyRoute: SafetyRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
