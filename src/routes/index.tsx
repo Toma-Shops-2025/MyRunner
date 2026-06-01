@@ -211,6 +211,7 @@ function Landing() {
           </Button>
         </div>
       </section>
+      </div>
     </PageShell>
   );
 }
