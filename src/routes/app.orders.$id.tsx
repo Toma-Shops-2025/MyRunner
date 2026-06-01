@@ -275,6 +275,37 @@ function OrderDetail() {
           Waiting for a Runner to accept this order. Chat opens once a Runner is assigned.
         </div>
       )}
+
+      {/* Rating */}
+      {order.status === "delivered" && (isCustomer || isAssignedDriver) && (
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-serif text-xl">{isCustomer ? "Rate your Runner" : "Rate the customer"}</h2>
+          {myRating ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              You rated this delivery {myRating} {myRating === 1 ? "star" : "stars"}. Thanks for the feedback.
+            </p>
+          ) : (
+            <div className="mt-3 space-y-3">
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button key={n} type="button" onClick={() => setStars(n)} aria-label={`${n} stars`}>
+                    <Star className={`size-7 ${n <= stars ? "fill-gold text-gold" : "text-muted-foreground"}`} />
+                  </button>
+                ))}
+              </div>
+              <Textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Optional: leave a short comment"
+                rows={3}
+              />
+              <Button onClick={submitRating} className="bg-gold text-primary-foreground hover:bg-gold/90">
+                Submit rating
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
