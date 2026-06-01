@@ -1,0 +1,1 @@
+ALTER VIEW public.user_rating_stats SET (security_invoker = true);
