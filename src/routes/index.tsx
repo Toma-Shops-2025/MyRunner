@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Package, Clock, MapPin, Shield, Star, Zap, Smartphone, Users, CheckCircle2 } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
-import heroImg from "@/assets/hero-courier.jpg";
+import heroVideo from "@/assets/hero-courier.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,20 +35,35 @@ export const Route = createFileRoute("/")({
 function Landing() {
   return (
     <PageShell>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-noise">
-        <div className="container-app grid gap-12 py-20 lg:grid-cols-[1.1fr_1fr] lg:py-28">
-          <div className="flex flex-col justify-center">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/30 bg-gold-soft px-3 py-1 text-xs uppercase tracking-widest text-gold">
+      {/* HERO with fixed background video */}
+      <section className="relative overflow-hidden min-h-[92vh] flex items-center">
+        {/* Fixed video background — stays put while page scrolls */}
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <video
+            src={heroVideo.url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/30 to-transparent" />
+        </div>
+
+        <div className="container-app py-24 lg:py-32">
+          <div className="max-w-2xl">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/30 bg-gold-soft px-3 py-1 text-xs uppercase tracking-widest text-gold backdrop-blur-sm">
               <span className="size-1.5 animate-pulse rounded-full bg-gold" />
               Now live in 50+ cities · 24/7
             </span>
-            <h1 className="mt-6 font-serif text-5xl leading-[1.05] sm:text-6xl lg:text-7xl">
+            <h1 className="mt-6 font-serif text-6xl leading-[1.02] sm:text-7xl lg:text-8xl">
               Need it moved?
               <br />
               <span className="italic text-gold">We're already on it.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+            <p className="mt-6 max-w-xl text-lg text-foreground/85">
               MyRunner connects you with vetted local Runners who'll pick up and
               deliver almost anything — from documents to prescriptions to that
               thing you forgot at home. Starting at <span className="text-foreground font-medium">$5.99</span>.
@@ -59,7 +74,7 @@ function Landing() {
                   Send a delivery <ArrowRight className="ml-1" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-border-strong">
+              <Button asChild size="lg" variant="outline" className="border-border-strong bg-background/40 backdrop-blur-sm">
                 <Link to="/drivers">Earn as a Runner</Link>
               </Button>
             </div>
@@ -68,16 +83,6 @@ function Landing() {
               <Stat label="Cargo insured" value="$100" />
               <Stat label="Rating" value="4.9 ★" />
             </div>
-          </div>
-          <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-tr from-gold/20 via-transparent to-gold/5 blur-2xl" />
-            <img
-              src={heroImg}
-              alt="Courier on a motorcycle delivering at golden hour"
-              width={1536}
-              height={1280}
-              className="aspect-[4/5] w-full rounded-2xl object-cover ring-1 ring-border-strong shadow-card"
-            />
           </div>
         </div>
       </section>
