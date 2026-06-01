@@ -35,35 +35,35 @@ export const Route = createFileRoute("/")({
 function Landing() {
   return (
     <PageShell>
-      {/* HERO with fixed background video */}
-      <section className="relative overflow-hidden min-h-[92vh] flex items-center">
-        {/* Fixed video background — stays put while page scrolls */}
-        <div className="fixed inset-0 -z-10 pointer-events-none">
-          <video
-            src={heroVideo.url}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/30 to-transparent" />
-        </div>
+      {/* Fixed video background — sits above PageShell bg, hero scrolls over it */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <video
+          src={heroVideo.url}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background/90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/20 to-transparent" />
+      </div>
 
+      {/* HERO */}
+      <section className="relative z-10 min-h-[92vh] flex items-center">
         <div className="container-app py-24 lg:py-32">
           <div className="max-w-2xl">
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/30 bg-gold-soft px-3 py-1 text-xs uppercase tracking-widest text-gold backdrop-blur-sm">
               <span className="size-1.5 animate-pulse rounded-full bg-gold" />
               Now live in 50+ cities · 24/7
             </span>
-            <h1 className="mt-6 font-serif text-6xl leading-[1.02] sm:text-7xl lg:text-8xl">
+            <h1 className="mt-6 font-serif text-6xl leading-[1.02] sm:text-7xl lg:text-8xl drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
               Need it moved?
               <br />
               <span className="italic text-gold">We're already on it.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-foreground/85">
+            <p className="mt-6 max-w-xl text-lg text-foreground/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
               MyRunner connects you with vetted local Runners who'll pick up and
               deliver almost anything — from documents to prescriptions to that
               thing you forgot at home. Starting at <span className="text-foreground font-medium">$5.99</span>.
@@ -86,6 +86,9 @@ function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Everything below scrolls over the video with a solid bg */}
+      <div className="relative z-10 bg-background">
 
       {/* MARQUEE / TRUST */}
       <section className="border-y border-border bg-surface/60 py-6">
