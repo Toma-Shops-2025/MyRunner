@@ -39,25 +39,27 @@ function Orders() {
       ) : (
         <ul className="space-y-3">
           {orders.map((o) => (
-            <li key={o.id} className="rounded-2xl border border-border bg-card p-5">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="font-medium">{o.item_description}</p>
-                  <p className="text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}</p>
-                  <p className="mt-1 text-xs text-muted-foreground capitalize">{o.type.replace("_", " ")}</p>
+            <li key={o.id} className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-gold/40">
+              <Link to="/app/orders/$id" params={{ id: o.id }} className="block">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-medium">{o.item_description}</p>
+                    <p className="text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}</p>
+                    <p className="mt-1 text-xs text-muted-foreground capitalize">{o.type.replace("_", " ")}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-serif text-2xl text-gold">{fmtUSD(o.price_cents + o.tip_cents)}</p>
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground">{o.status}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-serif text-2xl text-gold">{fmtUSD(o.price_cents + o.tip_cents)}</p>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">{o.status}</p>
-                </div>
-              </div>
+              </Link>
               <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
-                <Button variant="outline" size="sm">Track</Button>
-                <Button variant="outline" size="sm">Chat</Button>
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/app/report">Report driver</Link>
+                  <Link to="/app/orders/$id" params={{ id: o.id }}>Track & chat</Link>
                 </Button>
-                <Button variant="outline" size="sm">Request refund</Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/app/report">Report</Link>
+                </Button>
               </div>
             </li>
           ))}
