@@ -10,23 +10,39 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DriversRouteImport } from './routes/drivers'
+import { Route as DriverSignupRouteImport } from './routes/driver-signup'
+import { Route as DriverRouteImport } from './routes/driver'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppReportRouteImport } from './routes/app.report'
+import { Route as AppOrdersRouteImport } from './routes/app.orders'
+import { Route as AppNewDeliveryRouteImport } from './routes/app.new-delivery'
+import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SafetyRoute = SafetyRouteImport.update({
@@ -49,6 +65,11 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
@@ -62,6 +83,16 @@ const FaqRoute = FaqRouteImport.update({
 const DriversRoute = DriversRouteImport.update({
   id: '/drivers',
   path: '/drivers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverSignupRoute = DriverSignupRouteImport.update({
+  id: '/driver-signup',
+  path: '/driver-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverRoute = DriverRouteImport.update({
+  id: '/driver',
+  path: '/driver',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -79,6 +110,11 @@ const CommunityGuidelinesRoute = CommunityGuidelinesRouteImport.update({
   path: '/community-guidelines',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccessibilityRoute = AccessibilityRouteImport.update({
   id: '/accessibility',
   path: '/accessibility',
@@ -94,55 +130,118 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DriverDashboardRoute = DriverDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => DriverRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportRoute = AppReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrdersRoute = AppOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNewDeliveryRoute = AppNewDeliveryRouteImport.update({
+  id: '/new-delivery',
+  path: '/new-delivery',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/app': typeof AppRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/driver': typeof DriverRouteWithChildren
+  '/driver-signup': typeof DriverSignupRoute
   '/drivers': typeof DriversRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
+  '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/new-delivery': typeof AppNewDeliveryRoute
+  '/app/orders': typeof AppOrdersRoute
+  '/app/report': typeof AppReportRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/driver/dashboard': typeof DriverDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/app': typeof AppRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/driver': typeof DriverRouteWithChildren
+  '/driver-signup': typeof DriverSignupRoute
   '/drivers': typeof DriversRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
+  '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/new-delivery': typeof AppNewDeliveryRoute
+  '/app/orders': typeof AppOrdersRoute
+  '/app/report': typeof AppReportRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/driver/dashboard': typeof DriverDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/app': typeof AppRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/driver': typeof DriverRouteWithChildren
+  '/driver-signup': typeof DriverSignupRoute
   '/drivers': typeof DriversRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/safety': typeof SafetyRoute
+  '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/new-delivery': typeof AppNewDeliveryRoute
+  '/app/orders': typeof AppOrdersRoute
+  '/app/report': typeof AppReportRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/driver/dashboard': typeof DriverDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -150,65 +249,103 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/accessibility'
+    | '/app'
     | '/community-guidelines'
     | '/contact'
     | '/cookies'
+    | '/driver'
+    | '/driver-signup'
     | '/drivers'
     | '/faq'
     | '/how-it-works'
+    | '/login'
     | '/pricing'
     | '/privacy'
     | '/refund-policy'
     | '/safety'
+    | '/signup'
     | '/terms'
+    | '/app/dashboard'
+    | '/app/new-delivery'
+    | '/app/orders'
+    | '/app/report'
+    | '/app/settings'
+    | '/driver/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/accessibility'
+    | '/app'
     | '/community-guidelines'
     | '/contact'
     | '/cookies'
+    | '/driver'
+    | '/driver-signup'
     | '/drivers'
     | '/faq'
     | '/how-it-works'
+    | '/login'
     | '/pricing'
     | '/privacy'
     | '/refund-policy'
     | '/safety'
+    | '/signup'
     | '/terms'
+    | '/app/dashboard'
+    | '/app/new-delivery'
+    | '/app/orders'
+    | '/app/report'
+    | '/app/settings'
+    | '/driver/dashboard'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/accessibility'
+    | '/app'
     | '/community-guidelines'
     | '/contact'
     | '/cookies'
+    | '/driver'
+    | '/driver-signup'
     | '/drivers'
     | '/faq'
     | '/how-it-works'
+    | '/login'
     | '/pricing'
     | '/privacy'
     | '/refund-policy'
     | '/safety'
+    | '/signup'
     | '/terms'
+    | '/app/dashboard'
+    | '/app/new-delivery'
+    | '/app/orders'
+    | '/app/report'
+    | '/app/settings'
+    | '/driver/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccessibilityRoute: typeof AccessibilityRoute
+  AppRoute: typeof AppRouteWithChildren
   CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
   ContactRoute: typeof ContactRoute
   CookiesRoute: typeof CookiesRoute
+  DriverRoute: typeof DriverRouteWithChildren
+  DriverSignupRoute: typeof DriverSignupRoute
   DriversRoute: typeof DriversRoute
   FaqRoute: typeof FaqRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   SafetyRoute: typeof SafetyRoute
+  SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
 }
 
@@ -219,6 +356,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/safety': {
@@ -249,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/how-it-works': {
       id: '/how-it-works'
       path: '/how-it-works'
@@ -268,6 +419,20 @@ declare module '@tanstack/react-router' {
       path: '/drivers'
       fullPath: '/drivers'
       preLoaderRoute: typeof DriversRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver-signup': {
+      id: '/driver-signup'
+      path: '/driver-signup'
+      fullPath: '/driver-signup'
+      preLoaderRoute: typeof DriverSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver': {
+      id: '/driver'
+      path: '/driver'
+      fullPath: '/driver'
+      preLoaderRoute: typeof DriverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -291,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityGuidelinesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/accessibility': {
       id: '/accessibility'
       path: '/accessibility'
@@ -312,23 +484,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/driver/dashboard': {
+      id: '/driver/dashboard'
+      path: '/dashboard'
+      fullPath: '/driver/dashboard'
+      preLoaderRoute: typeof DriverDashboardRouteImport
+      parentRoute: typeof DriverRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/report': {
+      id: '/app/report'
+      path: '/report'
+      fullPath: '/app/report'
+      preLoaderRoute: typeof AppReportRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/orders': {
+      id: '/app/orders'
+      path: '/orders'
+      fullPath: '/app/orders'
+      preLoaderRoute: typeof AppOrdersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/new-delivery': {
+      id: '/app/new-delivery'
+      path: '/new-delivery'
+      fullPath: '/app/new-delivery'
+      preLoaderRoute: typeof AppNewDeliveryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
+
+interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppNewDeliveryRoute: typeof AppNewDeliveryRoute
+  AppOrdersRoute: typeof AppOrdersRoute
+  AppReportRoute: typeof AppReportRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppNewDeliveryRoute: AppNewDeliveryRoute,
+  AppOrdersRoute: AppOrdersRoute,
+  AppReportRoute: AppReportRoute,
+  AppSettingsRoute: AppSettingsRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
+interface DriverRouteChildren {
+  DriverDashboardRoute: typeof DriverDashboardRoute
+}
+
+const DriverRouteChildren: DriverRouteChildren = {
+  DriverDashboardRoute: DriverDashboardRoute,
+}
+
+const DriverRouteWithChildren =
+  DriverRoute._addFileChildren(DriverRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccessibilityRoute: AccessibilityRoute,
+  AppRoute: AppRouteWithChildren,
   CommunityGuidelinesRoute: CommunityGuidelinesRoute,
   ContactRoute: ContactRoute,
   CookiesRoute: CookiesRoute,
+  DriverRoute: DriverRouteWithChildren,
+  DriverSignupRoute: DriverSignupRoute,
   DriversRoute: DriversRoute,
   FaqRoute: FaqRoute,
   HowItWorksRoute: HowItWorksRoute,
+  LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   SafetyRoute: SafetyRoute,
+  SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
