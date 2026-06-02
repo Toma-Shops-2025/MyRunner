@@ -189,7 +189,15 @@ function OrderDetail() {
           <div className="text-right">
             <p className="font-serif text-4xl text-gold">{fmtUSD(order.price_cents + order.tip_cents)}</p>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">{order.status.replace("_", " ")}</p>
+            <p className={`mt-1 text-[10px] uppercase tracking-widest ${order.payment_status === "paid" ? "text-emerald-500" : "text-amber-500"}`}>
+              {order.payment_status === "paid" ? "✓ Paid" : "Unpaid"}
+            </p>
           </div>
+        </div>
+
+        {/* Map */}
+        <div className="mt-6">
+          <OrderMap pickup={order.pickup_address} dropoff={order.dropoff_address} />
         </div>
 
         {/* Status timeline */}
@@ -241,6 +249,11 @@ function OrderDetail() {
           )}
 
           {/* Customer actions */}
+          {isCustomer && order.payment_status !== "paid" && order.status !== "cancelled" && (
+            <Button size="sm" className="bg-gold text-primary-foreground hover:bg-gold/90" onClick={payNow} disabled={payBusy}>
+              <CreditCard className="mr-2 size-3" /> {payBusy ? "Opening checkout…" : `Pay ${fmtUSD(order.price_cents + order.tip_cents)}`}
+            </Button>
+          )}
           {isCustomer && ["pending", "accepted"].includes(order.status) && (
             <Button size="sm" variant="outline" onClick={cancelOrder}>Cancel order</Button>
           )}
