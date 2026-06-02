@@ -52,7 +52,18 @@ function OrderDetail() {
   const [myRating, setMyRating] = useState<number | null>(null);
   const [stars, setStars] = useState(5);
   const [comment, setComment] = useState("");
+  const [payBusy, setPayBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const checkout = useServerFn(createCheckoutSession);
+
+  async function payNow() {
+    setPayBusy(true);
+    const res = await checkout({ data: { orderId: id } });
+    setPayBusy(false);
+    if ("error" in res && res.error) return toast.error(res.error);
+    if ("url" in res && res.url) window.location.href = res.url;
+  }
+
 
   // Load order + messages, subscribe to realtime
   useEffect(() => {
