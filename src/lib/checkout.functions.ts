@@ -25,7 +25,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const origin = process.env.PUBLIC_APP_URL ?? "https://any-anywhere-delivery.lovable.app";
       const total = order.price_cents + order.tip_cents;
 
-      const session = await stripe.checkout.sessions.create({
+      const params = {
         mode: "payment",
         line_items: [
           {
@@ -45,7 +45,10 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         managed_payments: { enabled: true },
         payment_intent_data: { description: "MyRunner Delivery" },
         metadata: { order_id: order.id, env: "sandbox" },
-      });
+      };
+      // managed_payments is supported by the Stripe API (2026-03-25.dahlia)
+      // but not yet in the installed SDK's TS typings.
+      const session = await stripe.checkout.sessions.create(params as never);
 
       await supabase.from("orders").update({ stripe_session_id: session.id }).eq("id", order.id);
       return { url: session.url };
