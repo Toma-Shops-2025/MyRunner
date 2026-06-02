@@ -131,10 +131,13 @@ export type Database = {
           id: string
           item_description: string
           notes: string | null
+          paid_at: string | null
+          payment_status: string
           pickup_address: string
           price_cents: number
           scheduled_for: string | null
           status: Database["public"]["Enums"]["order_status"]
+          stripe_session_id: string | null
           tip_cents: number
           type: Database["public"]["Enums"]["order_type"]
           updated_at: string
@@ -148,10 +151,13 @@ export type Database = {
           id?: string
           item_description: string
           notes?: string | null
+          paid_at?: string | null
+          payment_status?: string
           pickup_address: string
           price_cents?: number
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          stripe_session_id?: string | null
           tip_cents?: number
           type?: Database["public"]["Enums"]["order_type"]
           updated_at?: string
@@ -165,10 +171,13 @@ export type Database = {
           id?: string
           item_description?: string
           notes?: string | null
+          paid_at?: string | null
+          payment_status?: string
           pickup_address?: string
           price_cents?: number
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          stripe_session_id?: string | null
           tip_cents?: number
           type?: Database["public"]["Enums"]["order_type"]
           updated_at?: string

@@ -1,0 +1,43 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { createStripeClient } from "@/lib/stripe.server";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
+export const Route = createFileRoute("/api/public/payments/webhook")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const url = new URL(request.url);
+        const env = url.searchParams.get("env") === "live" ? "live" : "sandbox";
+        const sig = request.headers.get("stripe-signature");
+        const body = await request.text();
+        const secret =
+          env === "live"
+            ? process.env.PAYMENTS_LIVE_WEBHOOK_SECRET
+            : process.env.PAYMENTS_SANDBOX_WEBHOOK_SECRET;
+
+        if (!sig || !secret) return new Response("Missing signature", { status: 400 });
+
+        const stripe = createStripeClient(env);
+        let event;
+        try {
+          event = await stripe.webhooks.constructEventAsync(body, sig, secret);
+        } catch (e) {
+          return new Response(`Webhook error: ${(e as Error).message}`, { status: 400 });
+        }
+
+        if (event.type === "checkout.session.completed") {
+          const session = event.data.object as { id: string; metadata?: { order_id?: string } };
+          const orderId = session.metadata?.order_id;
+          if (orderId) {
+            await supabaseAdmin
+              .from("orders")
+              .update({ payment_status: "paid", paid_at: new Date().toISOString() })
+              .eq("id", orderId);
+          }
+        }
+
+        return new Response("ok");
+      },
+    },
+  },
+});

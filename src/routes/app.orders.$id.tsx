@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Flag, CheckCircle2, Star } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowLeft, Send, Flag, CheckCircle2, Star, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { OrderMap } from "@/components/site/order-map";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
+import { createCheckoutSession } from "@/lib/checkout.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/orders/$id")({
@@ -27,6 +30,7 @@ type Order = {
   price_cents: number;
   tip_cents: number;
   distance_miles: number | null;
+  payment_status: string;
   created_at: string;
 };
 
@@ -48,7 +52,18 @@ function OrderDetail() {
   const [myRating, setMyRating] = useState<number | null>(null);
   const [stars, setStars] = useState(5);
   const [comment, setComment] = useState("");
+  const [payBusy, setPayBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const checkout = useServerFn(createCheckoutSession);
+
+  async function payNow() {
+    setPayBusy(true);
+    const res = await checkout({ data: { orderId: id } });
+    setPayBusy(false);
+    if ("error" in res && res.error) return toast.error(res.error);
+    if ("url" in res && res.url) window.location.href = res.url;
+  }
+
 
   // Load order + messages, subscribe to realtime
   useEffect(() => {
@@ -84,6 +99,14 @@ function OrderDetail() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
+
+  // Handle Stripe redirect query params
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get("paid") === "1") { toast.success("Payment received — your Runner is on it!"); window.history.replaceState({}, "", window.location.pathname); }
+    if (sp.get("cancelled") === "1") { toast("Payment cancelled — you can try again anytime."); window.history.replaceState({}, "", window.location.pathname); }
+  }, []);
+
 
   // Load existing rating I left on this order
   useEffect(() => {
@@ -174,7 +197,15 @@ function OrderDetail() {
           <div className="text-right">
             <p className="font-serif text-4xl text-gold">{fmtUSD(order.price_cents + order.tip_cents)}</p>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">{order.status.replace("_", " ")}</p>
+            <p className={`mt-1 text-[10px] uppercase tracking-widest ${order.payment_status === "paid" ? "text-emerald-500" : "text-amber-500"}`}>
+              {order.payment_status === "paid" ? "✓ Paid" : "Unpaid"}
+            </p>
           </div>
+        </div>
+
+        {/* Map */}
+        <div className="mt-6">
+          <OrderMap pickup={order.pickup_address} dropoff={order.dropoff_address} />
         </div>
 
         {/* Status timeline */}
@@ -226,6 +257,11 @@ function OrderDetail() {
           )}
 
           {/* Customer actions */}
+          {isCustomer && order.payment_status !== "paid" && order.status !== "cancelled" && (
+            <Button size="sm" className="bg-gold text-primary-foreground hover:bg-gold/90" onClick={payNow} disabled={payBusy}>
+              <CreditCard className="mr-2 size-3" /> {payBusy ? "Opening checkout…" : `Pay ${fmtUSD(order.price_cents + order.tip_cents)}`}
+            </Button>
+          )}
           {isCustomer && ["pending", "accepted"].includes(order.status) && (
             <Button size="sm" variant="outline" onClick={cancelOrder}>Cancel order</Button>
           )}
