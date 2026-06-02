@@ -100,6 +100,14 @@ function OrderDetail() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
+  // Handle Stripe redirect query params
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get("paid") === "1") { toast.success("Payment received — your Runner is on it!"); window.history.replaceState({}, "", window.location.pathname); }
+    if (sp.get("cancelled") === "1") { toast("Payment cancelled — you can try again anytime."); window.history.replaceState({}, "", window.location.pathname); }
+  }, []);
+
+
   // Load existing rating I left on this order
   useEffect(() => {
     if (!user) return;
