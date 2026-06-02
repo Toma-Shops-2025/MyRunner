@@ -32,13 +32,18 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
             price_data: {
               currency: "usd",
               unit_amount: total,
-              product_data: { name: `MyRunner delivery — ${order.item_description.slice(0, 80)}` },
+              product_data: {
+                name: `MyRunner delivery — ${order.item_description.slice(0, 80)}`,
+                tax_code: "txcd_92010001",
+              },
             },
             quantity: 1,
           },
         ],
         success_url: `${origin}/app/orders/${order.id}?paid=1`,
         cancel_url: `${origin}/app/orders/${order.id}?cancelled=1`,
+        managed_payments: { enabled: true },
+        payment_intent_data: { description: "MyRunner Delivery" },
         metadata: { order_id: order.id, env: "sandbox" },
       });
 
