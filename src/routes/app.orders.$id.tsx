@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Flag, CheckCircle2, Star } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowLeft, Send, Flag, CheckCircle2, Star, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { OrderMap } from "@/components/site/order-map";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
+import { createCheckoutSession } from "@/lib/checkout.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/orders/$id")({
@@ -27,6 +30,7 @@ type Order = {
   price_cents: number;
   tip_cents: number;
   distance_miles: number | null;
+  payment_status: string;
   created_at: string;
 };
 
