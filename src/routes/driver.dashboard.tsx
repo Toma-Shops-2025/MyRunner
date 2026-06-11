@@ -41,7 +41,9 @@ function DriverDashboard() {
   const [mine, setMine] = useState<Order[]>([]);
   const [completed, setCompleted] = useState<Order[]>([]);
   const [rating, setRating] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
+  const [payoutsEnabled, setPayoutsEnabled] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+
 
   const load = useCallback(async () => {
     if (!user) return;
