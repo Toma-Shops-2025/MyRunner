@@ -39,7 +39,7 @@ export const Route = createFileRoute("/privacy")({
       </ul>
       <p>We do not sell your personal information.</p>
       <h2>4. Your rights</h2>
-      <p>Depending on where you live (e.g., California CCPA/CPRA, EU GDPR), you may have the right to access, correct, delete, or port your data, and to opt out of certain processing. Email <a className="text-gold underline" href="mailto:support@myrunner.online">support@myrunner.online</a> or use the in‑app Delete Account flow under App → Settings.</p>
+      <p>Depending on where you live (e.g., California CCPA/CPRA, EU GDPR), you may have the right to access, correct, delete, or port your data, and to opt out of certain processing. Email <a className="text-gold underline" href="mailto:support@myrunner.shop">support@myrunner.shop</a> or use the in‑app Delete Account flow under App → Settings.</p>
       <h2>5. Data retention</h2>
       <p>Account data is kept until you delete your account. After deletion, personal data is removed within 30 days, except records we must retain for tax, fraud, safety, or legal compliance.</p>
       <h2>6. Children</h2>
@@ -49,7 +49,7 @@ export const Route = createFileRoute("/privacy")({
       <h2>8. Changes</h2>
       <p>We'll notify you of material changes. Continued use of the service constitutes acceptance.</p>
       <h2>9. Contact</h2>
-      <p>Email <a className="text-gold underline" href="mailto:support@myrunner.online">support@myrunner.online</a> with privacy questions.</p>
+      <p>Email <a className="text-gold underline" href="mailto:support@myrunner.shop">support@myrunner.shop</a> with privacy questions.</p>
     </LegalLayout>
   ),
 });

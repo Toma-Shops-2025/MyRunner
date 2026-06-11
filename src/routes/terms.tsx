@@ -33,7 +33,7 @@ export const Route = createFileRoute("/terms")({
       <h2>9. Limitation of liability</h2>
       <p>To the maximum extent permitted by law, MyRunner's total liability for any claim is limited to the amounts you paid us in the 12 months before the claim, plus any applicable insurance recovery.</p>
       <h2>10. Arbitration & class waiver</h2>
-      <p>You and MyRunner agree to resolve disputes through binding individual arbitration, not class actions, except where prohibited by law. You may opt out within 30 days of accepting these Terms by emailing <a className="text-gold underline" href="mailto:support@myrunner.online">support@myrunner.online</a>.</p>
+      <p>You and MyRunner agree to resolve disputes through binding individual arbitration, not class actions, except where prohibited by law. You may opt out within 30 days of accepting these Terms by emailing <a className="text-gold underline" href="mailto:support@myrunner.shop">support@myrunner.shop</a>.</p>
       <h2>11. Termination</h2>
       <p>You can delete your account anytime under App → Settings. We may suspend or terminate accounts that violate these Terms.</p>
       <h2>12. Changes</h2>
