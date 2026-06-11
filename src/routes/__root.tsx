@@ -111,7 +111,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           name: "MyRunner",
           url: "/",
           logo: "/icon-512.png",
-          email: "support@myrunner.online",
+          email: "support@myrunner.shop",
           slogan: "Anything · Anytime · Anywhere",
         }),
       },

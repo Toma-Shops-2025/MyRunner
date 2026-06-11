@@ -11,8 +11,8 @@ import { LegalConsent } from "@/components/site/legal-consent";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact MyRunner — support@myrunner.online" },
-      { name: "description", content: "Reach the MyRunner team. Email support@myrunner.online or use our contact form for help with deliveries, drivers, refunds, or partnerships." },
+      { title: "Contact MyRunner — support@myrunner.shop" },
+      { name: "description", content: "Reach the MyRunner team. Email support@myrunner.shop or use our contact form for help with deliveries, drivers, refunds, or partnerships." },
       { property: "og:title", content: "Contact MyRunner" },
       { property: "og:description", content: "We answer fast. Real humans + AI support 24/7." },
       { property: "og:url", content: "/contact" },
@@ -29,7 +29,7 @@ function Contact() {
       <section className="container-app py-20">
         <p className="text-xs uppercase tracking-widest text-gold">Contact</p>
         <h1 className="mt-3 font-serif text-6xl">Real humans. Fast replies.</h1>
-        <p className="mt-4 text-muted-foreground">support@myrunner.online · 24/7 in‑app AI chat</p>
+        <p className="mt-4 text-muted-foreground">support@myrunner.shop · 24/7 in‑app AI chat</p>
       </section>
       <section className="container-app pb-24">
         <form

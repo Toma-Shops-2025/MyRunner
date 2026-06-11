@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
           "@type": "Organization",
           name: "MyRunner",
           url: "/",
-          email: "support@myrunner.online",
+          email: "support@myrunner.shop",
           slogan: "Anything · Anytime · Anywhere",
         }),
       },

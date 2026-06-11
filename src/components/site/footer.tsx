@@ -52,7 +52,7 @@ export function SiteFooter() {
               you can't go get yourself.
             </p>
             <p className="mt-6 text-xs text-muted-foreground">
-              support@myrunner.online
+              support@myrunner.shop
             </p>
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
