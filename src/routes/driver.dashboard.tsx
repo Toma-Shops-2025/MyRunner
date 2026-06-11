@@ -84,6 +84,9 @@ function DriverDashboard() {
     });
     setPayoutsEnabled(Boolean((profileRes.data as { payouts_enabled?: boolean } | null)?.payouts_enabled));
     setLoading(false);
+  }, [user]);
+
+
 
 
   useEffect(() => {
