@@ -39,6 +39,7 @@ import { Route as AppNewDeliveryRouteImport } from './routes/app.new-delivery'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
 import { Route as AppOrdersIdRouteImport } from './routes/app.orders.$id'
@@ -194,6 +195,11 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDriversRoute = AdminDriversRouteImport.update({
+  id: '/drivers',
+  path: '/drivers',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/reports': typeof AdminReportsRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -276,6 +283,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/reports': typeof AdminReportsRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -313,6 +321,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/reports': typeof AdminReportsRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/applications'
     | '/admin/dashboard'
+    | '/admin/drivers'
     | '/admin/orders'
     | '/admin/reports'
     | '/app/dashboard'
@@ -387,6 +397,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/applications'
     | '/admin/dashboard'
+    | '/admin/drivers'
     | '/admin/orders'
     | '/admin/reports'
     | '/app/dashboard'
@@ -423,6 +434,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/applications'
     | '/admin/dashboard'
+    | '/admin/drivers'
     | '/admin/orders'
     | '/admin/reports'
     | '/app/dashboard'
@@ -673,6 +685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/drivers': {
+      id: '/admin/drivers'
+      path: '/drivers'
+      fullPath: '/admin/drivers'
+      preLoaderRoute: typeof AdminDriversRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/dashboard'
@@ -707,6 +726,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminApplicationsRoute: typeof AdminApplicationsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminDriversRoute: typeof AdminDriversRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminReportsRoute: typeof AdminReportsRoute
 }
@@ -714,6 +734,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApplicationsRoute: AdminApplicationsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminDriversRoute: AdminDriversRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminReportsRoute: AdminReportsRoute,
 }
