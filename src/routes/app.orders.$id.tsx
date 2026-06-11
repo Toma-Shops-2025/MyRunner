@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
 import { createCheckoutSession } from "@/lib/checkout.functions";
+import { payoutDriverForOrder } from "@/lib/connect.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/orders/$id")({
@@ -55,6 +56,7 @@ function OrderDetail() {
   const [payBusy, setPayBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const checkout = useServerFn(createCheckoutSession);
+  const runPayout = useServerFn(payoutDriverForOrder);
 
   async function payNow() {
     setPayBusy(true);
@@ -143,6 +145,14 @@ function OrderDetail() {
     const { error } = await supabase.from("orders").update({ status: next } as never).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(`Status: ${next.replace("_", " ")}`);
+    if (next === "delivered") {
+      const res = await runPayout({ data: { orderId: id } });
+      if ("error" in res && res.error) {
+        toast.error(`Payout issue: ${res.error}`);
+      } else if ("amount" in res && res.amount) {
+        toast.success(`Payout sent: ${fmtUSD(res.amount)}`);
+      }
+    }
   }
 
   async function claimOrder() {
