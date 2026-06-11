@@ -22,7 +22,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
     try {
       const stripe = createStripeClient("sandbox");
-      const origin = process.env.PUBLIC_APP_URL ?? "https://any-anywhere-delivery.lovable.app";
+      const origin = process.env.PUBLIC_APP_URL ?? "https://myrunner.shop";
       const total = order.price_cents + order.tip_cents;
 
       const params = {
