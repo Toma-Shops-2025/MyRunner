@@ -82,8 +82,9 @@ function DriverDashboard() {
       avg: stars.length ? stars.reduce((a, b) => a + b, 0) / stars.length : 0,
       count: stars.length,
     });
+    setPayoutsEnabled(Boolean((profileRes.data as { payouts_enabled?: boolean } | null)?.payouts_enabled));
     setLoading(false);
-  }, [user]);
+
 
   useEffect(() => {
     if (!user) return;
