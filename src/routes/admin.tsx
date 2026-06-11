@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ShieldCheck, Users, FileWarning, Package, LogOut } from "lucide-react";
+import { ShieldCheck, Users, FileWarning, Package, LogOut, Car } from "lucide-react";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,11 @@ export const Route = createFileRoute("/admin")({
 const tabs = [
   { to: "/admin/dashboard", label: "Overview", icon: ShieldCheck },
   { to: "/admin/applications", label: "Driver applications", icon: Users },
+  { to: "/admin/drivers", label: "Drivers & payouts", icon: Car },
   { to: "/admin/reports", label: "Reports", icon: FileWarning },
   { to: "/admin/orders", label: "All orders", icon: Package },
 ] as const;
+
 
 function AdminLayout() {
   const nav = useNavigate();
