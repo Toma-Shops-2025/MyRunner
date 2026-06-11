@@ -65,6 +65,56 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_payouts: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          driver_id: string
+          error_message: string | null
+          fee_share_cents: number
+          id: string
+          order_id: string
+          status: string
+          stripe_transfer_id: string | null
+          tip_cents: number
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          driver_id: string
+          error_message?: string | null
+          fee_share_cents?: number
+          id?: string
+          order_id: string
+          status?: string
+          stripe_transfer_id?: string | null
+          tip_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          driver_id?: string
+          error_message?: string | null
+          fee_share_cents?: number
+          id?: string
+          order_id?: string
+          status?: string
+          stripe_transfer_id?: string | null
+          tip_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_payouts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_preferences: {
         Row: {
           created_at: string
@@ -123,61 +173,79 @@ export type Database = {
       }
       orders: {
         Row: {
+          additional_pickups: number
           created_at: string
           customer_id: string
           distance_miles: number | null
           driver_id: string | null
+          driver_payout_cents: number
           dropoff_address: string
           id: string
           item_description: string
           notes: string | null
           paid_at: string | null
+          paid_out_at: string | null
           payment_status: string
+          payout_status: string
           pickup_address: string
+          platform_fee_cents: number
           price_cents: number
           scheduled_for: string | null
           status: Database["public"]["Enums"]["order_status"]
           stripe_session_id: string | null
+          stripe_transfer_id: string | null
           tip_cents: number
           type: Database["public"]["Enums"]["order_type"]
           updated_at: string
         }
         Insert: {
+          additional_pickups?: number
           created_at?: string
           customer_id: string
           distance_miles?: number | null
           driver_id?: string | null
+          driver_payout_cents?: number
           dropoff_address: string
           id?: string
           item_description: string
           notes?: string | null
           paid_at?: string | null
+          paid_out_at?: string | null
           payment_status?: string
+          payout_status?: string
           pickup_address: string
+          platform_fee_cents?: number
           price_cents?: number
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           stripe_session_id?: string | null
+          stripe_transfer_id?: string | null
           tip_cents?: number
           type?: Database["public"]["Enums"]["order_type"]
           updated_at?: string
         }
         Update: {
+          additional_pickups?: number
           created_at?: string
           customer_id?: string
           distance_miles?: number | null
           driver_id?: string | null
+          driver_payout_cents?: number
           dropoff_address?: string
           id?: string
           item_description?: string
           notes?: string | null
           paid_at?: string | null
+          paid_out_at?: string | null
           payment_status?: string
+          payout_status?: string
           pickup_address?: string
+          platform_fee_cents?: number
           price_cents?: number
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           stripe_session_id?: string | null
+          stripe_transfer_id?: string | null
           tip_cents?: number
           type?: Database["public"]["Enums"]["order_type"]
           updated_at?: string
@@ -191,7 +259,10 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          onboarding_completed_at: string | null
+          payouts_enabled: boolean
           phone: string | null
+          stripe_connect_account_id: string | null
           updated_at: string
         }
         Insert: {
@@ -200,7 +271,10 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          onboarding_completed_at?: string | null
+          payouts_enabled?: boolean
           phone?: string | null
+          stripe_connect_account_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -209,7 +283,10 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          onboarding_completed_at?: string | null
+          payouts_enabled?: boolean
           phone?: string | null
+          stripe_connect_account_id?: string | null
           updated_at?: string
         }
         Relationships: []

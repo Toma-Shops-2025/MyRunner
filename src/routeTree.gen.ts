@@ -30,6 +30,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DriverEarningsRouteImport } from './routes/driver.earnings'
 import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppReportRouteImport } from './routes/app.report'
@@ -148,6 +149,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DriverEarningsRoute = DriverEarningsRouteImport.update({
+  id: '/earnings',
+  path: '/earnings',
+  getParentRoute: () => DriverRoute,
+} as any)
 const DriverDashboardRoute = DriverDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
+  '/driver/earnings': typeof DriverEarningsRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -277,6 +284,7 @@ export interface FileRoutesByTo {
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
+  '/driver/earnings': typeof DriverEarningsRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -313,6 +321,7 @@ export interface FileRoutesById {
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
+  '/driver/earnings': typeof DriverEarningsRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -350,6 +359,7 @@ export interface FileRouteTypes {
     | '/app/report'
     | '/app/settings'
     | '/driver/dashboard'
+    | '/driver/earnings'
     | '/app/orders/$id'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -385,6 +395,7 @@ export interface FileRouteTypes {
     | '/app/report'
     | '/app/settings'
     | '/driver/dashboard'
+    | '/driver/earnings'
     | '/app/orders/$id'
     | '/api/public/payments/webhook'
   id:
@@ -420,6 +431,7 @@ export interface FileRouteTypes {
     | '/app/report'
     | '/app/settings'
     | '/driver/dashboard'
+    | '/driver/earnings'
     | '/app/orders/$id'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -598,6 +610,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/driver/earnings': {
+      id: '/driver/earnings'
+      path: '/earnings'
+      fullPath: '/driver/earnings'
+      preLoaderRoute: typeof DriverEarningsRouteImport
+      parentRoute: typeof DriverRoute
+    }
     '/driver/dashboard': {
       id: '/driver/dashboard'
       path: '/dashboard'
@@ -733,10 +752,12 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface DriverRouteChildren {
   DriverDashboardRoute: typeof DriverDashboardRoute
+  DriverEarningsRoute: typeof DriverEarningsRoute
 }
 
 const DriverRouteChildren: DriverRouteChildren = {
   DriverDashboardRoute: DriverDashboardRoute,
+  DriverEarningsRoute: DriverEarningsRoute,
 }
 
 const DriverRouteWithChildren =
@@ -769,13 +790,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

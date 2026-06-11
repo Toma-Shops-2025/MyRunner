@@ -36,6 +36,23 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
           }
         }
 
+        if (event.type === "account.updated") {
+          const account = event.data.object as {
+            id: string;
+            payouts_enabled?: boolean;
+            charges_enabled?: boolean;
+            details_submitted?: boolean;
+          };
+          const payoutsEnabled = Boolean(account.payouts_enabled && account.charges_enabled);
+          await supabaseAdmin
+            .from("profiles")
+            .update({
+              payouts_enabled: payoutsEnabled,
+              ...(payoutsEnabled ? { onboarding_completed_at: new Date().toISOString() } : {}),
+            })
+            .eq("stripe_connect_account_id", account.id);
+        }
+
         return new Response("ok");
       },
     },
