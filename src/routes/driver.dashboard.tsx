@@ -48,7 +48,7 @@ function DriverDashboard() {
   const load = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const [poolRes, mineRes, doneRes, ratingsRes] = await Promise.all([
+    const [poolRes, mineRes, doneRes, ratingsRes, profileRes] = await Promise.all([
       supabase
         .from("orders")
         .select("*")
@@ -71,8 +71,10 @@ function DriverDashboard() {
         .order("created_at", { ascending: false })
         .limit(100),
       supabase.from("ratings").select("stars").eq("ratee_id", user.id),
+      supabase.from("profiles").select("payouts_enabled").eq("id", user.id).maybeSingle(),
     ]);
     setPool((poolRes.data ?? []) as Order[]);
+
     setMine((mineRes.data ?? []) as Order[]);
     setCompleted((doneRes.data ?? []) as Order[]);
     const stars = (ratingsRes.data ?? []).map((r: { stars: number }) => r.stars);
