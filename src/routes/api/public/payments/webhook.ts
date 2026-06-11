@@ -44,11 +44,12 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
             details_submitted?: boolean;
           };
           const payoutsEnabled = Boolean(account.payouts_enabled && account.charges_enabled);
-          const updates: Record<string, unknown> = { payouts_enabled: payoutsEnabled };
-          if (payoutsEnabled) updates.onboarding_completed_at = new Date().toISOString();
           await supabaseAdmin
             .from("profiles")
-            .update(updates)
+            .update({
+              payouts_enabled: payoutsEnabled,
+              ...(payoutsEnabled ? { onboarding_completed_at: new Date().toISOString() } : {}),
+            })
             .eq("stripe_connect_account_id", account.id);
         }
 
