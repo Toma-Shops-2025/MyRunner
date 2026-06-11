@@ -141,6 +141,21 @@ function DriverDashboard() {
         </div>
       </div>
 
+      {payoutsEnabled === false && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-gold-soft p-5">
+          <div>
+            <p className="font-serif text-lg text-gold">Finish payout setup to get paid</p>
+            <p className="text-sm text-muted-foreground">
+              You can still accept orders, but payouts (70% of fee + 100% of tips) won't transfer until Stripe onboarding is complete.
+            </p>
+          </div>
+          <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
+            <Link to="/driver/earnings">Set up payouts</Link>
+          </Button>
+        </div>
+      )}
+
+
       <div className="grid gap-4 sm:grid-cols-4">
         <Stat label="Today's earnings" value={fmtUSD(todayCents)} />
         <Stat label="Active" value={String(mine.length)} />
