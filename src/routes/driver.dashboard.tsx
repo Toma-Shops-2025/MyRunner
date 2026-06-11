@@ -41,12 +41,14 @@ function DriverDashboard() {
   const [mine, setMine] = useState<Order[]>([]);
   const [completed, setCompleted] = useState<Order[]>([]);
   const [rating, setRating] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
+  const [payoutsEnabled, setPayoutsEnabled] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+
 
   const load = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const [poolRes, mineRes, doneRes, ratingsRes] = await Promise.all([
+    const [poolRes, mineRes, doneRes, ratingsRes, profileRes] = await Promise.all([
       supabase
         .from("orders")
         .select("*")
@@ -69,8 +71,10 @@ function DriverDashboard() {
         .order("created_at", { ascending: false })
         .limit(100),
       supabase.from("ratings").select("stars").eq("ratee_id", user.id),
+      supabase.from("profiles").select("payouts_enabled").eq("id", user.id).maybeSingle(),
     ]);
     setPool((poolRes.data ?? []) as Order[]);
+
     setMine((mineRes.data ?? []) as Order[]);
     setCompleted((doneRes.data ?? []) as Order[]);
     const stars = (ratingsRes.data ?? []).map((r: { stars: number }) => r.stars);
@@ -78,8 +82,12 @@ function DriverDashboard() {
       avg: stars.length ? stars.reduce((a, b) => a + b, 0) / stars.length : 0,
       count: stars.length,
     });
+    setPayoutsEnabled(Boolean((profileRes.data as { payouts_enabled?: boolean } | null)?.payouts_enabled));
     setLoading(false);
   }, [user]);
+
+
+
 
   useEffect(() => {
     if (!user) return;
@@ -132,6 +140,21 @@ function DriverDashboard() {
           />
         </div>
       </div>
+
+      {payoutsEnabled === false && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-gold-soft p-5">
+          <div>
+            <p className="font-serif text-lg text-gold">Finish payout setup to get paid</p>
+            <p className="text-sm text-muted-foreground">
+              You can still accept orders, but payouts (70% of fee + 100% of tips) won't transfer until Stripe onboarding is complete.
+            </p>
+          </div>
+          <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
+            <Link to="/driver/earnings">Set up payouts</Link>
+          </Button>
+        </div>
+      )}
+
 
       <div className="grid gap-4 sm:grid-cols-4">
         <Stat label="Today's earnings" value={fmtUSD(todayCents)} />
