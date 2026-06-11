@@ -93,8 +93,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "SwiftRun Delivery connects users with local drivers for on-demand delivery of any item." },
       { property: "og:description", content: "SwiftRun Delivery connects users with local drivers for on-demand delivery of any item." },
       { name: "twitter:description", content: "SwiftRun Delivery connects users with local drivers for on-demand delivery of any item." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5aa8e1fb-c3ef-4297-8ebf-c0dd1a7854c0/id-preview-44a1693e--9f03b4ad-2745-4495-8918-f312e3e1a7ad.lovable.app-1780353383833.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5aa8e1fb-c3ef-4297-8ebf-c0dd1a7854c0/id-preview-44a1693e--9f03b4ad-2745-4495-8918-f312e3e1a7ad.lovable.app-1780353383833.png" },
+      { property: "og:image", content: "https://myrunner.shop/og-image.png" },
+      { name: "twitter:image", content: "https://myrunner.shop/og-image.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
