@@ -152,17 +152,33 @@ function DriverDashboard() {
         </div>
       </div>
 
-      {payoutsEnabled === false && (
+      {(bgStatus === "failed" || !isActive) && (
+        <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-5">
+          <p className="font-serif text-lg text-destructive">Account deactivated</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your background check returned a result that doesn't meet our standards. You can't accept orders right now.
+            Contact <a href="/contact" className="underline text-destructive">support</a> if you believe this is a mistake.
+          </p>
+        </div>
+      )}
+
+      {payoutsEnabled === false && bgStatus !== "failed" && isActive && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-gold-soft p-5">
           <div>
-            <p className="font-serif text-lg text-gold">Finish payout setup to get paid</p>
+            <p className="font-serif text-lg text-gold">Finish payout setup before accepting orders</p>
             <p className="text-sm text-muted-foreground">
-              You can still accept orders, but payouts (70% of fee + 100% of tips) won't transfer until Stripe onboarding is complete.
+              You're activated as a Runner — but you can't accept orders or get paid until Stripe Connect is complete (70% of fee + 100% of tips).
             </p>
           </div>
           <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
             <Link to="/driver/earnings">Set up payouts</Link>
           </Button>
+        </div>
+      )}
+
+      {bgStatus === "pending" && payoutsEnabled === true && isActive && (
+        <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+          Background check in progress. You can accept and complete orders while it's running. If a disqualifying result comes back, your account will be deactivated automatically.
         </div>
       )}
 
