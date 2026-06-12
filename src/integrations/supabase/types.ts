@@ -255,37 +255,70 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          background_check_status: string
+          background_check_updated_at: string | null
           created_at: string
+          date_of_birth: string | null
           email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
           full_name: string | null
+          home_address: string | null
+          home_city: string | null
+          home_state: string | null
+          home_zip: string | null
           id: string
+          is_active: boolean
           onboarding_completed_at: string | null
           payouts_enabled: boolean
           phone: string | null
+          ssn_last4: string | null
           stripe_connect_account_id: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          background_check_status?: string
+          background_check_updated_at?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           full_name?: string | null
+          home_address?: string | null
+          home_city?: string | null
+          home_state?: string | null
+          home_zip?: string | null
           id: string
+          is_active?: boolean
           onboarding_completed_at?: string | null
           payouts_enabled?: boolean
           phone?: string | null
+          ssn_last4?: string | null
           stripe_connect_account_id?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          background_check_status?: string
+          background_check_updated_at?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           full_name?: string | null
+          home_address?: string | null
+          home_city?: string | null
+          home_state?: string | null
+          home_zip?: string | null
           id?: string
+          is_active?: boolean
           onboarding_completed_at?: string | null
           payouts_enabled?: boolean
           phone?: string | null
+          ssn_last4?: string | null
           stripe_connect_account_id?: string | null
           updated_at?: string
         }
