@@ -20,6 +20,7 @@ export const Route = createFileRoute("/app/new-delivery")({
 
 function NewDelivery() {
   const nav = useNavigate();
+  const checkoutFn = useServerFn(createCheckoutSession);
   const [miles, setMiles] = useState(3);
   const [type, setType] = useState<"standard" | "multi_pickup" | "multi_dropoff">("standard");
   const [agree, setAgree] = useState(false);
