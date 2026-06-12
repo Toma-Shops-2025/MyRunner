@@ -43,6 +43,7 @@ import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
 import { Route as AppOrdersIdRouteImport } from './routes/app.orders.$id'
+import { Route as ApiPublicDemoDriverEnsureRouteImport } from './routes/api/public/demo-driver-ensure'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const TermsRoute = TermsRouteImport.update({
@@ -215,6 +216,12 @@ const AppOrdersIdRoute = AppOrdersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AppOrdersRoute,
 } as any)
+const ApiPublicDemoDriverEnsureRoute =
+  ApiPublicDemoDriverEnsureRouteImport.update({
+    id: '/api/public/demo-driver-ensure',
+    path: '/api/public/demo-driver-ensure',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -256,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
+  '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -293,6 +301,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
+  '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -331,6 +340,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
+  '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/driver/dashboard'
     | '/driver/earnings'
+    | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -407,6 +418,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/driver/dashboard'
     | '/driver/earnings'
+    | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
     | '/api/public/payments/webhook'
   id:
@@ -444,6 +456,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/driver/dashboard'
     | '/driver/earnings'
+    | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -470,6 +483,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  ApiPublicDemoDriverEnsureRoute: typeof ApiPublicDemoDriverEnsureRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -713,6 +727,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrdersIdRouteImport
       parentRoute: typeof AppOrdersRoute
     }
+    '/api/public/demo-driver-ensure': {
+      id: '/api/public/demo-driver-ensure'
+      path: '/api/public/demo-driver-ensure'
+      fullPath: '/api/public/demo-driver-ensure'
+      preLoaderRoute: typeof ApiPublicDemoDriverEnsureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -806,6 +827,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  ApiPublicDemoDriverEnsureRoute: ApiPublicDemoDriverEnsureRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
