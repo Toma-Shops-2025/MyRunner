@@ -167,7 +167,7 @@ function NewDelivery() {
         </div>
 
         <LegalConsent id="order-consent" checked={agree} onCheckedChange={setAgree} variant="order" />
-        <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">Place order — {fmtUSD(total)}</Button>
+        <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">{busy ? "Starting checkout…" : `Continue to payment — ${fmtUSD(total)}`}</Button>
       </form>
     </div>
   );
