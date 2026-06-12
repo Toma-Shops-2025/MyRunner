@@ -245,7 +245,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function OrderCard({ order, mine, onClaim }: { order: Order; mine?: boolean; onClaim?: () => void }) {
+function OrderCard({ order, mine, onClaim, canAccept = true }: { order: Order; mine?: boolean; onClaim?: () => void; canAccept?: boolean }) {
   return (
     <li className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-4">
@@ -265,7 +265,13 @@ function OrderCard({ order, mine, onClaim }: { order: Order; mine?: boolean; onC
               <Link to="/app/orders/$id" params={{ id: order.id }}>Open</Link>
             </Button>
           ) : (
-            <Button size="sm" className="mt-2 bg-gold text-primary-foreground hover:bg-gold/90" onClick={onClaim}>
+            <Button
+              size="sm"
+              className="mt-2 bg-gold text-primary-foreground hover:bg-gold/90"
+              onClick={onClaim}
+              disabled={!canAccept}
+              title={canAccept ? "" : "Complete payout setup to accept orders"}
+            >
               Accept
             </Button>
           )}
