@@ -23,10 +23,31 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
 
   async function google() {
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app/dashboard" });
     if (res.error) toast.error("Google sign-in failed.");
+  }
+
+  async function demoDriver() {
+    setDemoBusy(true);
+    try {
+      const res = await fetch("/api/public/demo-driver-ensure", { method: "POST" });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error ?? "Could not seed demo driver");
+      const { error } = await supabase.auth.signInWithPassword({
+        email: "demo-driver@myrunner.shop",
+        password: "Demo1234!",
+      });
+      if (error) throw error;
+      toast.success("Signed in as Demo Driver.");
+      nav({ to: "/driver/dashboard" });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setDemoBusy(false);
+    }
   }
 
   return (
@@ -55,6 +76,14 @@ function Login() {
             <div className="grid gap-2"><Label htmlFor="password">Password</Label><Input id="password" name="password" type="password" required /></div>
             <Button type="submit" disabled={busy} className="w-full bg-gold text-primary-foreground hover:bg-gold/90">Sign in</Button>
             <Button type="button" variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
+          </div>
+          <div className="mt-6 rounded-xl border border-dashed border-gold/40 bg-gold-soft/30 p-4">
+            <p className="text-xs uppercase tracking-widest text-gold">For reviewers</p>
+            <p className="mt-1 text-sm">Try the full driver flow — pre-approved, payouts already set up.</p>
+            <Button type="button" variant="outline" className="mt-3 w-full" disabled={demoBusy} onClick={demoDriver}>
+              {demoBusy ? "Signing in…" : "Continue as Demo Driver"}
+            </Button>
+            <p className="mt-2 text-xs text-muted-foreground">demo-driver@myrunner.shop · Demo1234!</p>
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             New here? <Link to="/signup" className="text-gold underline">Create an account</Link>

@@ -9,6 +9,8 @@ import { AddressAutocomplete } from "@/components/site/address-autocomplete";
 import { OrderMap } from "@/components/site/order-map";
 import { priceQuote, fmtUSD } from "@/lib/pricing";
 import { supabase } from "@/integrations/supabase/client";
+import { createCheckoutSession } from "@/lib/checkout.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/new-delivery")({
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/app/new-delivery")({
 
 function NewDelivery() {
   const nav = useNavigate();
+  const checkoutFn = useServerFn(createCheckoutSession);
   const [miles, setMiles] = useState(3);
   const [type, setType] = useState<"standard" | "multi_pickup" | "multi_dropoff">("standard");
   const [agree, setAgree] = useState(false);
@@ -59,7 +62,7 @@ function NewDelivery() {
           const fd = new FormData(e.currentTarget);
           const { data: { user } } = await supabase.auth.getUser();
           if (!user) { setBusy(false); return toast.error("Please sign in again."); }
-          const { error } = await supabase.from("orders").insert({
+          const { data: created, error } = await supabase.from("orders").insert({
             customer_id: user.id,
             pickup_address: pickup,
             dropoff_address: dropoff,
@@ -68,11 +71,24 @@ function NewDelivery() {
             price_cents: total,
             tip_cents: Math.round(Number(fd.get("tip") || 0) * 100),
             distance_miles: effectiveMiles,
-          });
+          }).select("id").single();
+          if (error || !created) { setBusy(false); return toast.error(error?.message ?? "Could not create order"); }
+
+          // Immediately open Stripe Checkout to take payment
+          const session = await checkoutFn({ data: { orderId: created.id } });
+          if ("error" in session && session.error) {
+            setBusy(false);
+            toast.error(session.error);
+            // Order exists but not paid — send them to its page where they can retry
+            return nav({ to: "/app/orders/$id", params: { id: created.id } });
+          }
+          if ("url" in session && session.url) {
+            window.location.href = session.url;
+            return;
+          }
           setBusy(false);
-          if (error) return toast.error(error.message);
-          toast.success("Order placed. Finding you a Runner…");
-          nav({ to: "/app/orders" });
+          toast.error("Could not start checkout.");
+          nav({ to: "/app/orders/$id", params: { id: created.id } });
         }}
         className="grid gap-6 rounded-2xl border border-border bg-card p-8"
       >
@@ -151,7 +167,7 @@ function NewDelivery() {
         </div>
 
         <LegalConsent id="order-consent" checked={agree} onCheckedChange={setAgree} variant="order" />
-        <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">Place order — {fmtUSD(total)}</Button>
+        <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">{busy ? "Starting checkout…" : `Continue to payment — ${fmtUSD(total)}`}</Button>
       </form>
     </div>
   );

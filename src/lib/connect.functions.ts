@@ -205,6 +205,29 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
     const platformFee = order.price_cents - feeShare;
     const driverTotal = feeShare + order.tip_cents;
 
+    // Demo driver: skip the actual Stripe transfer, write a simulated payout
+    if (driverProfile.stripe_connect_account_id === "acct_demo") {
+      await Promise.all([
+        supabase.from("orders").update({
+          driver_payout_cents: driverTotal,
+          platform_fee_cents: platformFee,
+          stripe_transfer_id: "tr_demo",
+          payout_status: "paid",
+          paid_out_at: new Date().toISOString(),
+        }).eq("id", order.id),
+        supabase.from("driver_payouts").insert({
+          driver_id: order.driver_id,
+          order_id: order.id,
+          amount_cents: driverTotal,
+          tip_cents: order.tip_cents,
+          fee_share_cents: feeShare,
+          stripe_transfer_id: "tr_demo",
+          status: "paid",
+        }),
+      ]);
+      return { ok: true, amount: driverTotal, transferId: "tr_demo", demo: true };
+    }
+
     try {
       const stripe = createStripeClient("sandbox");
       const transfer = await stripe.transfers.create(

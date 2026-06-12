@@ -42,6 +42,8 @@ function DriverDashboard() {
   const [completed, setCompleted] = useState<Order[]>([]);
   const [rating, setRating] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
   const [payoutsEnabled, setPayoutsEnabled] = useState<boolean | null>(null);
+  const [bgStatus, setBgStatus] = useState<"pending" | "clear" | "failed">("pending");
+  const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(true);
 
 
@@ -71,7 +73,7 @@ function DriverDashboard() {
         .order("created_at", { ascending: false })
         .limit(100),
       supabase.from("ratings").select("stars").eq("ratee_id", user.id),
-      supabase.from("profiles").select("payouts_enabled").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles").select("payouts_enabled, background_check_status, is_active").eq("id", user.id).maybeSingle(),
     ]);
     setPool((poolRes.data ?? []) as Order[]);
 
@@ -82,7 +84,10 @@ function DriverDashboard() {
       avg: stars.length ? stars.reduce((a, b) => a + b, 0) / stars.length : 0,
       count: stars.length,
     });
-    setPayoutsEnabled(Boolean((profileRes.data as { payouts_enabled?: boolean } | null)?.payouts_enabled));
+    const prof = profileRes.data as { payouts_enabled?: boolean; background_check_status?: "pending" | "clear" | "failed"; is_active?: boolean } | null;
+    setPayoutsEnabled(Boolean(prof?.payouts_enabled));
+    setBgStatus(prof?.background_check_status ?? "pending");
+    setIsActive(prof?.is_active ?? true);
     setLoading(false);
   }, [user]);
 
@@ -100,8 +105,14 @@ function DriverDashboard() {
     return () => { supabase.removeChannel(ch); };
   }, [user, load]);
 
+  const canAccept = payoutsEnabled === true && isActive && bgStatus !== "failed";
+
   async function claim(o: Order) {
     if (!user) return;
+    if (!canAccept) {
+      if (!payoutsEnabled) return toast.error("Finish Stripe payout setup before accepting orders.");
+      if (bgStatus === "failed" || !isActive) return toast.error("Your account is deactivated. Contact support.");
+    }
     const { error } = await supabase
       .from("orders")
       .update({ driver_id: user.id, status: "accepted" })
@@ -141,17 +152,33 @@ function DriverDashboard() {
         </div>
       </div>
 
-      {payoutsEnabled === false && (
+      {(bgStatus === "failed" || !isActive) && (
+        <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-5">
+          <p className="font-serif text-lg text-destructive">Account deactivated</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your background check returned a result that doesn't meet our standards. You can't accept orders right now.
+            Contact <a href="/contact" className="underline text-destructive">support</a> if you believe this is a mistake.
+          </p>
+        </div>
+      )}
+
+      {payoutsEnabled === false && bgStatus !== "failed" && isActive && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-gold-soft p-5">
           <div>
-            <p className="font-serif text-lg text-gold">Finish payout setup to get paid</p>
+            <p className="font-serif text-lg text-gold">Finish payout setup before accepting orders</p>
             <p className="text-sm text-muted-foreground">
-              You can still accept orders, but payouts (70% of fee + 100% of tips) won't transfer until Stripe onboarding is complete.
+              You're activated as a Runner — but you can't accept orders or get paid until Stripe Connect is complete (70% of fee + 100% of tips).
             </p>
           </div>
           <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
             <Link to="/driver/earnings">Set up payouts</Link>
           </Button>
+        </div>
+      )}
+
+      {bgStatus === "pending" && payoutsEnabled === true && isActive && (
+        <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+          Background check in progress. You can accept and complete orders while it's running. If a disqualifying result comes back, your account will be deactivated automatically.
         </div>
       )}
 
@@ -183,7 +210,7 @@ function DriverDashboard() {
           </div>
         ) : (
           <ul className="mt-4 space-y-3">
-            {pool.map((o) => <OrderCard key={o.id} order={o} onClaim={() => claim(o)} />)}
+            {pool.map((o) => <OrderCard key={o.id} order={o} onClaim={() => claim(o)} canAccept={canAccept} />)}
           </ul>
         )}
       </section>
@@ -218,7 +245,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function OrderCard({ order, mine, onClaim }: { order: Order; mine?: boolean; onClaim?: () => void }) {
+function OrderCard({ order, mine, onClaim, canAccept = true }: { order: Order; mine?: boolean; onClaim?: () => void; canAccept?: boolean }) {
   return (
     <li className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-4">
@@ -238,7 +265,13 @@ function OrderCard({ order, mine, onClaim }: { order: Order; mine?: boolean; onC
               <Link to="/app/orders/$id" params={{ id: order.id }}>Open</Link>
             </Button>
           ) : (
-            <Button size="sm" className="mt-2 bg-gold text-primary-foreground hover:bg-gold/90" onClick={onClaim}>
+            <Button
+              size="sm"
+              className="mt-2 bg-gold text-primary-foreground hover:bg-gold/90"
+              onClick={onClaim}
+              disabled={!canAccept}
+              title={canAccept ? "" : "Complete payout setup to accept orders"}
+            >
               Accept
             </Button>
           )}

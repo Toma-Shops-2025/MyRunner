@@ -1,55 +1,48 @@
+## What you'll see when this ships
 
-# Stripe Connect for Driver Payouts
-
-## What changes for you
-
-- Drivers get a new **Earnings** page where they finish a one-time Stripe onboarding (Stripe-hosted form: name, DOB, address, SSN last 4, bank account). Without it, they can still accept orders but can't be paid.
-- After each delivered order, the system automatically sends **70% of the delivery fee + 100% of the tip** to the driver's Stripe account. MyRunner keeps the other 30% of the fee.
-- Pricing updates to **$5.99 base + $1.50/mile + $3.00 per additional pickup**.
-- You'll see each driver's onboarding status and lifetime payout total in the admin dashboard.
-
-## Important heads-up
-
-Lovable's built-in Stripe doesn't support Connect (driver payouts). To do this we have to switch to the **bring-your-own-key Stripe** mode, which means:
-
-1. You'll need to add your Stripe **secret key** as a project secret (I'll prompt you when ready — get it from your Stripe dashboard → Developers → API keys → "Reveal live secret key", starts with `sk_live_...`).
-2. In your Stripe dashboard, enable **Connect** under Settings → Connect → Get started → choose **Express** accounts → Platform profile (the form asks what your platform does — same delivery marketplace description as before).
-3. The webhook URL changes — I'll generate a new signing secret you'll paste in.
-
-The customer checkout flow stays exactly as it works today; only the underlying connection changes.
+1. **Driver application is now one continuous flow.** A new applicant fills out a longer form (personal info + DOB + last 4 of SSN + home address + emergency contact + vehicle + license/insurance + uploads). On submit they're created, signed in, granted the `driver` role automatically, and dropped on `/driver/dashboard` — no admin approval needed.
+2. **They can see the dashboard immediately but can't accept orders yet.** A persistent banner says "Complete Stripe payout setup to start accepting deliveries." The Accept button is disabled until Stripe Connect onboarding is `payouts_enabled = true`.
+3. **Background check guardrail.** A new `background_check_status` on their profile defaults to `pending`. If you (admin) flip it to `failed`, their `driver` role is removed and a "Deactivated" banner takes over their dashboard until you flip it back to `clear`. The hook is in place even though Checkr itself isn't wired yet — you'll toggle status manually from the admin page.
+4. **Customer pays right when they submit a new delivery.** The new-delivery form leads straight into Stripe embedded checkout. Payment success creates the order in `available` status and it shows up in the driver "Available orders" feed. No more orders stuck in "pending" with no way to pay.
+5. **Driver claim → deliver → payout.** Drivers see Available orders, hit Accept (only if onboarded), do the delivery, mark Delivered, and the existing `payoutDriver` server function automatically transfers their 70% + 100% tip. House keeps 30%.
+6. **Demo driver for reviewers.** A `demo-driver@myrunner.shop` / `Demo1234!` account is seeded with: driver role, background check = clear, Stripe Connect marked complete (mock — no real account, payouts simulated), so the reviewer can log in and immediately accept demo orders.
 
 ## Build steps
 
-1. **Pricing update** — update `src/lib/pricing.ts` and the new-delivery form to use $5.99 base / $1.50 mile / $3 per extra pickup. Show breakdown to customer at checkout.
-2. **Database**
-   - Add `stripe_connect_account_id`, `payouts_enabled`, `onboarding_completed_at` to `profiles`
-   - Add `driver_payout_cents`, `platform_fee_cents`, `stripe_transfer_id`, `payout_status`, `additional_pickups` to `orders`
-   - Add `driver_payouts` table for ledger/history
-3. **Server functions** (TanStack `createServerFn`)
-   - `createConnectAccount` — creates Stripe Express account for the driver
-   - `createOnboardingLink` — returns Stripe-hosted onboarding URL
-   - `refreshAccountStatus` — checks `payouts_enabled` after onboarding
-   - `payoutDriver` — runs when order marked `delivered`: creates a Stripe Transfer (70% × fee + 100% × tip) to driver's connected account, writes to `driver_payouts`
-4. **Webhook handler** — listen for `account.updated` (onboarding state changes) and update profile flags
-5. **Driver UI**
-   - New `/driver/earnings` page: onboarding banner if not complete, payout history, lifetime totals, "Open Stripe dashboard" link
-   - Block "Accept" button with helpful banner if `payouts_enabled=false`
-6. **Order completion flow** — when driver marks delivered, call `payoutDriver` automatically; show payout amount in success toast
-7. **Admin dashboard** — column showing each driver's onboarding status + total paid out
+1. **Schema migration**
+   - Add to `profiles`: `date_of_birth`, `ssn_last4`, `home_address`, `home_city`, `home_state`, `home_zip`, `phone`, `emergency_contact_name`, `emergency_contact_phone`, `background_check_status` (enum-ish text default `'pending'`), `background_check_updated_at`, `is_active` (default true).
+   - Drop the admin-approval requirement from `driver_applications.status` default to `'auto_approved'`; keep the table for record-keeping.
+   - Add `available` to allowed `orders.status` values; orders start at `'awaiting_payment'`, flip to `'available'` on `payment_status='paid'`.
+   - RLS: drivers can read their own profile, admins can update `background_check_status` via `has_role('admin')`.
+
+2. **Driver signup form rewrite** (`src/routes/driver-signup.tsx`)
+   - Add all the new fields (DOB, last-4 SSN, full address, emergency contact). Full SSN field present but we only persist last 4 — discarded after submit.
+   - On submit: create user → upsert profile with all data → insert `driver` role → toast → navigate to `/driver/dashboard`.
+
+3. **Driver dashboard banners** (`src/routes/driver.dashboard.tsx`)
+   - Top banner: "Complete Stripe payout setup" if `payouts_enabled=false`, linking to `/driver/earnings`.
+   - Top banner: "Account deactivated — background check status: failed" if `background_check_status='failed'` or `is_active=false`.
+   - Available-orders list pulled from `orders` where `status='available'`. Accept button disabled (with tooltip) when payouts not enabled or account inactive.
+
+4. **Customer pay-on-submit** (`src/routes/app.new-delivery.tsx`)
+   - On submit: create order with `status='awaiting_payment'`, then immediately open Stripe Embedded Checkout in a dialog. On success, webhook flips `payment_status='paid'` AND `status='available'` so drivers see it. On dialog close without paying: order stays awaiting_payment, customer sees a Pay Now button on `/app/orders/$id`.
+
+5. **Webhook update** (`src/routes/api/public/payments/webhook.ts`)
+   - On `checkout.session.completed` for an order: set `payment_status='paid'` and `status='available'` in one update.
+
+6. **Admin background check toggle** (`src/routes/admin.drivers.tsx`)
+   - Add a status dropdown per driver: `pending` / `clear` / `failed`. Server fn updates the profile and, on `failed`, removes the `driver` role; on `clear` reinstated if missing.
+
+7. **Demo driver seed** (one-time migration)
+   - Insert demo auth user, profile with `background_check_status='clear'`, `payouts_enabled=true`, `stripe_connect_account_id='acct_demo'`. Bypass `payoutDriver` for demo driver (skip Stripe transfer, just write the ledger row as `status='simulated'`).
+   - Show "Demo driver login" hint card on `/login` with the credentials.
 
 ## Technical notes
 
-- BYOK Stripe SDK directly (not gateway): `import Stripe from "stripe"` with `process.env.STRIPE_SECRET_KEY`
-- Charges stay as direct charges on the platform account; payouts use `stripe.transfers.create({ amount, currency, destination: driverConnectAccountId, transfer_group: orderId })` after funds settle (~2 business days)
-- For instant testing in sandbox, use `stripe.transfers.create` immediately — sandbox doesn't enforce settlement delays
-- Express accounts let Stripe handle KYC, tax forms (1099-NEC at year-end), and the driver-facing payout dashboard — minimal work for you
-- Tips are pulled from `orders.tip_cents`, fees from `orders.price_cents`
-- A delivered order with no `driver_payout_cents` becomes admin's TODO (e.g., driver hasn't onboarded yet) — manual retry button in admin
+- Last-4 SSN stored as `text` column with a check `length=4 and ~ '^\d{4}$'`. Full SSN never touches the DB — collected client-side and dropped after submit.
+- `payoutDriver` server fn gets a short-circuit: if `driver.stripe_connect_account_id = 'acct_demo'` skip the Stripe transfer and write the payout row with `status='simulated'`. Keeps the demo end-to-end without needing a real Connect account.
+- Background-check enforcement uses both an `is_active` profile flag and role removal so RLS-checked queries (Accept button server fn) naturally fail for deactivated drivers.
+- The existing `payouts_enabled` flag continues to gate Accept; we add an `is_active && background_check_status != 'failed'` check alongside it.
+- Demo driver password set via Supabase admin API in a one-time server-side seed script (run as migration with `auth.admin.createUser`).
 
-## What you'll need to do during build
-
-- Paste your Stripe live secret key when prompted
-- After I push the webhook code, copy the new webhook URL → add it in Stripe dashboard → Developers → Webhooks → paste the signing secret back to me
-- Enable Connect Express in your Stripe dashboard (5-min form)
-
-Ready to proceed? Reply "go" and I'll start with the pricing update + database schema, then prompt you for the Stripe secret key when I need it.
+Reply "go" and I'll start with the migration + form rewrite, then wire the rest in sequence.

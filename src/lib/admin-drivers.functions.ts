@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const listDriversForAdmin = createServerFn({ method: "GET" })
@@ -24,7 +25,7 @@ export const listDriversForAdmin = createServerFn({ method: "GET" })
     const [{ data: profiles }, { data: payouts }] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("id, email, full_name, phone, stripe_connect_account_id, payouts_enabled, onboarding_completed_at, created_at")
+        .select("id, email, full_name, phone, stripe_connect_account_id, payouts_enabled, onboarding_completed_at, created_at, background_check_status, background_check_updated_at, is_active")
         .in("id", ids),
       supabaseAdmin
         .from("driver_payouts")
@@ -47,4 +48,45 @@ export const listDriversForAdmin = createServerFn({ method: "GET" })
     }));
     drivers.sort((a, b) => b.totals.paidCents - a.totals.paidCents);
     return { drivers };
+  });
+
+const updateInput = z.object({
+  driverId: z.string().uuid(),
+  status: z.enum(["pending", "clear", "failed"]),
+});
+
+export const updateDriverBackgroundCheck = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => updateInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const isActive = data.status !== "failed";
+    const { error: updErr } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        background_check_status: data.status,
+        background_check_updated_at: new Date().toISOString(),
+        is_active: isActive,
+      })
+      .eq("id", data.driverId);
+    if (updErr) throw updErr;
+
+    if (data.status === "failed") {
+      // Revoke driver role
+      await supabaseAdmin.from("user_roles").delete().eq("user_id", data.driverId).eq("role", "driver");
+    } else {
+      // Reinstate driver role if missing
+      await supabaseAdmin.from("user_roles").upsert(
+        { user_id: data.driverId, role: "driver" },
+        { onConflict: "user_id,role", ignoreDuplicates: true },
+      );
+    }
+    return { ok: true };
   });
