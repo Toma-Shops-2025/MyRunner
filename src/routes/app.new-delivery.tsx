@@ -62,7 +62,7 @@ function NewDelivery() {
           const fd = new FormData(e.currentTarget);
           const { data: { user } } = await supabase.auth.getUser();
           if (!user) { setBusy(false); return toast.error("Please sign in again."); }
-          const { error } = await supabase.from("orders").insert({
+          const { data: created, error } = await supabase.from("orders").insert({
             customer_id: user.id,
             pickup_address: pickup,
             dropoff_address: dropoff,
@@ -71,11 +71,24 @@ function NewDelivery() {
             price_cents: total,
             tip_cents: Math.round(Number(fd.get("tip") || 0) * 100),
             distance_miles: effectiveMiles,
-          });
+          }).select("id").single();
+          if (error || !created) { setBusy(false); return toast.error(error?.message ?? "Could not create order"); }
+
+          // Immediately open Stripe Checkout to take payment
+          const session = await checkoutFn({ data: { orderId: created.id } });
+          if ("error" in session && session.error) {
+            setBusy(false);
+            toast.error(session.error);
+            // Order exists but not paid — send them to its page where they can retry
+            return nav({ to: "/app/orders/$id", params: { id: created.id } });
+          }
+          if ("url" in session && session.url) {
+            window.location.href = session.url;
+            return;
+          }
           setBusy(false);
-          if (error) return toast.error(error.message);
-          toast.success("Order placed. Finding you a Runner…");
-          nav({ to: "/app/orders" });
+          toast.error("Could not start checkout.");
+          nav({ to: "/app/orders/$id", params: { id: created.id } });
         }}
         className="grid gap-6 rounded-2xl border border-border bg-card p-8"
       >
