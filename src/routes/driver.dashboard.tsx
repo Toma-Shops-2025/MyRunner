@@ -73,7 +73,7 @@ function DriverDashboard() {
         .order("created_at", { ascending: false })
         .limit(100),
       supabase.from("ratings").select("stars").eq("ratee_id", user.id),
-      supabase.from("profiles").select("payouts_enabled").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles").select("payouts_enabled, background_check_status, is_active").eq("id", user.id).maybeSingle(),
     ]);
     setPool((poolRes.data ?? []) as Order[]);
 
@@ -84,7 +84,10 @@ function DriverDashboard() {
       avg: stars.length ? stars.reduce((a, b) => a + b, 0) / stars.length : 0,
       count: stars.length,
     });
-    setPayoutsEnabled(Boolean((profileRes.data as { payouts_enabled?: boolean } | null)?.payouts_enabled));
+    const prof = profileRes.data as { payouts_enabled?: boolean; background_check_status?: "pending" | "clear" | "failed"; is_active?: boolean } | null;
+    setPayoutsEnabled(Boolean(prof?.payouts_enabled));
+    setBgStatus(prof?.background_check_status ?? "pending");
+    setIsActive(prof?.is_active ?? true);
     setLoading(false);
   }, [user]);
 
@@ -102,8 +105,14 @@ function DriverDashboard() {
     return () => { supabase.removeChannel(ch); };
   }, [user, load]);
 
+  const canAccept = payoutsEnabled === true && isActive && bgStatus !== "failed";
+
   async function claim(o: Order) {
     if (!user) return;
+    if (!canAccept) {
+      if (!payoutsEnabled) return toast.error("Finish Stripe payout setup before accepting orders.");
+      if (bgStatus === "failed" || !isActive) return toast.error("Your account is deactivated. Contact support.");
+    }
     const { error } = await supabase
       .from("orders")
       .update({ driver_id: user.id, status: "accepted" })
