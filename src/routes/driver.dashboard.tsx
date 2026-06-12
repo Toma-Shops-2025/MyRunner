@@ -210,7 +210,7 @@ function DriverDashboard() {
           </div>
         ) : (
           <ul className="mt-4 space-y-3">
-            {pool.map((o) => <OrderCard key={o.id} order={o} onClaim={() => claim(o)} />)}
+            {pool.map((o) => <OrderCard key={o.id} order={o} onClaim={() => claim(o)} canAccept={canAccept} />)}
           </ul>
         )}
       </section>
