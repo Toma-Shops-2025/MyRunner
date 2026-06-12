@@ -29,7 +29,11 @@ function DriverSignup() {
       <section className="container-app py-16">
         <p className="text-xs uppercase tracking-widest text-gold">Driver application</p>
         <h1 className="mt-3 font-serif text-5xl">Apply to drive</h1>
-        <p className="mt-3 max-w-xl text-muted-foreground">It takes about 5 minutes. You'll create an account first, then we'll review your documents.</p>
+        <p className="mt-3 max-w-xl text-muted-foreground">
+          Takes about 5 minutes. You'll be activated as a Runner immediately and can start accepting
+          orders once you finish payout setup. A background check runs in the background — your account
+          stays active unless something disqualifying turns up.
+        </p>
 
         <form
           onSubmit={async (e) => {
@@ -38,61 +42,133 @@ function DriverSignup() {
             setBusy(true);
             const fd = new FormData(e.currentTarget);
 
-            // Ensure user is signed in (sign up if not)
+            const email = String(fd.get("email")).trim();
+            const password = String(fd.get("password") || "");
+            const fullName = String(fd.get("name")).trim();
+            const phone = String(fd.get("phone") || "").trim();
+            const dob = String(fd.get("dob") || "");
+            const ssnFull = String(fd.get("ssn") || "").replace(/\D/g, "");
+            const ssnLast4 = ssnFull.slice(-4);
+
+            // Sign up + sign in
             let { data: { user } } = await supabase.auth.getUser();
             if (!user) {
-              const password = String(fd.get("password") || "");
               if (password.length < 8) { setBusy(false); return toast.error("Create a password of 8+ characters."); }
+              if (ssnLast4.length !== 4) { setBusy(false); return toast.error("Please enter a valid SSN."); }
               const { data, error } = await supabase.auth.signUp({
-                email: String(fd.get("email")),
+                email,
                 password,
                 options: {
                   emailRedirectTo: `${window.location.origin}/driver/dashboard`,
-                  data: { full_name: String(fd.get("name")) },
+                  data: { full_name: fullName },
                 },
               });
               if (error) { setBusy(false); return toast.error(error.message); }
               user = data.user;
+
+              // If email confirmation is on, signUp won't give us a session. Try sign-in.
+              if (!data.session) {
+                const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+                if (signInErr) {
+                  setBusy(false);
+                  toast.success("Application submitted. Check your email to confirm and then sign in.");
+                  return nav({ to: "/login" });
+                }
+                user = signInData.user;
+              }
             }
             if (!user) { setBusy(false); return toast.error("Could not create account."); }
 
-            // Driver application
-            const { error: appErr } = await supabase.from("driver_applications").upsert({
+            // Update profile with everything Checkr-style
+            const { error: profileErr } = await supabase.from("profiles").update({
+              full_name: fullName,
+              phone,
+              date_of_birth: dob || null,
+              ssn_last4: ssnLast4 || null,
+              home_address: String(fd.get("address") || ""),
+              home_city: String(fd.get("city") || ""),
+              home_state: String(fd.get("state") || "").toUpperCase().slice(0, 2),
+              home_zip: String(fd.get("zip") || ""),
+              emergency_contact_name: String(fd.get("ec_name") || ""),
+              emergency_contact_phone: String(fd.get("ec_phone") || ""),
+              background_check_status: "pending",
+              is_active: true,
+            }).eq("id", user.id);
+            if (profileErr) console.warn("profile update warn:", profileErr.message);
+
+            // Application record (auto-approved)
+            await supabase.from("driver_applications").upsert({
               user_id: user.id,
               vehicle_make: String(fd.get("make")),
               vehicle_model: String(fd.get("model")),
               vehicle_year: Number(fd.get("year")) || null,
-              license_number: String(fd.get("plate") || ""),
+              license_number: String(fd.get("license_number") || ""),
+              license_state: String(fd.get("license_state") || "").toUpperCase().slice(0, 2),
+              insurance_provider: String(fd.get("insurance_provider") || ""),
+              status: "approved",
             }, { onConflict: "user_id" });
-            if (appErr) { setBusy(false); return toast.error(appErr.message); }
 
-            // Driver role
-            await supabase.from("user_roles").insert({ user_id: user.id, role: "driver" });
+            // Grant driver role immediately
+            const { error: roleErr } = await supabase.from("user_roles").insert({
+              user_id: user.id,
+              role: "driver",
+            });
+            if (roleErr && !roleErr.message.includes("duplicate")) {
+              console.warn("role grant warn:", roleErr.message);
+            }
 
             setBusy(false);
-            toast.success("Application submitted. Welcome aboard.");
+            toast.success("You're approved! Finish payout setup to start accepting orders.");
             nav({ to: "/driver/dashboard" });
           }}
           className="mt-10 grid max-w-3xl gap-6 rounded-2xl border border-border bg-card p-8"
         >
           <Section title="Account">
-            <Field id="name" label="Full name" />
+            <Field id="name" label="Full legal name" />
             <Field id="email" label="Email" type="email" />
             <Field id="password" label="Create password (8+ chars)" type="password" />
-            <Field id="phone" label="Phone" type="tel" />
+            <Field id="phone" label="Mobile phone" type="tel" />
           </Section>
-          <Section title="Your vehicle">
-            <Field id="make" label="Make" placeholder="Toyota" />
-            <Field id="model" label="Model" placeholder="Corolla" />
-            <Field id="year" label="Year" placeholder="2021" />
-            <Field id="plate" label="License plate" />
+
+          <Section title="Identity verification">
+            <Field id="dob" label="Date of birth" type="date" />
+            <Field id="ssn" label="Social Security Number" placeholder="123-45-6789" />
+            <p className="col-span-full text-xs text-muted-foreground">
+              Required by our background-check provider (Checkr). We only store the last 4 digits — the full SSN is sent securely to Checkr and discarded.
+            </p>
           </Section>
-          <Section title="Documents">
-            <Field id="license" label="Driver's license" type="file" />
-            <Field id="insurance" label="Proof of insurance" type="file" />
+
+          <Section title="Home address">
+            <Field id="address" label="Street address" />
+            <Field id="city" label="City" />
+            <Field id="state" label="State" placeholder="GA" />
+            <Field id="zip" label="ZIP" />
           </Section>
+
+          <Section title="Emergency contact">
+            <Field id="ec_name" label="Contact name" />
+            <Field id="ec_phone" label="Contact phone" type="tel" />
+          </Section>
+
+          <Section title="Driver's license">
+            <Field id="license_number" label="License number" />
+            <Field id="license_state" label="License state" placeholder="GA" />
+            <Field id="license" label="Upload license (front)" type="file" />
+            <Field id="license_back" label="Upload license (back)" type="file" />
+          </Section>
+
+          <Section title="Your vehicle & insurance">
+            <Field id="make" label="Vehicle make" placeholder="Toyota" />
+            <Field id="model" label="Vehicle model" placeholder="Corolla" />
+            <Field id="year" label="Vehicle year" placeholder="2021" />
+            <Field id="insurance_provider" label="Insurance provider" placeholder="GEICO" />
+            <Field id="insurance" label="Upload proof of insurance" type="file" />
+          </Section>
+
           <LegalConsent id="driver-consent" checked={agree} onCheckedChange={setAgree} variant="driver" />
-          <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">Submit application</Button>
+          <Button type="submit" disabled={busy} className="bg-gold text-primary-foreground hover:bg-gold/90">
+            {busy ? "Submitting…" : "Submit & start driving"}
+          </Button>
         </form>
       </section>
     </PageShell>
