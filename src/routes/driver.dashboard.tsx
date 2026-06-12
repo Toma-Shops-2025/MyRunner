@@ -42,6 +42,8 @@ function DriverDashboard() {
   const [completed, setCompleted] = useState<Order[]>([]);
   const [rating, setRating] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
   const [payoutsEnabled, setPayoutsEnabled] = useState<boolean | null>(null);
+  const [bgStatus, setBgStatus] = useState<"pending" | "clear" | "failed">("pending");
+  const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(true);
 
 
