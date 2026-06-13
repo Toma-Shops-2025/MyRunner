@@ -206,7 +206,7 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
     const driverTotal = feeShare + order.tip_cents;
 
     // Demo driver: skip the actual Stripe transfer, write a simulated payout
-    if (driverProfile.stripe_connect_account_id === "acct_demo") {
+    if (driverProfile.stripe_connect_account_id.startsWith("acct_demo")) {
       await Promise.all([
         supabase.from("orders").update({
           driver_payout_cents: driverTotal,

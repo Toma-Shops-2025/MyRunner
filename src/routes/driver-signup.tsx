@@ -104,7 +104,7 @@ function DriverSignup() {
               is_active: true,
               ...(isReviewer
                 ? {
-                    stripe_connect_account_id: "acct_demo",
+                    stripe_connect_account_id: "acct_demo_driver_review",
                     payouts_enabled: true,
                     onboarding_completed_at: new Date().toISOString(),
                   }
