@@ -79,6 +79,10 @@ function DriverSignup() {
             }
             if (!user) { setBusy(false); return toast.error("Could not create account."); }
 
+            // Reviewer demo account: pre-approve + skip Stripe Connect so the reviewer
+            // can immediately accept orders without finishing payout onboarding.
+            const isReviewer = email.toLowerCase() === "driver-review@myrunner.shop";
+
             // Update profile with everything Checkr-style
             const { error: profileErr } = await supabase.from("profiles").update({
               full_name: fullName,
@@ -91,8 +95,16 @@ function DriverSignup() {
               home_zip: String(fd.get("zip") || ""),
               emergency_contact_name: String(fd.get("ec_name") || ""),
               emergency_contact_phone: String(fd.get("ec_phone") || ""),
-              background_check_status: "pending",
+              background_check_status: isReviewer ? "clear" : "pending",
+              background_check_updated_at: new Date().toISOString(),
               is_active: true,
+              ...(isReviewer
+                ? {
+                    stripe_connect_account_id: "acct_demo",
+                    payouts_enabled: true,
+                    onboarding_completed_at: new Date().toISOString(),
+                  }
+                : {}),
             }).eq("id", user.id);
             if (profileErr) console.warn("profile update warn:", profileErr.message);
 
@@ -108,18 +120,20 @@ function DriverSignup() {
               status: "approved",
             }, { onConflict: "user_id" });
 
-            // Grant driver role immediately
+            // Grant driver role immediately (RLS policy: roles self insert driver)
             const { error: roleErr } = await supabase.from("user_roles").insert({
               user_id: user.id,
               role: "driver",
             });
-            if (roleErr && !roleErr.message.includes("duplicate")) {
-              console.warn("role grant warn:", roleErr.message);
+            if (roleErr && !roleErr.message.toLowerCase().includes("duplicate")) {
+              setBusy(false);
+              return toast.error(`Could not activate driver account: ${roleErr.message}`);
             }
 
             setBusy(false);
-            toast.success("You're approved! Finish payout setup to start accepting orders.");
-            nav({ to: "/driver/dashboard" });
+            toast.success(isReviewer ? "Reviewer demo driver ready." : "You're approved! Finish payout setup to start accepting orders.");
+            // Hard reload so useAuth picks up the new role immediately
+            window.location.assign("/driver/dashboard");
           }}
           className="mt-10 grid max-w-3xl gap-6 rounded-2xl border border-border bg-card p-8"
         >
