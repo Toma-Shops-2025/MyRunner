@@ -16,16 +16,21 @@ export function useAuth() {
       setUser(s?.user ?? null);
       if (s?.user) {
         // defer to avoid deadlock per Supabase docs
-        setTimeout(() => loadRoles(s.user.id), 0);
+        setLoading(true);
+        setTimeout(() => loadRoles(s.user.id).finally(() => setLoading(false)), 0);
       } else {
         setRoles([]);
+        setLoading(false);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      if (data.session?.user) loadRoles(data.session.user.id);
-      setLoading(false);
+      if (data.session?.user) {
+        loadRoles(data.session.user.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
