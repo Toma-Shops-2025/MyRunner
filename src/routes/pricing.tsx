@@ -34,7 +34,7 @@ function Pricing() {
             <h2 className="font-serif text-3xl">Per delivery</h2>
             <ul className="mt-6 space-y-4">
               <Row a="Base fee" b="$5.99" />
-              <Row a="Per mile" b="$0.75" />
+              <Row a="Per mile" b="$1.50" />
               <Row a="Extra stop (multi‑drop)" b="$3.00 each" />
               <Row a="Tip" b="Optional · 100% to driver" />
               <Row a="Promo & loyalty" b="Apply at checkout" />
