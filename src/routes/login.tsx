@@ -58,11 +58,10 @@ function Login() {
           </div>
           <div className="mt-6 rounded-xl border border-dashed border-gold/40 bg-gold-soft/30 p-4">
             <p className="text-xs uppercase tracking-widest text-gold">For reviewers</p>
-            <p className="mt-1 text-sm">Try the full driver flow — pre-approved, payouts already set up.</p>
-            <Button type="button" variant="outline" className="mt-3 w-full" disabled={demoBusy} onClick={demoDriver}>
-              {demoBusy ? "Signing in…" : "Continue as Demo Driver"}
-            </Button>
-            <p className="mt-2 text-xs text-muted-foreground">demo-driver@myrunner.shop · Demo1234!</p>
+            <p className="mt-1 text-sm">
+              Sign in with <span className="font-mono">driver-review@myrunner.shop</span> to see the
+              full pre-approved driver flow.
+            </p>
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             New here? <Link to="/signup" className="text-gold underline">Create an account</Link>
