@@ -1,0 +1,1 @@
+DELETE FROM public.order_messages; DELETE FROM public.offers; DELETE FROM public.orders; UPDATE public.profiles SET driver_status='online' WHERE driver_status='on_delivery';

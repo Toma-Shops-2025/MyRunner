@@ -32,6 +32,7 @@ type Order = {
   tip_cents: number;
   distance_miles: number | null;
   payment_status: string;
+  proof_photo_url: string | null;
   created_at: string;
 };
 
@@ -280,6 +281,17 @@ function OrderDetail() {
             <Link to="/app/report"><Flag className="mr-2 size-3" /> Report an issue</Link>
           </Button>
         </div>
+
+        {/* Proof of delivery photo */}
+        {order.proof_photo_url && (
+          <div className="mt-6 border-t border-border pt-4">
+            <h3 className="font-serif text-lg">Proof of delivery</h3>
+            <p className="text-xs text-muted-foreground">Your Runner left the package and captured this photo.</p>
+            <a href={order.proof_photo_url} target="_blank" rel="noreferrer" className="mt-3 block overflow-hidden rounded-xl border border-border">
+              <img src={order.proof_photo_url} alt="Delivery proof" className="h-auto w-full object-cover" />
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Chat */}
