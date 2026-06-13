@@ -55,14 +55,28 @@ function OrderDetail() {
   const [stars, setStars] = useState(5);
   const [comment, setComment] = useState("");
   const [payBusy, setPayBusy] = useState(false);
+  const [tipBusy, setTipBusy] = useState(false);
+  const [customTip, setCustomTip] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const checkout = useServerFn(createCheckoutSession);
+  const tipCheckout = useServerFn(createTipCheckoutSession);
   const runPayout = useServerFn(payoutDriverForOrder);
 
   async function payNow() {
     setPayBusy(true);
     const res = await checkout({ data: { orderId: id } });
     setPayBusy(false);
+    if ("error" in res && res.error) return toast.error(res.error);
+    if ("url" in res && res.url) window.location.href = res.url;
+  }
+
+  async function addTip(dollars: number) {
+    const cents = Math.round(dollars * 100);
+    if (cents < 100) return toast.error("Minimum tip is $1");
+    if (cents > 50000) return toast.error("Maximum tip is $500");
+    setTipBusy(true);
+    const res = await tipCheckout({ data: { orderId: id, tipCents: cents } });
+    setTipBusy(false);
     if ("error" in res && res.error) return toast.error(res.error);
     if ("url" in res && res.url) window.location.href = res.url;
   }
