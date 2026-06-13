@@ -44,7 +44,9 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
 import { Route as AppOrdersIdRouteImport } from './routes/app.orders.$id'
 import { Route as ApiPublicDemoDriverEnsureRouteImport } from './routes/api/public/demo-driver-ensure'
+import { Route as ApiPublicCheckrWebhookRouteImport } from './routes/api/public/checkr-webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksDispatchTickRouteImport } from './routes/api/public/hooks/dispatch-tick'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -222,10 +224,21 @@ const ApiPublicDemoDriverEnsureRoute =
     path: '/api/public/demo-driver-ensure',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCheckrWebhookRoute = ApiPublicCheckrWebhookRouteImport.update({
+  id: '/api/public/checkr-webhook',
+  path: '/api/public/checkr-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
     path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksDispatchTickRoute =
+  ApiPublicHooksDispatchTickRouteImport.update({
+    id: '/api/public/hooks/dispatch-tick',
+    path: '/api/public/hooks/dispatch-tick',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -263,8 +276,10 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
+  '/api/public/checkr-webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
+  '/api/public/hooks/dispatch-tick': typeof ApiPublicHooksDispatchTickRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -301,8 +316,10 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
+  '/api/public/checkr-webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
+  '/api/public/hooks/dispatch-tick': typeof ApiPublicHooksDispatchTickRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -340,8 +357,10 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
+  '/api/public/checkr-webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
+  '/api/public/hooks/dispatch-tick': typeof ApiPublicHooksDispatchTickRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -380,8 +399,10 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/driver/dashboard'
     | '/driver/earnings'
+    | '/api/public/checkr-webhook'
     | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
+    | '/api/public/hooks/dispatch-tick'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -418,8 +439,10 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/driver/dashboard'
     | '/driver/earnings'
+    | '/api/public/checkr-webhook'
     | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
+    | '/api/public/hooks/dispatch-tick'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -456,8 +479,10 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/driver/dashboard'
     | '/driver/earnings'
+    | '/api/public/checkr-webhook'
     | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
+    | '/api/public/hooks/dispatch-tick'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -483,7 +508,9 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  ApiPublicCheckrWebhookRoute: typeof ApiPublicCheckrWebhookRoute
   ApiPublicDemoDriverEnsureRoute: typeof ApiPublicDemoDriverEnsureRoute
+  ApiPublicHooksDispatchTickRoute: typeof ApiPublicHooksDispatchTickRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -734,11 +761,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDemoDriverEnsureRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/checkr-webhook': {
+      id: '/api/public/checkr-webhook'
+      path: '/api/public/checkr-webhook'
+      fullPath: '/api/public/checkr-webhook'
+      preLoaderRoute: typeof ApiPublicCheckrWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
       fullPath: '/api/public/payments/webhook'
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/dispatch-tick': {
+      id: '/api/public/hooks/dispatch-tick'
+      path: '/api/public/hooks/dispatch-tick'
+      fullPath: '/api/public/hooks/dispatch-tick'
+      preLoaderRoute: typeof ApiPublicHooksDispatchTickRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -827,9 +868,21 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  ApiPublicCheckrWebhookRoute: ApiPublicCheckrWebhookRoute,
   ApiPublicDemoDriverEnsureRoute: ApiPublicDemoDriverEnsureRoute,
+  ApiPublicHooksDispatchTickRoute: ApiPublicHooksDispatchTickRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
