@@ -62,7 +62,7 @@ function Dashboard() {
         <h2 className="font-serif text-2xl">Recent orders</h2>
         {orders.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">
-            No orders yet. {" "}
+            No orders yet.{" "}
             <Link to="/app/new-delivery" className="text-gold underline">
               Send your first delivery
             </Link>
