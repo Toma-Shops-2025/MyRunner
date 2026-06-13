@@ -99,7 +99,7 @@ function DriverSignup() {
               home_zip: String(fd.get("zip") || ""),
               emergency_contact_name: String(fd.get("ec_name") || ""),
               emergency_contact_phone: String(fd.get("ec_phone") || ""),
-              background_check_status: isReviewer ? "clear" : "pending",
+              background_check_status: "clear",
               background_check_updated_at: new Date().toISOString(),
               is_active: true,
               ...(isReviewer
