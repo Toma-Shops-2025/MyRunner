@@ -1,5 +1,5 @@
 export function priceQuote(miles: number, extraStops = 0) {
-  const base = 599;
+  const base = 0;
   const perMile = 150;
   const stop = 300;
   return base + Math.round(miles * perMile) + extraStops * stop;
