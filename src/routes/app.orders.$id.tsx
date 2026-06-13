@@ -380,6 +380,49 @@ function OrderDetail() {
           )}
         </div>
       )}
+
+      {/* Post-delivery tip */}
+      {isCustomer && order.status === "delivered" && order.driver_id && (
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-serif text-xl">Add a tip for your Runner</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Loved the service? Send your Runner an extra thank-you — 100% goes to them.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[2, 5, 10, 20].map((amt) => (
+              <Button
+                key={amt}
+                size="sm"
+                variant="outline"
+                disabled={tipBusy}
+                onClick={() => addTip(amt)}
+              >
+                ${amt}
+              </Button>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <Input
+              type="number"
+              min={1}
+              max={500}
+              step="1"
+              placeholder="Custom amount ($)"
+              value={customTip}
+              onChange={(e) => setCustomTip(e.target.value)}
+              className="max-w-[200px]"
+            />
+            <Button
+              size="sm"
+              disabled={tipBusy || !customTip}
+              className="bg-gold text-primary-foreground hover:bg-gold/90"
+              onClick={() => addTip(Number(customTip))}
+            >
+              {tipBusy ? "Opening…" : "Send tip"}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
