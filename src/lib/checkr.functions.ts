@@ -25,7 +25,7 @@ export const startDriverBackgroundCheck = createServerFn({ method: "POST" })
     const result = await startBackgroundCheck({
       first_name: first || "Driver",
       last_name: last,
-      email: profile.email,
+      email: profile.email ?? "",
       phone: profile.phone ?? undefined,
       dob: profile.date_of_birth ?? undefined,
       zipcode: profile.home_zip ?? undefined,
