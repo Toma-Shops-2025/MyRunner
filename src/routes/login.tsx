@@ -37,14 +37,18 @@ function Login() {
             e.preventDefault();
             setBusy(true);
             const fd = new FormData(e.currentTarget);
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signInWithPassword({
               email: String(fd.get("email")),
               password: String(fd.get("password")),
             });
             setBusy(false);
             if (error) return toast.error(error.message);
+            const { data: roleRows } = data.user
+              ? await supabase.from("user_roles").select("role").eq("user_id", data.user.id)
+              : { data: [] };
+            const isDriver = (roleRows ?? []).some((row) => row.role === "driver");
             toast.success("Welcome back.");
-            nav({ to: "/app/dashboard" });
+            nav({ to: isDriver ? "/driver/dashboard" : "/app/dashboard" });
           }}
           className="w-full max-w-md rounded-2xl border border-border bg-card p-8"
         >
