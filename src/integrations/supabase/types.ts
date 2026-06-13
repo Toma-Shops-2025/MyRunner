@@ -139,6 +139,50 @@ export type Database = {
         }
         Relationships: []
       }
+      offers: {
+        Row: {
+          attempt_number: number
+          created_at: string
+          driver_id: string
+          expires_at: string
+          id: string
+          offered_at: string
+          order_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_number?: number
+          created_at?: string
+          driver_id: string
+          expires_at: string
+          id?: string
+          offered_at?: string
+          order_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_number?: number
+          created_at?: string
+          driver_id?: string
+          expires_at?: string
+          id?: string
+          offered_at?: string
+          order_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_messages: {
         Row: {
           body: string
@@ -176,18 +220,23 @@ export type Database = {
           additional_pickups: number
           created_at: string
           customer_id: string
+          dispatch_attempts: number
+          dispatch_status: string
           distance_miles: number | null
           driver_id: string | null
           driver_payout_cents: number
           dropoff_address: string
           id: string
           item_description: string
+          last_dispatched_at: string | null
           notes: string | null
           paid_at: string | null
           paid_out_at: string | null
           payment_status: string
           payout_status: string
           pickup_address: string
+          pickup_lat: number | null
+          pickup_lng: number | null
           platform_fee_cents: number
           price_cents: number
           scheduled_for: string | null
@@ -202,18 +251,23 @@ export type Database = {
           additional_pickups?: number
           created_at?: string
           customer_id: string
+          dispatch_attempts?: number
+          dispatch_status?: string
           distance_miles?: number | null
           driver_id?: string | null
           driver_payout_cents?: number
           dropoff_address: string
           id?: string
           item_description: string
+          last_dispatched_at?: string | null
           notes?: string | null
           paid_at?: string | null
           paid_out_at?: string | null
           payment_status?: string
           payout_status?: string
           pickup_address: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           platform_fee_cents?: number
           price_cents?: number
           scheduled_for?: string | null
@@ -228,18 +282,23 @@ export type Database = {
           additional_pickups?: number
           created_at?: string
           customer_id?: string
+          dispatch_attempts?: number
+          dispatch_status?: string
           distance_miles?: number | null
           driver_id?: string | null
           driver_payout_cents?: number
           dropoff_address?: string
           id?: string
           item_description?: string
+          last_dispatched_at?: string | null
           notes?: string | null
           paid_at?: string | null
           paid_out_at?: string | null
           payment_status?: string
           payout_status?: string
           pickup_address?: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           platform_fee_cents?: number
           price_cents?: number
           scheduled_for?: string | null
@@ -257,8 +316,14 @@ export type Database = {
           avatar_url: string | null
           background_check_status: string
           background_check_updated_at: string | null
+          checkr_candidate_id: string | null
+          checkr_report_id: string | null
+          checkr_report_status: string | null
           created_at: string
+          current_lat: number | null
+          current_lng: number | null
           date_of_birth: string | null
+          driver_status: string
           email: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
@@ -269,6 +334,7 @@ export type Database = {
           home_zip: string | null
           id: string
           is_active: boolean
+          location_updated_at: string | null
           onboarding_completed_at: string | null
           payouts_enabled: boolean
           phone: string | null
@@ -280,8 +346,14 @@ export type Database = {
           avatar_url?: string | null
           background_check_status?: string
           background_check_updated_at?: string | null
+          checkr_candidate_id?: string | null
+          checkr_report_id?: string | null
+          checkr_report_status?: string | null
           created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
           date_of_birth?: string | null
+          driver_status?: string
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -292,6 +364,7 @@ export type Database = {
           home_zip?: string | null
           id: string
           is_active?: boolean
+          location_updated_at?: string | null
           onboarding_completed_at?: string | null
           payouts_enabled?: boolean
           phone?: string | null
@@ -303,8 +376,14 @@ export type Database = {
           avatar_url?: string | null
           background_check_status?: string
           background_check_updated_at?: string | null
+          checkr_candidate_id?: string | null
+          checkr_report_id?: string | null
+          checkr_report_status?: string | null
           created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
           date_of_birth?: string | null
+          driver_status?: string
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -315,6 +394,7 @@ export type Database = {
           home_zip?: string | null
           id?: string
           is_active?: boolean
+          location_updated_at?: string | null
           onboarding_completed_at?: string | null
           payouts_enabled?: boolean
           phone?: string | null
@@ -434,6 +514,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      haversine_miles: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
       }
     }
     Enums: {
