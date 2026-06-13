@@ -9,7 +9,7 @@ import { OrderMap } from "@/components/site/order-map";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
-import { createCheckoutSession } from "@/lib/checkout.functions";
+import { createCheckoutSession, createTipCheckoutSession } from "@/lib/checkout.functions";
 import { payoutDriverForOrder } from "@/lib/connect.functions";
 import { toast } from "sonner";
 
@@ -55,14 +55,28 @@ function OrderDetail() {
   const [stars, setStars] = useState(5);
   const [comment, setComment] = useState("");
   const [payBusy, setPayBusy] = useState(false);
+  const [tipBusy, setTipBusy] = useState(false);
+  const [customTip, setCustomTip] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const checkout = useServerFn(createCheckoutSession);
+  const tipCheckout = useServerFn(createTipCheckoutSession);
   const runPayout = useServerFn(payoutDriverForOrder);
 
   async function payNow() {
     setPayBusy(true);
     const res = await checkout({ data: { orderId: id } });
     setPayBusy(false);
+    if ("error" in res && res.error) return toast.error(res.error);
+    if ("url" in res && res.url) window.location.href = res.url;
+  }
+
+  async function addTip(dollars: number) {
+    const cents = Math.round(dollars * 100);
+    if (cents < 100) return toast.error("Minimum tip is $1");
+    if (cents > 50000) return toast.error("Maximum tip is $500");
+    setTipBusy(true);
+    const res = await tipCheckout({ data: { orderId: id, tipCents: cents } });
+    setTipBusy(false);
     if ("error" in res && res.error) return toast.error(res.error);
     if ("url" in res && res.url) window.location.href = res.url;
   }
@@ -108,6 +122,8 @@ function OrderDetail() {
     const sp = new URLSearchParams(window.location.search);
     if (sp.get("paid") === "1") { toast.success("Payment received — your Runner is on it!"); window.history.replaceState({}, "", window.location.pathname); }
     if (sp.get("cancelled") === "1") { toast("Payment cancelled — you can try again anytime."); window.history.replaceState({}, "", window.location.pathname); }
+    if (sp.get("tipped") === "1") { toast.success("Tip sent — thanks for taking care of your Runner!"); window.history.replaceState({}, "", window.location.pathname); }
+    if (sp.get("tip_cancelled") === "1") { toast("Tip cancelled."); window.history.replaceState({}, "", window.location.pathname); }
   }, []);
 
 
@@ -362,6 +378,49 @@ function OrderDetail() {
               </Button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Post-delivery tip */}
+      {isCustomer && order.status === "delivered" && order.driver_id && (
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-serif text-xl">Add a tip for your Runner</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Loved the service? Send your Runner an extra thank-you — 100% goes to them.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[2, 5, 10, 20].map((amt) => (
+              <Button
+                key={amt}
+                size="sm"
+                variant="outline"
+                disabled={tipBusy}
+                onClick={() => addTip(amt)}
+              >
+                ${amt}
+              </Button>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <Input
+              type="number"
+              min={1}
+              max={500}
+              step="1"
+              placeholder="Custom amount ($)"
+              value={customTip}
+              onChange={(e) => setCustomTip(e.target.value)}
+              className="max-w-[200px]"
+            />
+            <Button
+              size="sm"
+              disabled={tipBusy || !customTip}
+              className="bg-gold text-primary-foreground hover:bg-gold/90"
+              onClick={() => addTip(Number(customTip))}
+            >
+              {tipBusy ? "Opening…" : "Send tip"}
+            </Button>
+          </div>
         </div>
       )}
     </div>
