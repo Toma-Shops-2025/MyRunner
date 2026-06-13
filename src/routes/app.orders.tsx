@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,8 +18,13 @@ type Order = {
 
 export const Route = createFileRoute("/app/orders")({
   head: () => ({ meta: [{ title: "My orders — MyRunner" }, { name: "robots", content: "noindex" }] }),
-  component: Orders,
+  component: OrdersRoute,
 });
+
+function OrdersRoute() {
+  const isOrderDetail = useRouterState({ select: (state) => state.location.pathname !== "/app/orders" });
+  return isOrderDetail ? <Outlet /> : <Orders />;
+}
 
 function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -28,6 +33,7 @@ function Orders() {
 
   useEffect(() => {
     let active = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -37,7 +43,7 @@ function Orders() {
       setOrders(list);
       prevStatuses.current = Object.fromEntries(list.map((o) => [o.id, o.status]));
 
-      const channel = supabase
+      channel = supabase
         .channel(`my-orders-${user.id}`)
         .on(
           "postgres_changes",
@@ -56,10 +62,11 @@ function Orders() {
           },
         )
         .subscribe();
-
-      return () => { supabase.removeChannel(channel); };
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [navigate]);
 
   return (
