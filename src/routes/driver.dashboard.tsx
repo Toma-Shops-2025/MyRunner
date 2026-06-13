@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,7 @@ function DriverDashboard() {
   const presenceFn = useServerFn(setDriverPresence);
   const acceptFn = useServerFn(acceptOffer);
   const declineFn = useServerFn(declineOffer);
+  const navigate = useNavigate();
 
   const lastLocRef = useRef<{ lat: number; lng: number } | null>(null);
 
@@ -234,11 +235,12 @@ function DriverDashboard() {
 
   async function handleAccept() {
     if (!currentOffer) return;
+    const orderId = currentOffer.order_id;
     try {
       await acceptFn({ data: { offerId: currentOffer.id } });
-      toast.success("Order accepted — head to pickup.");
+      toast.success("Order accepted — opening delivery.");
       setCurrentOffer(null);
-      load();
+      navigate({ to: "/driver/orders/$id", params: { id: orderId } });
     } catch (e) {
       toast.error((e as Error).message);
       setCurrentOffer(null);
@@ -264,8 +266,8 @@ function DriverDashboard() {
       .eq("id", o.id)
       .is("driver_id", null);
     if (error) return toast.error(error.message);
-    toast.success("Order claimed. Head to pickup.");
-    load();
+    toast.success("Order claimed — opening delivery.");
+    navigate({ to: "/driver/orders/$id", params: { id: o.id } });
   }
 
   const todayMs = new Date(); todayMs.setHours(0, 0, 0, 0);
