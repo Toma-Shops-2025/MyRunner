@@ -23,31 +23,10 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
-  const [demoBusy, setDemoBusy] = useState(false);
 
   async function google() {
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app/dashboard" });
     if (res.error) toast.error("Google sign-in failed.");
-  }
-
-  async function demoDriver() {
-    setDemoBusy(true);
-    try {
-      const res = await fetch("/api/public/demo-driver-ensure", { method: "POST" });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error ?? "Could not seed demo driver");
-      const { error } = await supabase.auth.signInWithPassword({
-        email: "demo-driver@myrunner.shop",
-        password: "Demo1234!",
-      });
-      if (error) throw error;
-      toast.success("Signed in as Demo Driver.");
-      nav({ to: "/driver/dashboard" });
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setDemoBusy(false);
-    }
   }
 
   return (
