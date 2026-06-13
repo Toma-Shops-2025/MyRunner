@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtUSD } from "@/lib/pricing";
+import { toast } from "sonner";
 
 type Order = {
   id: string;
@@ -22,9 +23,44 @@ export const Route = createFileRoute("/app/orders")({
 
 function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const navigate = useNavigate();
+  const prevStatuses = useRef<Record<string, string>>({});
+
   useEffect(() => {
-    supabase.from("orders").select("*").order("created_at", { ascending: false }).then(({ data }) => setOrders((data ?? []) as Order[]));
-  }, []);
+    let active = true;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("orders").select("*").eq("customer_id", user.id).order("created_at", { ascending: false });
+      if (!active) return;
+      const list = (data ?? []) as Order[];
+      setOrders(list);
+      prevStatuses.current = Object.fromEntries(list.map((o) => [o.id, o.status]));
+
+      const channel = supabase
+        .channel(`my-orders-${user.id}`)
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "orders", filter: `customer_id=eq.${user.id}` },
+          (payload) => {
+            const next = payload.new as Order;
+            const prev = prevStatuses.current[next.id];
+            prevStatuses.current[next.id] = next.status;
+            setOrders((cur) => cur.map((o) => (o.id === next.id ? { ...o, ...next } : o)));
+            if (prev === "pending" && next.status === "accepted") {
+              toast.success("🎉 A Runner accepted your order — opening chat", {
+                action: { label: "Open", onClick: () => navigate({ to: "/app/orders/$id", params: { id: next.id } }) },
+              });
+              navigate({ to: "/app/orders/$id", params: { id: next.id } });
+            }
+          },
+        )
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    })();
+    return () => { active = false; };
+  }, [navigate]);
 
   return (
     <div className="space-y-6">
