@@ -122,6 +122,8 @@ function OrderDetail() {
     const sp = new URLSearchParams(window.location.search);
     if (sp.get("paid") === "1") { toast.success("Payment received — your Runner is on it!"); window.history.replaceState({}, "", window.location.pathname); }
     if (sp.get("cancelled") === "1") { toast("Payment cancelled — you can try again anytime."); window.history.replaceState({}, "", window.location.pathname); }
+    if (sp.get("tipped") === "1") { toast.success("Tip sent — thanks for taking care of your Runner!"); window.history.replaceState({}, "", window.location.pathname); }
+    if (sp.get("tip_cancelled") === "1") { toast("Tip cancelled."); window.history.replaceState({}, "", window.location.pathname); }
   }, []);
 
 
