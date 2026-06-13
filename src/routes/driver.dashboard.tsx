@@ -441,7 +441,7 @@ function OrderCard({ order, mine, onClaim, canAccept = true }: { order: Order; m
           <p className="font-serif text-3xl text-gold">{fmtUSD(order.price_cents + order.tip_cents)}</p>
           {mine ? (
             <Button asChild size="sm" className="mt-2 bg-gold text-primary-foreground hover:bg-gold/90">
-              <Link to="/app/orders/$id" params={{ id: order.id }}>Open</Link>
+              <Link to="/driver/orders/$id" params={{ id: order.id }}>Open</Link>
             </Button>
           ) : (
             <Button
