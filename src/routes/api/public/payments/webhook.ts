@@ -33,6 +33,13 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
               .from("orders")
               .update({ payment_status: "paid", paid_at: new Date().toISOString() })
               .eq("id", orderId);
+            // Kick off Spark-style dispatch
+            try {
+              const { dispatchOrder } = await import("@/lib/dispatch.functions");
+              await dispatchOrder({ data: { orderId } });
+            } catch (e) {
+              console.error("[webhook] dispatch failed", e);
+            }
           }
         }
 
