@@ -42,6 +42,7 @@ import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
+import { Route as DriverOrdersIdRouteImport } from './routes/driver.orders.$id'
 import { Route as AppOrdersIdRouteImport } from './routes/app.orders.$id'
 import { Route as ApiPublicDemoDriverEnsureRouteImport } from './routes/api/public/demo-driver-ensure'
 import { Route as ApiPublicCheckrWebhookRouteImport } from './routes/api/public/checkr-webhook'
@@ -213,6 +214,11 @@ const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
   path: '/applications',
   getParentRoute: () => AdminRoute,
 } as any)
+const DriverOrdersIdRoute = DriverOrdersIdRouteImport.update({
+  id: '/orders/$id',
+  path: '/orders/$id',
+  getParentRoute: () => DriverRoute,
+} as any)
 const AppOrdersIdRoute = AppOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/api/public/checkr-webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
+  '/driver/orders/$id': typeof DriverOrdersIdRoute
   '/api/public/hooks/dispatch-tick': typeof ApiPublicHooksDispatchTickRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -319,6 +326,7 @@ export interface FileRoutesByTo {
   '/api/public/checkr-webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
+  '/driver/orders/$id': typeof DriverOrdersIdRoute
   '/api/public/hooks/dispatch-tick': typeof ApiPublicHooksDispatchTickRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -360,6 +368,7 @@ export interface FileRoutesById {
   '/api/public/checkr-webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/demo-driver-ensure': typeof ApiPublicDemoDriverEnsureRoute
   '/app/orders/$id': typeof AppOrdersIdRoute
+  '/driver/orders/$id': typeof DriverOrdersIdRoute
   '/api/public/hooks/dispatch-tick': typeof ApiPublicHooksDispatchTickRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -402,6 +411,7 @@ export interface FileRouteTypes {
     | '/api/public/checkr-webhook'
     | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
+    | '/driver/orders/$id'
     | '/api/public/hooks/dispatch-tick'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -442,6 +452,7 @@ export interface FileRouteTypes {
     | '/api/public/checkr-webhook'
     | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
+    | '/driver/orders/$id'
     | '/api/public/hooks/dispatch-tick'
     | '/api/public/payments/webhook'
   id:
@@ -482,6 +493,7 @@ export interface FileRouteTypes {
     | '/api/public/checkr-webhook'
     | '/api/public/demo-driver-ensure'
     | '/app/orders/$id'
+    | '/driver/orders/$id'
     | '/api/public/hooks/dispatch-tick'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -747,6 +759,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApplicationsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/driver/orders/$id': {
+      id: '/driver/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/driver/orders/$id'
+      preLoaderRoute: typeof DriverOrdersIdRouteImport
+      parentRoute: typeof DriverRoute
+    }
     '/app/orders/$id': {
       id: '/app/orders/$id'
       path: '/$id'
@@ -836,11 +855,13 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface DriverRouteChildren {
   DriverDashboardRoute: typeof DriverDashboardRoute
   DriverEarningsRoute: typeof DriverEarningsRoute
+  DriverOrdersIdRoute: typeof DriverOrdersIdRoute
 }
 
 const DriverRouteChildren: DriverRouteChildren = {
   DriverDashboardRoute: DriverDashboardRoute,
   DriverEarningsRoute: DriverEarningsRoute,
+  DriverOrdersIdRoute: DriverOrdersIdRoute,
 }
 
 const DriverRouteWithChildren =
