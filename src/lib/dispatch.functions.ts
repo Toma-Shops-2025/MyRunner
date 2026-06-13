@@ -250,7 +250,12 @@ export const setDriverPresence = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { status: "online" | "offline"; lat?: number; lng?: number }) => d)
   .handler(async ({ data, context }) => {
-    const update: Record<string, unknown> = { driver_status: data.status };
+    const update: {
+      driver_status: "online" | "offline";
+      current_lat?: number;
+      current_lng?: number;
+      location_updated_at?: string;
+    } = { driver_status: data.status };
     if (data.lat != null && data.lng != null) {
       update.current_lat = data.lat;
       update.current_lng = data.lng;
