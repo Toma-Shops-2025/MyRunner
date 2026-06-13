@@ -9,7 +9,7 @@ import { OrderMap } from "@/components/site/order-map";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
-import { createCheckoutSession } from "@/lib/checkout.functions";
+import { createCheckoutSession, createTipCheckoutSession } from "@/lib/checkout.functions";
 import { payoutDriverForOrder } from "@/lib/connect.functions";
 import { toast } from "sonner";
 
