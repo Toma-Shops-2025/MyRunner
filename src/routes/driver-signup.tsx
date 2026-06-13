@@ -63,18 +63,22 @@ function DriverSignup() {
                   data: { full_name: fullName },
                 },
               });
-              if (error) { setBusy(false); return toast.error(error.message); }
-              user = data.user;
-
-              // If email confirmation is on, signUp won't give us a session. Try sign-in.
-              if (!data.session) {
+              if (error) {
+                // Fallback: account already exists, try sign-in with provided password
                 const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-                if (signInErr) {
-                  setBusy(false);
-                  toast.success("Application submitted. Check your email to confirm and then sign in.");
-                  return nav({ to: "/login" });
-                }
+                if (signInErr) { setBusy(false); return toast.error(error.message); }
                 user = signInData.user;
+              } else {
+                user = data.user;
+                if (!data.session) {
+                  const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+                  if (signInErr) {
+                    setBusy(false);
+                    toast.success("Application submitted. Check your email to confirm and then sign in.");
+                    return nav({ to: "/login" });
+                  }
+                  user = signInData.user;
+                }
               }
             }
             if (!user) { setBusy(false); return toast.error("Could not create account."); }
