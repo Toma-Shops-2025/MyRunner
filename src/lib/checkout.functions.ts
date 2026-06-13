@@ -25,7 +25,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const origin = process.env.PUBLIC_APP_URL ?? "https://myrunner.shop";
       const total = order.price_cents + order.tip_cents;
 
-      const params = {
+      const session = await stripe.checkout.sessions.create({
         mode: "payment",
         line_items: [
           {
@@ -34,7 +34,6 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
               unit_amount: total,
               product_data: {
                 name: `MyRunner delivery — ${order.item_description.slice(0, 80)}`,
-                tax_code: "txcd_92010001",
               },
             },
             quantity: 1,
@@ -42,17 +41,14 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         ],
         success_url: `${origin}/app/orders/${order.id}?paid=1`,
         cancel_url: `${origin}/app/orders/${order.id}?cancelled=1`,
-        managed_payments: { enabled: true },
         payment_intent_data: { description: "MyRunner Delivery" },
         metadata: { order_id: order.id, env: "sandbox" },
-      };
-      // managed_payments is supported by the Stripe API (2026-03-25.dahlia)
-      // but not yet in the installed SDK's TS typings.
-      const session = await stripe.checkout.sessions.create(params as never);
+      });
 
       await supabase.from("orders").update({ stripe_session_id: session.id }).eq("id", order.id);
       return { url: session.url };
     } catch (e) {
+      console.error("createCheckoutSession failed:", e);
       return { error: getStripeErrorMessage(e) };
     }
   });
