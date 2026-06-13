@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Package, Star, Wallet, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtUSD } from "@/lib/pricing";
+import { useAuth } from "@/hooks/use-auth";
 
 type Order = {
   id: string;
@@ -21,7 +22,12 @@ export const Route = createFileRoute("/app/dashboard")({
 });
 
 function Dashboard() {
+  const nav = useNavigate();
+  const { loading, isDriver } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+  useEffect(() => {
+    if (!loading && isDriver) nav({ to: "/driver/dashboard" });
+  }, [loading, isDriver, nav]);
   useEffect(() => {
     supabase.from("orders").select("id,pickup_address,dropoff_address,item_description,status,price_cents,tip_cents").order("created_at", { ascending: false }).then(({ data }) => setOrders((data ?? []) as Order[]));
   }, []);
