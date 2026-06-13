@@ -54,12 +54,19 @@ function Orders() {
                 </div>
               </Link>
               <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/app/orders/$id" params={{ id: o.id }}>Track & chat</Link>
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/app/report">Report</Link>
-                </Button>
+                <Link
+                  to="/app/orders/$id"
+                  params={{ id: o.id }}
+                  className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  Track & chat
+                </Link>
+                <Link
+                  to="/app/report"
+                  className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  Report
+                </Link>
               </div>
             </li>
           ))}
