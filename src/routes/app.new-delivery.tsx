@@ -165,7 +165,7 @@ function NewDelivery() {
             <p className="text-sm text-muted-foreground">Estimated total</p>
             <p className="font-serif text-4xl text-gold">{fmtUSD(total)}</p>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">$5.99 base + ${(effectiveMiles * 0.75).toFixed(2)} miles{extraStops ? ` + $${(extraStops * 3).toFixed(2)} extra stop` : ""}</p>
+          <p className="mt-1 text-xs text-muted-foreground">$5.99 base + ${(effectiveMiles * 1.5).toFixed(2)} miles{extraStops ? ` + $${(extraStops * 3).toFixed(2)} extra stop` : ""}</p>
         </div>
 
         <LegalConsent id="order-consent" checked={agree} onCheckedChange={setAgree} variant="order" />
