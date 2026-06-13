@@ -71,6 +71,8 @@ function NewDelivery() {
             price_cents: total,
             tip_cents: Math.round(Number(fd.get("tip") || 0) * 100),
             distance_miles: effectiveMiles,
+            pickup_lat: pickupCoord ? pickupCoord[1] : null,
+            pickup_lng: pickupCoord ? pickupCoord[0] : null,
           }).select("id").single();
           if (error || !created) { setBusy(false); return toast.error(error?.message ?? "Could not create order"); }
 
