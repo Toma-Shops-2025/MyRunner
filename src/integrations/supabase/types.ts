@@ -220,6 +220,7 @@ export type Database = {
           additional_pickups: number
           created_at: string
           customer_id: string
+          delivered_at: string | null
           dispatch_attempts: number
           dispatch_status: string
           distance_miles: number | null
@@ -239,6 +240,7 @@ export type Database = {
           pickup_lng: number | null
           platform_fee_cents: number
           price_cents: number
+          proof_photo_url: string | null
           scheduled_for: string | null
           status: Database["public"]["Enums"]["order_status"]
           stripe_session_id: string | null
@@ -251,6 +253,7 @@ export type Database = {
           additional_pickups?: number
           created_at?: string
           customer_id: string
+          delivered_at?: string | null
           dispatch_attempts?: number
           dispatch_status?: string
           distance_miles?: number | null
@@ -270,6 +273,7 @@ export type Database = {
           pickup_lng?: number | null
           platform_fee_cents?: number
           price_cents?: number
+          proof_photo_url?: string | null
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           stripe_session_id?: string | null
@@ -282,6 +286,7 @@ export type Database = {
           additional_pickups?: number
           created_at?: string
           customer_id?: string
+          delivered_at?: string | null
           dispatch_attempts?: number
           dispatch_status?: string
           distance_miles?: number | null
@@ -301,6 +306,7 @@ export type Database = {
           pickup_lng?: number | null
           platform_fee_cents?: number
           price_cents?: number
+          proof_photo_url?: string | null
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           stripe_session_id?: string | null
