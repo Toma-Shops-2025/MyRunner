@@ -7,7 +7,7 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — MyRunner delivery fees, simple & transparent" },
-      { name: "description", content: "MyRunner starts at $5.99 base + $1.50/mile + $3 per extra stop. No hidden fees. Tips go 100% to drivers." },
+      { name: "description", content: "MyRunner starts at $5.99 base + $0.75/mile + $3 per extra stop. No hidden fees. Tips go 100% to drivers." },
       { property: "og:title", content: "MyRunner pricing" },
       { property: "og:description", content: "Transparent per‑delivery pricing. No subscriptions, no surge to customers." },
       { property: "og:url", content: "/pricing" },
