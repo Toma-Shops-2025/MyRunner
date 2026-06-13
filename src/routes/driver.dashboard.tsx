@@ -62,6 +62,7 @@ function DriverDashboard() {
   const presenceFn = useServerFn(setDriverPresence);
   const acceptFn = useServerFn(acceptOffer);
   const declineFn = useServerFn(declineOffer);
+  const navigate = useNavigate();
 
   const lastLocRef = useRef<{ lat: number; lng: number } | null>(null);
 
