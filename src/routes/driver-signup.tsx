@@ -134,6 +134,16 @@ function DriverSignup() {
               return toast.error(`Could not activate driver account: ${roleErr.message}`);
             }
 
+            // Fire-and-forget background check (no-op if Checkr keys not set yet)
+            if (!isReviewer) {
+              try {
+                const { startDriverBackgroundCheck } = await import("@/lib/checkr.functions");
+                await startDriverBackgroundCheck();
+              } catch (e) {
+                console.warn("background check kickoff failed:", (e as Error).message);
+              }
+            }
+
             setBusy(false);
             toast.success(isReviewer ? "Reviewer demo driver ready." : "You're approved! Finish payout setup to start accepting orders.");
             // Hard reload so useAuth picks up the new role immediately
