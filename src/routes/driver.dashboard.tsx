@@ -235,11 +235,12 @@ function DriverDashboard() {
 
   async function handleAccept() {
     if (!currentOffer) return;
+    const orderId = currentOffer.order_id;
     try {
       await acceptFn({ data: { offerId: currentOffer.id } });
-      toast.success("Order accepted — head to pickup.");
+      toast.success("Order accepted — opening delivery.");
       setCurrentOffer(null);
-      load();
+      navigate({ to: "/driver/orders/$id", params: { id: orderId } });
     } catch (e) {
       toast.error((e as Error).message);
       setCurrentOffer(null);
@@ -265,8 +266,8 @@ function DriverDashboard() {
       .eq("id", o.id)
       .is("driver_id", null);
     if (error) return toast.error(error.message);
-    toast.success("Order claimed. Head to pickup.");
-    load();
+    toast.success("Order claimed — opening delivery.");
+    navigate({ to: "/driver/orders/$id", params: { id: o.id } });
   }
 
   const todayMs = new Date(); todayMs.setHours(0, 0, 0, 0);
