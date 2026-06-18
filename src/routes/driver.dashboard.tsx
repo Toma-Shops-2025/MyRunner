@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { MapPin, RefreshCw } from "lucide-react";
+import { MapPin, RefreshCw, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
@@ -375,6 +375,19 @@ function DriverDashboard() {
           </ul>
         </section>
       )}
+
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gold/40 bg-gold-soft p-6">
+        <div className="flex items-center gap-3">
+          <Share2 className="size-6 text-gold" />
+          <div>
+            <p className="font-serif text-xl">Refer & grow MyRunner</p>
+            <p className="text-sm text-muted-foreground">Grab your QR code and link to share with riders, shops, and neighbors.</p>
+          </div>
+        </div>
+        <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
+          <Link to="/share">Open share page</Link>
+        </Button>
+      </section>
 
       <Dialog open={!!currentOffer} onOpenChange={(open) => { if (!open) handleDecline(); }}>
         <DialogContent className="sm:max-w-md">

@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Trash2, ShieldOff, Star } from "lucide-react";
+import { Trash2, ShieldOff, Star, Share2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, signOut } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -85,6 +86,19 @@ function Settings() {
           <div className="grid gap-2"><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
         </div>
         <Button className="mt-4 bg-gold text-primary-foreground hover:bg-gold/90" onClick={saveProfile}>Save changes</Button>
+      </section>
+
+      <section className="rounded-2xl border border-gold/40 bg-gold-soft p-6">
+        <div className="flex items-center gap-2">
+          <Share2 className="size-5 text-gold" />
+          <h2 className="font-serif text-2xl">Share MyRunner</h2>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Help friends discover on‑demand delivery. Grab your QR code and shareable link.
+        </p>
+        <Button asChild className="mt-4 bg-gold text-primary-foreground hover:bg-gold/90">
+          <Link to="/share">Open share page</Link>
+        </Button>
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-6">
