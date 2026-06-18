@@ -11,6 +11,7 @@ const nav = [
   { to: "/drivers", label: "Drive" },
   { to: "/safety", label: "Safety" },
   { to: "/faq", label: "FAQ" },
+  { to: "/share", label: "Share" },
 ] as const;
 
 export function SiteHeader() {
