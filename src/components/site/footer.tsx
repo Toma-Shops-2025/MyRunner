@@ -26,6 +26,7 @@ const cols = [
       { to: "/faq", label: "Help center" },
       { to: "/app/report", label: "Report an issue" },
       { to: "/refund-policy", label: "Refunds" },
+      { to: "/share", label: "Share / QR code" },
     ],
   },
   {
