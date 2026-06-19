@@ -24,6 +24,7 @@ export const createConnectAccount = createServerFn({ method: "POST" })
 
     try {
       const stripe = createStripeClient("sandbox");
+      const publicUrl = `${APP_URL}/r/${userId}`;
       const account = await stripe.accounts.create({
         type: "express",
         country: "US",
@@ -34,10 +35,13 @@ export const createConnectAccount = createServerFn({ method: "POST" })
         },
         business_type: "individual",
         business_profile: {
-          product_description: "Independent contractor delivery driver for MyRunner.",
-          mcc: "4214", // motor freight carriers / local delivery
+          name: profile?.full_name ?? "MyRunner Independent Runner",
+          url: publicUrl,
+          product_description: "Independent contractor delivery driver for MyRunner — on-demand pickup and delivery of groceries, food, pharmacy and last-minute errands.",
+          support_email: profile?.email ?? undefined,
+          mcc: "4214",
         },
-        metadata: { user_id: userId },
+        metadata: { user_id: userId, public_url: publicUrl },
       });
 
       await supabase
