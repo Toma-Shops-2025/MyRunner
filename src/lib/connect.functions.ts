@@ -108,6 +108,19 @@ export const refreshAccountStatus = createServerFn({ method: "POST" })
       const account = await stripe.accounts.retrieve(profile.stripe_connect_account_id);
       const payoutsEnabled = Boolean(account.payouts_enabled && account.charges_enabled);
 
+      // Self-healing backfill: ensure business_profile.url is set (Stripe requires it for marketplaces).
+      const expectedUrl = `${APP_URL}/r/${userId}`;
+      const isDemo = profile.stripe_connect_account_id.startsWith("acct_demo");
+      if (!isDemo && account.business_profile?.url !== expectedUrl) {
+        try {
+          await stripe.accounts.update(profile.stripe_connect_account_id, {
+            business_profile: { url: expectedUrl },
+          });
+        } catch (e) {
+          console.error("[connect] failed to backfill business_profile.url", e);
+        }
+      }
+
       await supabase
         .from("profiles")
         .update({
