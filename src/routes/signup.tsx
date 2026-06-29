@@ -8,6 +8,7 @@ import { LegalConsent } from "@/components/site/legal-consent";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -25,6 +26,7 @@ function Signup() {
   const nav = useNavigate();
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function google() {
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app/dashboard" });
@@ -60,7 +62,26 @@ function Signup() {
           <div className="mt-6 space-y-4">
             <div className="grid gap-2"><Label htmlFor="name">Full name</Label><Input id="name" name="name" required /></div>
             <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" required /></div>
-            <div className="grid gap-2"><Label htmlFor="password">Password</Label><Input id="password" name="password" type="password" required minLength={8} /></div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={8}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
             <LegalConsent id="signup-consent" checked={agree} onCheckedChange={setAgree} />
             <Button type="submit" disabled={busy} className="w-full bg-gold text-primary-foreground hover:bg-gold/90">Create account</Button>
             <Button type="button" variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
