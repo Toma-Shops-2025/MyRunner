@@ -33,12 +33,14 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const videoUrl = import.meta.env.VITE_HERO_VIDEO_URL || heroVideo.url;
+
   return (
     <PageShell>
       {/* Fixed video background — sits above PageShell bg, hero scrolls over it */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <video
-          src={heroVideo.url}
+          src={videoUrl}
           autoPlay
           muted
           loop
