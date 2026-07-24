@@ -112,15 +112,15 @@ function Landing() {
         </div>
 
         {/* FOOTER FIX - HIGH CONTRAST */}
-        <footer className="bg-black border-t border-white/10 pt-32 pb-20 text-center">
+        <footer className="bg-[#111] border-t border-white/10 pt-32 pb-20 text-center relative z-20">
            <div className="container-app">
               <h2 className="text-gold font-serif text-4xl mb-6 italic tracking-tighter">MyRunner</h2>
-              <div className="flex justify-center gap-10 text-[9px] font-black uppercase tracking-[0.3em] text-white/40 mb-12">
-                 <Link to="/pricing">Pricing</Link>
-                 <Link to="/safety">Safety</Link>
-                 <Link to="/privacy">Privacy</Link>
+              <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-12">
+                 <Link to="/pricing" className="hover:text-gold transition-colors">Pricing</Link>
+                 <Link to="/safety" className="hover:text-gold transition-colors">Safety</Link>
+                 <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
               </div>
-              <p className="text-white/10 text-[8px] font-black uppercase tracking-[0.8em]">Toma Shops Ecosystem · 2025</p>
+              <p className="text-white/20 text-[8px] font-black uppercase tracking-[0.8em]">Toma Shops Ecosystem · 2025</p>
            </div>
         </footer>
       </div>
