@@ -175,6 +175,16 @@ function Settings() {
           </AlertDialogContent>
         </AlertDialog>
       </section>
+
+      <section className="rounded-2xl border border-border bg-card p-6 pb-20">
+        <h2 className="font-serif text-2xl mb-4">Legal & Support</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/privacy" className="p-4 rounded-xl border border-border bg-background text-sm font-medium hover:border-gold transition-colors">Privacy Policy</Link>
+          <Link to="/terms" className="p-4 rounded-xl border border-border bg-background text-sm font-medium hover:border-gold transition-colors">Terms of Service</Link>
+          <Link to="/faq" className="p-4 rounded-xl border border-border bg-background text-sm font-medium hover:border-gold transition-colors">F.A.Q.</Link>
+          <Link to="/contact" className="p-4 rounded-xl border border-border bg-background text-sm font-medium hover:border-gold transition-colors text-gold">Contact Support</Link>
+        </div>
+      </section>
     </div>
   );
 }
