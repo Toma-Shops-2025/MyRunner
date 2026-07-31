@@ -42,14 +42,25 @@ function Signup() {
             if (!agree) return toast.error("Please accept the policies to continue.");
             setBusy(true);
             const fd = new FormData(e.currentTarget);
-            const { error } = await supabase.auth.signUp({
-              email: String(fd.get("email")),
+            const email = String(fd.get("email"));
+            const fullName = String(fd.get("name"));
+            const { data: authData, error } = await supabase.auth.signUp({
+              email: email,
               password: String(fd.get("password")),
               options: {
                 emailRedirectTo: `${window.location.origin}/app/dashboard`,
-                data: { full_name: String(fd.get("name")) },
+                data: { full_name: fullName },
               },
             });
+
+            if (!error && authData.user) {
+              // Sync email to profiles for admin visibility
+              await supabase.from('profiles').insert({
+                  id: authData.user.id,
+                  full_name: fullName,
+                  email: email
+              }).catch(err => console.warn("Profile sync error", err));
+            }
             setBusy(false);
             if (error) return toast.error(error.message);
             toast.success("Welcome to MyRunner.");
