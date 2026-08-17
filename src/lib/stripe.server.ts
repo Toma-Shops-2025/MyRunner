@@ -8,6 +8,11 @@ const getEnv = (key: string): string => {
 
 export type StripeEnv = "sandbox" | "live";
 
+/** Server-side Stripe mode. Set STRIPE_ENV=live in production deploy env. */
+export function getStripeEnv(): StripeEnv {
+  return process.env.STRIPE_ENV === "live" ? "live" : "sandbox";
+}
+
 const GATEWAY_STRIPE_BASE = "https://connector-gateway.lovable.dev/stripe";
 
 export function getConnectionApiKey(env: StripeEnv): string {

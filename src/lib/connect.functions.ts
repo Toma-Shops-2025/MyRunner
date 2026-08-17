@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
+import { createStripeClient, getStripeEnv, getStripeErrorMessage } from "@/lib/stripe.server";
 
 const APP_URL = process.env.PUBLIC_APP_URL ?? "https://myrunner.shop";
 
@@ -23,7 +23,7 @@ export const createConnectAccount = createServerFn({ method: "POST" })
     }
 
     try {
-      const stripe = createStripeClient("sandbox");
+      const stripe = createStripeClient(getStripeEnv());
       const publicUrl = `${APP_URL}/r/${userId}`;
       const account = await stripe.accounts.create({
         type: "express",
@@ -73,7 +73,7 @@ export const createOnboardingLink = createServerFn({ method: "POST" })
     }
 
     try {
-      const stripe = createStripeClient("sandbox");
+      const stripe = createStripeClient(getStripeEnv());
       const link = await stripe.accountLinks.create({
         account: profile.stripe_connect_account_id,
         refresh_url: `${APP_URL}/driver/earnings?refresh=1`,
@@ -104,7 +104,7 @@ export const refreshAccountStatus = createServerFn({ method: "POST" })
     }
 
     try {
-      const stripe = createStripeClient("sandbox");
+      const stripe = createStripeClient(getStripeEnv());
       const account = await stripe.accounts.retrieve(profile.stripe_connect_account_id);
       const payoutsEnabled = Boolean(account.payouts_enabled && account.charges_enabled);
 
@@ -159,7 +159,7 @@ export const createDashboardLink = createServerFn({ method: "POST" })
     }
 
     try {
-      const stripe = createStripeClient("sandbox");
+      const stripe = createStripeClient(getStripeEnv());
       const link = await stripe.accounts.createLoginLink(profile.stripe_connect_account_id);
       return { url: link.url };
     } catch (e) {
@@ -246,7 +246,7 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
     }
 
     try {
-      const stripe = createStripeClient("sandbox");
+      const stripe = createStripeClient(getStripeEnv());
       const transfer = await stripe.transfers.create(
         {
           amount: driverTotal,

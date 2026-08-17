@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
+import { createStripeClient, getStripeEnv, getStripeErrorMessage } from "@/lib/stripe.server";
 
 const input = z.object({ orderId: z.string().uuid() });
 
@@ -21,7 +21,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     if (order.payment_status === "paid") return { error: "Order is already paid" };
 
     try {
-      const stripe = createStripeClient("sandbox");
+      const stripeEnv = getStripeEnv();
+      const stripe = createStripeClient(stripeEnv);
       const origin = process.env.PUBLIC_APP_URL ?? "https://myrunner.shop";
       const total = order.price_cents + order.tip_cents;
 
@@ -42,7 +43,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         success_url: `${origin}/app/orders/${order.id}?paid=1`,
         cancel_url: `${origin}/app/orders/${order.id}?cancelled=1`,
         payment_intent_data: { description: "MyRunner Delivery" },
-        metadata: { order_id: order.id, env: "sandbox" },
+        metadata: { order_id: order.id, env: stripeEnv },
       });
 
       await supabase.from("orders").update({ stripe_session_id: session.id }).eq("id", order.id);
@@ -75,7 +76,8 @@ export const createTipCheckoutSession = createServerFn({ method: "POST" })
     if (!order.driver_id) return { error: "No Runner assigned" };
 
     try {
-      const stripe = createStripeClient("sandbox");
+      const stripeEnv = getStripeEnv();
+      const stripe = createStripeClient(stripeEnv);
       const origin = process.env.PUBLIC_APP_URL ?? "https://myrunner.shop";
 
       const session = await stripe.checkout.sessions.create({
@@ -97,7 +99,7 @@ export const createTipCheckoutSession = createServerFn({ method: "POST" })
         payment_intent_data: { description: "MyRunner post-delivery tip" },
         metadata: {
           order_id: order.id,
-          env: "sandbox",
+          env: stripeEnv,
           kind: "tip",
           tip_cents: String(data.tipCents),
         },
