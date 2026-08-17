@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LegalConsent } from "@/components/site/legal-consent";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -29,8 +28,11 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false);
 
   async function google() {
-    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app/dashboard" });
-    if (res.error) toast.error("Google sign-in failed.");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/app/dashboard" },
+    });
+    if (error) toast.error("Google sign-in failed.");
   }
 
   return (

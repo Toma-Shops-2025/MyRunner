@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -30,10 +29,11 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   async function google() {
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app/dashboard",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/app/dashboard" },
     });
-    if (res.error) toast.error("Google sign-in failed.");
+    if (error) toast.error("Google sign-in failed.");
   }
 
   return (
