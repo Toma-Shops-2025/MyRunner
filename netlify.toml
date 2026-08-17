@@ -3,9 +3,9 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
   NITRO_PRESET = "netlify"
-  # Public Supabase values are embedded in the client bundle by design
-  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,VITE_SUPABASE_URL,VITE_PAYMENTS_CLIENT_TOKEN"
+  # Public / non-secret values that appear in the client bundle or source
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,VITE_SUPABASE_URL,VITE_PAYMENTS_CLIENT_TOKEN,STRIPE_ENV,PUBLIC_APP_URL"
 
 # Do NOT add a catch-all SPA redirect — TanStack Start SSR handles routing via Netlify Functions.
