@@ -13,14 +13,26 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
+const HERO_VIDEO =
+  (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_HERO_VIDEO_URL ||
+  "https://cdn.pixabay.com/video/2021/04/12/70860-536965158_large.mp4";
+
 function Landing() {
   return (
-    <PageShell>
-      {/* CINEMATIC ANIMATED BACKGROUND - REPLACES BROKEN VIDEO */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-black">
-        <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_50%,_rgba(245,197,66,0.15)_0%,_transparent_50%)]" />
-        <div className="absolute inset-0 opacity-20 bg-[conic-gradient(from_0deg_at_50%_50%,_#f5c542_0deg,_transparent_60deg)] animate-[spin_20s_linear_infinite]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+    <PageShell className="bg-transparent">
+      {/* Fixed cinematic video background (same pattern as RunItUp) */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black">
+        <video
+          src={HERO_VIDEO}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="size-full object-cover opacity-[0.72]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/75" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.55)_100%)]" />
       </div>
 
       <div className="relative z-10">

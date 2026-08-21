@@ -1,10 +1,17 @@
 import type { ReactNode } from "react";
 import { SiteHeader } from "./header";
 import { SiteFooter } from "./footer";
+import { cn } from "@/lib/utils";
 
-export function PageShell({ children }: { children: ReactNode }) {
+export function PageShell({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className={cn("flex min-h-screen flex-col bg-background", className)}>
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />

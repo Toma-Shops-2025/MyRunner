@@ -3,9 +3,10 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'shop.myrunner.twa',
   appName: 'MyRunner',
-  webDir: 'dist/client',
+  webDir: 'dist',
   server: {
-    androidScheme: 'https'
+    url: 'https://myrunner.shop',
+    cleartext: false,
   },
   android: {
     allowMixedContent: false,

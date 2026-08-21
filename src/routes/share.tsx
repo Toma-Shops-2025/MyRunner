@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Copy, Download, Share2, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import qrAsset from "@/assets/myrunner-qr.png.asset.json";
 
 export const Route = createFileRoute("/share")({
   head: () => ({
@@ -17,6 +16,7 @@ export const Route = createFileRoute("/share")({
 
 const SHARE_URL = "https://myrunner.shop";
 const SHARE_TEXT = "Need anything delivered? MyRunner — Anything. Anytime. Anywhere.";
+const QR_SRC = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(SHARE_URL)}`;
 
 function Share() {
   const [copied, setCopied] = useState(false);
@@ -40,8 +40,10 @@ function Share() {
 
   function downloadQR() {
     const a = document.createElement("a");
-    a.href = qrAsset.url;
+    a.href = QR_SRC;
     a.download = "myrunner-qr.png";
+    a.target = "_blank";
+    a.rel = "noopener";
     a.click();
   }
 
@@ -59,7 +61,7 @@ function Share() {
         <div className="flex items-center justify-center bg-gradient-to-br from-gold-soft to-card p-8">
           <div className="rounded-2xl bg-white p-5 shadow-xl">
             <img
-              src={qrAsset.url}
+              src={QR_SRC}
               alt="QR code to myrunner.shop"
               className="size-64 rounded-lg"
             />
