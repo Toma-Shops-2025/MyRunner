@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Package, Clock, MapPin, Shield, Star, Zap, Smartphone, Users, CheckCircle2 } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
+import { HeroBackgroundVideo } from "@/components/site/hero-background-video";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -13,27 +14,10 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const HERO_VIDEO =
-  (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_HERO_VIDEO_URL ||
-  "https://cdn.pixabay.com/video/2021/04/12/70860-536965158_large.mp4";
-
 function Landing() {
   return (
     <PageShell className="bg-transparent">
-      {/* Fixed cinematic video background (same pattern as RunItUp) */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black">
-        <video
-          src={HERO_VIDEO}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          className="size-full object-cover opacity-[0.72]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/75" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.55)_100%)]" />
-      </div>
+      <HeroBackgroundVideo />
 
       <div className="relative z-10">
         {/* HERO SECTION */}
