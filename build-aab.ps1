@@ -32,8 +32,9 @@ bun install
 Write-Host "==> Building web app" -ForegroundColor Cyan
 bun run build
 
-Write-Host "==> Regenerating Android icons + splash" -ForegroundColor Cyan
-bunx capacitor-assets generate --android
+Write-Host "==> Regenerating Android icons + splash from resources/" -ForegroundColor Cyan
+bun run assets:generate
+if ($LASTEXITCODE -ne 0) { throw "Asset generation failed" }
 
 Write-Host "==> Syncing Capacitor" -ForegroundColor Cyan
 bunx cap sync android
@@ -50,17 +51,15 @@ if ($content -match "versionCode (\d+)") {
 }
 
 Write-Host "==> Building signed release AAB" -ForegroundColor Cyan
-$password = Read-Host "Keystore password" -AsSecureString
-$plain = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
-  [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+$Password = "Custom.247"
 
 Push-Location android
 try {
   .\gradlew.bat bundleRelease `
     "-Pandroid.injected.signing.store.file=$KEYSTORE" `
-    "-Pandroid.injected.signing.store.password=$plain" `
+    "-Pandroid.injected.signing.store.password=$Password" `
     "-Pandroid.injected.signing.key.alias=$KEY_ALIAS" `
-    "-Pandroid.injected.signing.key.password=$plain"
+    "-Pandroid.injected.signing.key.password=$Password"
 } finally {
   Pop-Location
 }

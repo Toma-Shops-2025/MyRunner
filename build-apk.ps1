@@ -5,29 +5,41 @@ $ProjectPath  = "$env:USERPROFILE\Desktop\myrunner"
 $KeystorePath = "C:\Keys\myrunner.jks"
 $KeyAlias     = "myrunner1"
 $ApkPath      = "$ProjectPath\android\app\build\outputs\apk\release\app-release.apk"
+$Password     = "Custom.247"
 
 $ErrorActionPreference = "Stop"
 
 function Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 
-Step "Building Web App..."
 Set-Location $ProjectPath
-bun install
-bun run build
 
-Step "Syncing Capacitor..."
+Step "Installing dependencies"
+bun install
+
+Step "Building web app"
+bun run build
+if ($LASTEXITCODE -ne 0) { throw "Web build failed" }
+
+Step "Regenerating Android launcher icon + splash from resources/"
+bun run assets:generate
+if ($LASTEXITCODE -ne 0) { throw "Asset generation failed" }
+
+Step "Syncing Capacitor Android"
 bunx cap sync android
 
-Step "Keystore credentials (typing is hidden)"
-$storePassSecure = Read-Host "Keystore password" -AsSecureString
-$storePass = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($storePassSecure))
-
-Step "Building Android APK..."
+Step "Building signed release APK"
 Set-Location "$ProjectPath\android"
-& .\gradlew.bat clean assembleRelease "-Pandroid.injected.signing.store.file=$KeystorePath" "-Pandroid.injected.signing.store.password=$storePass" "-Pandroid.injected.signing.key.alias=$KeyAlias" "-Pandroid.injected.signing.key.password=$storePass"
-
+& .\gradlew.bat assembleRelease `
+  "-Pandroid.injected.signing.store.file=$KeystorePath" `
+  "-Pandroid.injected.signing.store.password=$Password" `
+  "-Pandroid.injected.signing.key.alias=$KeyAlias" `
+  "-Pandroid.injected.signing.key.password=$Password"
+$gradleExit = $LASTEXITCODE
 Set-Location $ProjectPath
-if (Test-Path $ApkPath) {
-    Write-Host "`n  SUCCESS! APK Ready: $ApkPath" -ForegroundColor Green
-    Start-Process explorer.exe "/select,`"$ApkPath`""
+
+if ($gradleExit -eq 0 -and (Test-Path $ApkPath)) {
+  Write-Host "`n  SUCCESS! APK Ready: $ApkPath" -ForegroundColor Green
+  Start-Process explorer.exe "/select,`"$ApkPath`""
+} else {
+  Write-Error "APK not found at $ApkPath"
 }

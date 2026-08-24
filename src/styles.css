@@ -168,15 +168,21 @@
 }
 
 /* Hide Android WebView's giant play overlay on muted autoplay videos */
+.hero-bg-video {
+  object-fit: cover;
+}
 .hero-bg-video::-webkit-media-controls,
 .hero-bg-video::-webkit-media-controls-enclosure,
+.hero-bg-video::-webkit-media-controls-panel,
 .hero-bg-video::-webkit-media-controls-start-playback-button,
-.hero-bg-video::-webkit-media-controls-overlay-play-button {
+.hero-bg-video::-webkit-media-controls-overlay-play-button,
+.hero-bg-video::-webkit-media-controls-overlay-enclosure {
   display: none !important;
-  -webkit-appearance: none;
+  -webkit-appearance: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
   width: 0 !important;
   height: 0 !important;
+  max-height: 0 !important;
 }
 
