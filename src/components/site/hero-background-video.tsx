@@ -29,12 +29,12 @@ export function HeroBackgroundVideo() {
     el.setAttribute("playsinline", "");
     el.setAttribute("webkit-playsinline", "true");
     el.disablePictureInPicture = true;
-    el.playbackRate = 0.5;
+    el.playbackRate = 0.25;
 
     const tryPlay = () => {
       el.muted = true;
       el.volume = 0;
-      el.playbackRate = 0.5;
+      el.playbackRate = 0.25;
       void el.play().catch(() => undefined);
     };
 
