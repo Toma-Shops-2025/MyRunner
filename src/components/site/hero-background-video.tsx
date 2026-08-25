@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
-/** Self-hosted — remote CDNs (Pixabay) started returning 403 and killed the hero. */
-const HERO_VIDEO =
-  (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_HERO_VIDEO_URL ||
-  "/video/hero.mp4";
+/**
+ * Always use the self-hosted file. Netlify/Pixabay env URLs started returning 403
+ * and were baked into production builds via VITE_HERO_VIDEO_URL.
+ */
+const HERO_VIDEO = "/video/hero.mp4";
 
 /**
  * Muted looping background for the landing page.
