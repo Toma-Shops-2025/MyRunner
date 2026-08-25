@@ -9,7 +9,7 @@ export function Logo({ withText = true, size = 32 }: { withText?: boolean; size?
         alt=""
         width={size}
         height={size}
-        className="rounded-md ring-1 ring-border-strong transition-transform group-hover:scale-105"
+        className="rounded-lg object-cover ring-1 ring-gold/30 transition-transform group-hover:scale-105"
         style={{ width: size, height: size }}
       />
       {withText && (
