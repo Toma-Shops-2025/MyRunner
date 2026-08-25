@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
  * and were baked into production builds via VITE_HERO_VIDEO_URL.
  * Cache-bust when swapping the clip so clients don't keep the old lab file.
  */
-const HERO_VIDEO = "/video/hero.mp4?v=night-drive-1";
+const HERO_VIDEO = "/video/hero.mp4?v=custom-1";
 
 /**
  * Muted looping background for the landing page.
