@@ -82,11 +82,16 @@ export const updateDriverBackgroundCheck = createServerFn({ method: "POST" })
       // Revoke driver role
       await supabaseAdmin.from("user_roles").delete().eq("user_id", data.driverId).eq("role", "driver");
     } else {
-      // Reinstate driver role if missing
-      await supabaseAdmin.from("user_roles").upsert(
-        { user_id: data.driverId, role: "driver" },
-        { onConflict: "user_id,role", ignoreDuplicates: true },
-      );
+      // Reinstate driver role if missing (avoid upsert — live DB may lack unique constraint)
+      const { data: existing } = await supabaseAdmin
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", data.driverId)
+        .eq("role", "driver")
+        .maybeSingle();
+      if (!existing) {
+        await supabaseAdmin.from("user_roles").insert({ user_id: data.driverId, role: "driver" });
+      }
     }
     return { ok: true };
   });

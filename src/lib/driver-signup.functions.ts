@@ -11,11 +11,22 @@ export const activateDriverRole = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { error } = await supabaseAdmin.from("user_roles").upsert(
-      { user_id: context.userId, role: "driver" },
-      { onConflict: "user_id,role", ignoreDuplicates: true },
-    );
-    if (error) throw new Error(error.message);
+    // Live DB may lack UNIQUE(user_id, role) required by upsert onConflict —
+    // check then insert so activation works either way.
+    const { data: existing, error: readErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", context.userId)
+      .eq("role", "driver")
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+
+    if (!existing) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: context.userId, role: "driver" });
+      if (error) throw new Error(error.message);
+    }
 
     // Keep application + profile activation in sync for dashboards
     await supabaseAdmin
