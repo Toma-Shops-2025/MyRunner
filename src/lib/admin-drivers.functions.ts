@@ -90,7 +90,11 @@ export const updateDriverBackgroundCheck = createServerFn({ method: "POST" })
         .eq("role", "driver")
         .maybeSingle();
       if (!existing) {
-        await supabaseAdmin.from("user_roles").insert({ user_id: data.driverId, role: "driver" });
+        await supabaseAdmin.from("user_roles").insert({
+          id: crypto.randomUUID(),
+          user_id: data.driverId,
+          role: "driver",
+        });
       }
     }
     return { ok: true };

@@ -22,9 +22,11 @@ export const activateDriverRole = createServerFn({ method: "POST" })
     if (readErr) throw new Error(readErr.message);
 
     if (!existing) {
-      const { error } = await supabaseAdmin
-        .from("user_roles")
-        .insert({ user_id: context.userId, role: "driver" });
+      const { error } = await supabaseAdmin.from("user_roles").insert({
+        id: crypto.randomUUID(),
+        user_id: context.userId,
+        role: "driver",
+      });
       if (error) throw new Error(error.message);
     }
 

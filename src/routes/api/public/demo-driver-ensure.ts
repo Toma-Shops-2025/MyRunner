@@ -83,7 +83,11 @@ async function handler(): Promise<Response> {
       .eq("role", "driver")
       .maybeSingle();
     if (!hasRole) {
-      await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "driver" });
+      await supabaseAdmin.from("user_roles").insert({
+        id: crypto.randomUUID(),
+        user_id: userId,
+        role: "driver",
+      });
     }
 
     return Response.json({ ok: true, email: DEMO_EMAIL });
