@@ -34,6 +34,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as RIdRouteImport } from './routes/r.$id'
 import { Route as DriverEarningsRouteImport } from './routes/driver.earnings'
 import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppReportRouteImport } from './routes/app.report'
 import { Route as AppOrdersRouteImport } from './routes/app.orders'
@@ -176,6 +177,11 @@ const DriverDashboardRoute = DriverDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => DriverRoute,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/app/orders': typeof AppOrdersRouteWithChildren
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/r/$id': typeof RIdRoute
@@ -336,6 +343,7 @@ export interface FileRoutesByTo {
   '/app/orders': typeof AppOrdersRouteWithChildren
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/r/$id': typeof RIdRoute
@@ -380,6 +388,7 @@ export interface FileRoutesById {
   '/app/orders': typeof AppOrdersRouteWithChildren
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/r/$id': typeof RIdRoute
@@ -425,6 +434,7 @@ export interface FileRouteTypes {
     | '/app/orders'
     | '/app/report'
     | '/app/settings'
+    | '/auth/callback'
     | '/driver/dashboard'
     | '/driver/earnings'
     | '/r/$id'
@@ -468,6 +478,7 @@ export interface FileRouteTypes {
     | '/app/orders'
     | '/app/report'
     | '/app/settings'
+    | '/auth/callback'
     | '/driver/dashboard'
     | '/driver/earnings'
     | '/r/$id'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/app/orders'
     | '/app/report'
     | '/app/settings'
+    | '/auth/callback'
     | '/driver/dashboard'
     | '/driver/earnings'
     | '/r/$id'
@@ -545,6 +557,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   RIdRoute: typeof RIdRoute
   ApiPublicCheckrWebhookRoute: typeof ApiPublicCheckrWebhookRoute
   ApiPublicDemoDriverEnsureRoute: typeof ApiPublicDemoDriverEnsureRoute
@@ -728,6 +741,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/driver/dashboard'
       preLoaderRoute: typeof DriverDashboardRouteImport
       parentRoute: typeof DriverRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/settings': {
       id: '/app/settings'
@@ -930,6 +950,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   RIdRoute: RIdRoute,
   ApiPublicCheckrWebhookRoute: ApiPublicCheckrWebhookRoute,
   ApiPublicDemoDriverEnsureRoute: ApiPublicDemoDriverEnsureRoute,

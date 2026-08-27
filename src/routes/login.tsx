@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { signInWithGoogle } from "@/lib/auth-google";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -26,14 +27,18 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   async function google() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/app/dashboard" },
-    });
-    if (error) toast.error("Google sign-in failed.");
+    setGoogleBusy(true);
+    const { error } = await signInWithGoogle();
+    if (error) {
+      setGoogleBusy(false);
+      toast.error(
+        error.message || "Google sign-in failed. Check that Google is enabled in Supabase.",
+      );
+    }
   }
 
   return (
@@ -62,6 +67,19 @@ function Login() {
           <h1 className="font-serif text-4xl">Welcome back</h1>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to continue.</p>
           <div className="mt-6 space-y-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={googleBusy}
+              onClick={google}
+            >
+              {googleBusy ? "Redirecting to Google…" : "Continue with Google"}
+            </Button>
+            <div className="relative py-1 text-center text-xs uppercase tracking-widest text-muted-foreground">
+              <span className="relative z-10 bg-card px-2">or email</span>
+              <span className="absolute inset-x-0 top-1/2 border-t border-border" />
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" required />
@@ -91,9 +109,6 @@ function Login() {
               className="w-full bg-gold text-primary-foreground hover:bg-gold/90"
             >
               Sign in
-            </Button>
-            <Button type="button" variant="outline" className="w-full" onClick={google}>
-              Continue with Google
             </Button>
           </div>
           <div className="mt-6 rounded-xl border border-dashed border-gold/40 bg-gold-soft/30 p-4">
