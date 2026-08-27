@@ -1,5 +1,6 @@
 -- Fix driver signup: policy existed but authenticated lacked INSERT privilege.
--- Run in Supabase SQL Editor for project ansjbzszrfkaajlfiukv if not applied via CLI.
+-- Run in Supabase SQL Editor for project ghcedtumkxhqdhrbrojn if not applied via CLI.
+-- Casts handle live schema where user_id may be text while auth.uid() is uuid.
 
 GRANT INSERT ON public.user_roles TO authenticated;
 
@@ -8,4 +9,7 @@ CREATE POLICY "roles self insert driver"
 ON public.user_roles
 FOR INSERT
 TO authenticated
-WITH CHECK (user_id = auth.uid() AND role = 'driver'::app_role);
+WITH CHECK (
+  user_id::text = auth.uid()::text
+  AND role::text = 'driver'
+);
