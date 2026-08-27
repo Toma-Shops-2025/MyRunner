@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Send, MapPin, Camera, CheckCircle2, Package } from "lucide-react";
+import { Send, MapPin, Camera, CheckCircle2, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -109,10 +109,6 @@ function DriverOrder() {
 
   return (
     <div className="space-y-6">
-      <Link to="/driver/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" /> Back to dashboard
-      </Link>
-
       <div className="rounded-2xl border border-border bg-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>

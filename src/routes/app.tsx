@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Home, ListOrdered, PlusCircle, Settings, Flag, LogOut } from "lucide-react";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
+import { BackButton } from "@/components/site/back-button";
 import { Button } from "@/components/ui/button";
 import { useAuth, signOut } from "@/hooks/use-auth";
 
@@ -63,7 +64,8 @@ function AppLayout() {
             <LogOut className="mr-2 size-4" /> Sign out
           </Button>
         </aside>
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-4">
+          <BackButton fallbackTo="/app/dashboard" label="Back" />
           <Outlet />
         </div>
       </div>

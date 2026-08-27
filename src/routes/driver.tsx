@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-rout
 import { useEffect } from "react";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
+import { BackButton } from "@/components/site/back-button";
 import { PayoutSetupBanner } from "@/components/site/payout-setup-banner";
 import { Button } from "@/components/ui/button";
 import { useAuth, signOut } from "@/hooks/use-auth";
@@ -35,6 +36,9 @@ function DriverLayout() {
           </div>
         </div>
         <PayoutSetupBanner />
+        <div className="mb-4">
+          <BackButton fallbackTo="/driver/dashboard" />
+        </div>
         <Outlet />
         <p className="mt-6 text-xs text-muted-foreground">
           Need help? <Link to="/contact" className="text-gold underline">Contact support</Link> · <Link to="/app/report" className="text-gold underline">Report an issue</Link>

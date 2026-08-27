@@ -1,19 +1,36 @@
 import type { ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { SiteHeader } from "./header";
 import { SiteFooter } from "./footer";
+import { BackButton } from "./back-button";
 import { cn } from "@/lib/utils";
 
 export function PageShell({
   children,
   className,
+  showBack,
+  backFallback = "/",
 }: {
   children: ReactNode;
   className?: string;
+  /** Override auto back (hidden on home). */
+  showBack?: boolean;
+  backFallback?: string;
 }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const shouldShowBack = showBack ?? pathname !== "/";
+
   return (
     <div className={cn("flex min-h-screen flex-col bg-background", className)}>
       <SiteHeader />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        {shouldShowBack ? (
+          <div className="container-app pt-6">
+            <BackButton fallbackTo={backFallback} />
+          </div>
+        ) : null}
+        {children}
+      </main>
       <SiteFooter />
     </div>
   );
@@ -30,7 +47,7 @@ export function LegalLayout({
 }) {
   return (
     <PageShell>
-      <section className="container-app py-20">
+      <section className="container-app pb-20 pt-6">
         <p className="text-xs uppercase tracking-widest text-muted-foreground">Legal</p>
         <h1 className="mt-3 font-serif text-5xl">{title}</h1>
         <p className="mt-2 text-sm text-muted-foreground">Last updated: {updated}</p>

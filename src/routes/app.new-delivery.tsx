@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LegalConsent } from "@/components/site/legal-consent";
 import { AddressAutocomplete } from "@/components/site/address-autocomplete";
 import { OrderMap } from "@/components/site/order-map";
-import { priceQuote, fmtUSD } from "@/lib/pricing";
+import { priceQuote, fmtUSD, BASE_FEE_CENTS, PER_MILE_CENTS, EXTRA_STOP_CENTS } from "@/lib/pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckoutSession } from "@/lib/checkout.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -165,7 +165,11 @@ function NewDelivery() {
             <p className="text-sm text-muted-foreground">Estimated total</p>
             <p className="font-serif text-4xl text-gold">{fmtUSD(total)}</p>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">$5.99 base + ${(effectiveMiles * 1.5).toFixed(2)} miles{extraStops ? ` + $${(extraStops * 3).toFixed(2)} extra stop` : ""}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {fmtUSD(BASE_FEE_CENTS)} base + {fmtUSD(Math.round(effectiveMiles * PER_MILE_CENTS))} miles
+            {extraStops ? ` + ${fmtUSD(extraStops * EXTRA_STOP_CENTS)} extra stop` : ""}
+            {BASE_FEE_CENTS === 0 ? " · base fee waived for testing" : ""}
+          </p>
         </div>
 
         <LegalConsent id="order-consent" checked={agree} onCheckedChange={setAgree} variant="order" />

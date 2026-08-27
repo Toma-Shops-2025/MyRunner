@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Download, Share2, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PageShell } from "@/components/site/page-shell";
 
 export const Route = createFileRoute("/share")({
   head: () => ({
@@ -48,54 +49,56 @@ function Share() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
-      <div>
-        <h1 className="font-serif text-4xl">Share MyRunner</h1>
-        <p className="mt-2 text-muted-foreground">
-          Help friends, neighbors, and local shops discover on‑demand delivery.
-          Show the QR, share the link, or post it anywhere.
-        </p>
-      </div>
+    <PageShell>
+      <div className="container-app space-y-8 pb-16 pt-4">
+        <div>
+          <h1 className="font-serif text-4xl">Share MyRunner</h1>
+          <p className="mt-2 text-muted-foreground">
+            Help friends, neighbors, and local shops discover on‑demand delivery.
+            Show the QR, share the link, or post it anywhere.
+          </p>
+        </div>
 
-      <div className="overflow-hidden rounded-3xl border border-border bg-card">
-        <div className="flex items-center justify-center bg-gradient-to-br from-gold-soft to-card p-8">
-          <div className="rounded-2xl bg-white p-5 shadow-xl">
-            <img
-              src={QR_SRC}
-              alt="QR code to myrunner.shop"
-              className="size-64 rounded-lg"
-            />
+        <div className="overflow-hidden rounded-3xl border border-border bg-card">
+          <div className="flex items-center justify-center bg-gradient-to-br from-gold-soft to-card p-8">
+            <div className="rounded-2xl bg-white p-5 shadow-xl">
+              <img
+                src={QR_SRC}
+                alt="QR code to myrunner.shop"
+                className="size-64 rounded-lg"
+              />
+            </div>
+          </div>
+          <div className="space-y-4 p-6">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground">Your link</p>
+              <p className="mt-1 break-all font-serif text-xl text-gold">{SHARE_URL}</p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <Button onClick={copyLink} variant="outline">
+                {copied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
+                {copied ? "Copied" : "Copy link"}
+              </Button>
+              <Button onClick={nativeShare} variant="outline">
+                <Share2 className="mr-2 size-4" /> Share
+              </Button>
+              <Button onClick={downloadQR} className="bg-gold text-primary-foreground hover:bg-gold/90">
+                <Download className="mr-2 size-4" /> Download QR
+              </Button>
+            </div>
           </div>
         </div>
-        <div className="space-y-4 p-6">
-          <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Your link</p>
-            <p className="mt-1 break-all font-serif text-xl text-gold">{SHARE_URL}</p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <Button onClick={copyLink} variant="outline">
-              {copied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
-              {copied ? "Copied" : "Copy link"}
-            </Button>
-            <Button onClick={nativeShare} variant="outline">
-              <Share2 className="mr-2 size-4" /> Share
-            </Button>
-            <Button onClick={downloadQR} className="bg-gold text-primary-foreground hover:bg-gold/90">
-              <Download className="mr-2 size-4" /> Download QR
-            </Button>
-          </div>
-        </div>
-      </div>
 
-      <section className="rounded-2xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl">Where to share</h2>
-        <ul className="mt-3 space-y-2 text-sm text-foreground/80">
-          <li>· Print the QR on flyers, business cards, or vehicle decals</li>
-          <li>· Post it on Instagram, TikTok, or Facebook with a short caption</li>
-          <li>· Hand cards to neighbors, gyms, coffee shops, and apartment lobbies</li>
-          <li>· Add it as the end card of any video you publish (5+ seconds, on white)</li>
-        </ul>
-      </section>
-    </div>
+        <section className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-serif text-2xl">Where to share</h2>
+          <ul className="mt-3 space-y-2 text-sm text-foreground/80">
+            <li>· Print the QR on flyers, business cards, or vehicle decals</li>
+            <li>· Post it on Instagram, TikTok, or Facebook with a short caption</li>
+            <li>· Hand cards to neighbors, gyms, coffee shops, and apartment lobbies</li>
+            <li>· Add it as the end card of any video you publish (5+ seconds, on white)</li>
+          </ul>
+        </section>
+      </div>
+    </PageShell>
   );
 }

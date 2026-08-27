@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Send, Flag, CheckCircle2, Star, CreditCard } from "lucide-react";
+import { Send, Flag, CheckCircle2, Star, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -192,9 +192,6 @@ function OrderDetail() {
   if (!order) {
     return (
       <div className="space-y-4">
-        <Link to="/app/orders" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="size-4" /> Back to orders
-        </Link>
         <p className="text-muted-foreground">Loading…</p>
       </div>
     );
@@ -207,10 +204,6 @@ function OrderDetail() {
 
   return (
     <div className="space-y-6">
-      <Link to="/app/orders" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" /> Back to orders
-      </Link>
-
       {/* Summary */}
       <div className="rounded-2xl border border-border bg-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">

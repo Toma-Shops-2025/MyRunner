@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
+import { BackButton } from "@/components/site/back-button";
 
 /**
  * Public Runner profile page.
@@ -72,7 +73,10 @@ function RunnerProfile() {
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="container-app flex-1 py-16">
+      <main className="container-app flex-1 py-10">
+        <div className="mb-6">
+          <BackButton fallbackTo="/" />
+        </div>
         <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card p-8">
           <p className="text-xs uppercase tracking-widest text-gold">Independent Runner</p>
           <h1 className="mt-2 font-serif text-4xl">{runner.name}</h1>

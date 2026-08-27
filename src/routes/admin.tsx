@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { ShieldCheck, Users, FileWarning, Package, LogOut, Car } from "lucide-react";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
+import { BackButton } from "@/components/site/back-button";
 import { Button } from "@/components/ui/button";
 import { useAuth, signOut } from "@/hooks/use-auth";
 
@@ -66,7 +67,8 @@ function AdminLayout() {
             <LogOut className="mr-2 size-4" /> Sign out
           </Button>
         </aside>
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-4">
+          <BackButton fallbackTo="/admin/dashboard" />
           <Outlet />
         </div>
       </div>
