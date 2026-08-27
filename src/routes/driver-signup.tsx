@@ -1,11 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LegalConsent } from "@/components/site/legal-consent";
 import { supabase } from "@/integrations/supabase/client";
+import { activateDriverRole } from "@/lib/driver-signup.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/driver-signup")({
@@ -21,6 +23,7 @@ export const Route = createFileRoute("/driver-signup")({
 
 function DriverSignup() {
   const nav = useNavigate();
+  const activateRole = useServerFn(activateDriverRole);
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -124,14 +127,14 @@ function DriverSignup() {
               status: "approved",
             }, { onConflict: "user_id" });
 
-            // Grant driver role immediately (RLS policy: roles self insert driver)
-            const { error: roleErr } = await supabase.from("user_roles").insert({
-              user_id: user.id,
-              role: "driver",
-            });
-            if (roleErr && !roleErr.message.toLowerCase().includes("duplicate")) {
+            // Grant driver role via server (service role) — client INSERT is blocked by grants/RLS
+            try {
+              await activateRole();
+            } catch (err) {
               setBusy(false);
-              return toast.error(`Could not activate driver account: ${roleErr.message}`);
+              return toast.error(
+                `Could not activate driver account: ${(err as Error).message || "unknown error"}`,
+              );
             }
 
             // Fire-and-forget background check (no-op if Checkr keys not set yet)
