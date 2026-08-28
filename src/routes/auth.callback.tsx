@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef, useState } from "react";
 import { PageShell } from "@/components/site/page-shell";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -8,7 +7,7 @@ import {
   intentFromMetadata,
   readSignupIntent,
 } from "@/lib/signup-intent";
-import { resolvePostAuthDestination } from "@/lib/auth.functions";
+import { fetchUserRoles } from "@/lib/auth-routing";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -21,44 +20,39 @@ export const Route = createFileRoute("/auth/callback")({
   component: AuthCallback,
 });
 
+type AuthDestination =
+  | "/driver/dashboard"
+  | "/driver-signup"
+  | "/app/dashboard";
+
+async function pickDestination(userId: string, metadata: Record<string, unknown>): Promise<AuthDestination> {
+  const signupIntent = readSignupIntent() ?? intentFromMetadata(metadata);
+  clearSignupIntent();
+
+  const roles = await fetchUserRoles(userId);
+  if (roles.includes("driver")) return "/driver/dashboard";
+  if (signupIntent === "driver") return "/driver-signup";
+  return "/app/dashboard";
+}
+
 /**
- * Google (and other OAuth) return here after Supabase finishes the handshake.
- * Waits for the session, then sends drivers vs customers to the right home.
+ * Google OAuth return — exchange PKCE code / wait for session, then route by role.
  */
 function AuthCallback() {
   const nav = useNavigate();
   const [message, setMessage] = useState("Finishing Google sign-in…");
+  const routedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
-    let tries = 0;
 
-    async function finish() {
-      const { data, error } = await supabase.auth.getSession();
-      if (cancelled) return;
+    async function routeUser(session: NonNullable<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>) {
+      if (routedRef.current || cancelled) return;
+      routedRef.current = true;
 
-      if (error) {
-        toast.error(error.message);
-        nav({ to: "/login" });
-        return;
-      }
-
-      const session = data.session;
-      if (!session?.user) {
-        tries += 1;
-        if (tries < 20) {
-          setTimeout(finish, 150);
-          return;
-        }
-        setMessage("Sign-in timed out. Try again.");
-        toast.error("Google sign-in did not complete. Please try again.");
-        nav({ to: "/login" });
-        return;
-      }
-
-      // Ensure profile row exists (trigger usually handles this; upsert is safe)
+      setMessage("Setting up your account…");
       const meta = session.user.user_metadata ?? {};
-      await supabase.from("profiles").upsert(
+      void supabase.from("profiles").upsert(
         {
           id: session.user.id,
           email: session.user.email ?? null,
@@ -71,26 +65,63 @@ function AuthCallback() {
         { onConflict: "id" },
       );
 
-      const roles = await fetchUserRoles(session.user.id);
-      const isDriver = roles.includes("driver");
-
-      const signupIntent =
-        readSignupIntent() ?? intentFromMetadata(meta as Record<string, unknown>);
-      clearSignupIntent();
+      const to = await pickDestination(session.user.id, meta as Record<string, unknown>);
+      if (cancelled) return;
 
       toast.success("Welcome to MyRunner.");
-      if (isDriver) {
-        nav({ to: "/driver/dashboard" });
-      } else if (signupIntent === "driver") {
-        nav({ to: "/driver-signup" });
-      } else {
-        nav({ to: "/app/dashboard" });
-      }
+      nav({ to });
     }
 
-    void finish();
+    async function bootstrap() {
+      // PKCE: Supabase redirects with ?code= — must exchange before getSession works
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (code) {
+        setMessage("Confirming with Google…");
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error && !cancelled) {
+          toast.error(error.message);
+          nav({ to: "/login" });
+          return;
+        }
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+
+      const { data, error } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (error) {
+        toast.error(error.message);
+        nav({ to: "/login" });
+        return;
+      }
+      if (data.session?.user) {
+        await routeUser(data.session);
+        return;
+      }
+
+      setMessage("Waiting for Google…");
+    }
+
+    void bootstrap();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled || routedRef.current) return;
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
+        void routeUser(session);
+      }
+    });
+
+    const timeout = window.setTimeout(() => {
+      if (routedRef.current || cancelled) return;
+      setMessage("Sign-in timed out. Try again.");
+      toast.error("Google sign-in did not complete. Please try again.");
+      nav({ to: "/login" });
+    }, 15000);
+
     return () => {
       cancelled = true;
+      subscription.unsubscribe();
+      window.clearTimeout(timeout);
     };
   }, [nav]);
 

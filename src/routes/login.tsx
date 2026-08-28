@@ -60,16 +60,30 @@ function Login() {
             setBusy(false);
             if (error) return toast.error(error.message);
             try {
-              const { to } = await resolveDest();
+              const dest = await Promise.race([
+                resolveDest(),
+                new Promise<never>((_, reject) =>
+                  setTimeout(() => reject(new Error("timeout")), 8000),
+                ),
+              ]);
               const signupIntent = intentFromMetadata(data.user?.user_metadata);
               toast.success("Welcome back.");
-              if (to === "/app/dashboard" && signupIntent === "driver") {
+              if (dest.to === "/app/dashboard" && signupIntent === "driver") {
                 nav({ to: "/driver-signup" });
               } else {
-                nav({ to });
+                nav({ to: dest.to });
               }
-            } catch (err) {
-              toast.error((err as Error).message || "Could not determine account type.");
+            } catch {
+              const roles = data.user ? await fetchUserRoles(data.user.id) : [];
+              const signupIntent = intentFromMetadata(data.user?.user_metadata);
+              toast.success("Welcome back.");
+              if (roles.includes("driver")) {
+                nav({ to: "/driver/dashboard" });
+              } else if (signupIntent === "driver") {
+                nav({ to: "/driver-signup" });
+              } else {
+                nav({ to: "/app/dashboard" });
+              }
             }
           }}
           className="w-full max-w-md rounded-2xl border border-border bg-card p-8"
