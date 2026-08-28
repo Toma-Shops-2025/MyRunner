@@ -13,7 +13,7 @@ function recentlyApprovedDriver(): boolean {
   const raw = sessionStorage.getItem(DRIVER_APPROVED_KEY);
   if (!raw) return false;
   const ts = Number(raw);
-  if (!Number.isFinite(ts) || Date.now() - ts > 60_000) {
+  if (!Number.isFinite(ts) || Date.now() - ts > 300_000) {
     sessionStorage.removeItem(DRIVER_APPROVED_KEY);
     return false;
   }

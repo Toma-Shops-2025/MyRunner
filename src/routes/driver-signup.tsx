@@ -13,20 +13,6 @@ import { toast } from "sonner";
 
 const DRIVER_APPROVED_KEY = "myrunner-driver-just-approved";
 
-async function waitForDriverRole(userId: string, attempts = 15): Promise<boolean> {
-  for (let i = 0; i < attempts; i += 1) {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "driver")
-      .maybeSingle();
-    if (data) return true;
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  return false;
-}
-
 function goToDriverDashboard() {
   sessionStorage.setItem(DRIVER_APPROVED_KEY, String(Date.now()));
   window.location.replace("/driver/dashboard");
@@ -58,7 +44,16 @@ function DriverSignup() {
     }
     if (isDriver) {
       nav({ to: "/driver/dashboard" });
+      return;
     }
+    void supabase
+      .from("driver_applications")
+      .select("status")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.status === "approved") goToDriverDashboard();
+      });
   }, [loading, user, isDriver, nav]);
 
   if (loading || !user || isDriver) {
@@ -141,14 +136,6 @@ function DriverSignup() {
               setBusy(false);
               return toast.error(
                 `Could not save application: ${(err as Error).message || "unknown error"}`,
-              );
-            }
-
-            const roleReady = await waitForDriverRole(currentUser.id);
-            if (!roleReady) {
-              setBusy(false);
-              return toast.error(
-                "Application saved but driver access is still syncing. Refresh and try again in a moment.",
               );
             }
 

@@ -105,5 +105,15 @@ export const activateDriverRole = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     }
 
+    const { data: verifiedRole, error: verifyErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("role", "driver")
+      .maybeSingle();
+    if (verifyErr || !verifiedRole) {
+      throw new Error("Driver role could not be assigned. Please contact support.");
+    }
+
     return { ok: true as const };
   });
