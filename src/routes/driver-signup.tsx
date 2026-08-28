@@ -142,17 +142,42 @@ function DriverSignup() {
             }).eq("id", currentUser.id);
             if (profileErr) console.warn("profile update warn:", profileErr.message);
 
-            // Application record (auto-approved)
-            const { error: appErr } = await supabase.from("driver_applications").upsert({
-              user_id: currentUser.id,
+            // Application record (auto-approved) — live DB may lack UNIQUE(user_id) for upsert
+            const applicationPayload = {
               vehicle_make: String(fd.get("make")),
               vehicle_model: String(fd.get("model")),
               vehicle_year: Number(fd.get("year")) || null,
               license_number: String(fd.get("license_number") || ""),
               license_state: String(fd.get("license_state") || "").toUpperCase().slice(0, 2),
               insurance_provider: String(fd.get("insurance_provider") || ""),
-              status: "approved",
-            }, { onConflict: "user_id" });
+              status: "approved" as const,
+            };
+
+            const { data: existingApp, error: appReadErr } = await supabase
+              .from("driver_applications")
+              .select("id")
+              .eq("user_id", currentUser.id)
+              .maybeSingle();
+            if (appReadErr) {
+              setBusy(false);
+              return toast.error(`Could not save application: ${appReadErr.message}`);
+            }
+
+            const appErr = existingApp
+              ? (
+                  await supabase
+                    .from("driver_applications")
+                    .update(applicationPayload)
+                    .eq("user_id", currentUser.id)
+                ).error
+              : (
+                  await supabase.from("driver_applications").insert({
+                    id: crypto.randomUUID(),
+                    user_id: currentUser.id,
+                    ...applicationPayload,
+                  })
+                ).error;
+
             if (appErr) {
               setBusy(false);
               return toast.error(`Could not save application: ${appErr.message}`);
