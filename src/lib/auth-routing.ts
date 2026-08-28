@@ -5,10 +5,25 @@ import { intentFromMetadata, type SignupIntent } from "@/lib/signup-intent";
 export type AuthDestination =
   | "/driver/dashboard"
   | "/driver-signup"
-  | "/app/dashboard";
+  | "/app/dashboard"
+  | "/admin/dashboard";
+
+function applyCustomerGuard(
+  roles: Set<Role>,
+  signupIntent: SignupIntent | null,
+  approvedApp: boolean,
+) {
+  if (signupIntent === "customer" && !approvedApp) {
+    roles.delete("driver");
+  }
+}
 
 /** Uses has_role RPC with fallbacks for live DBs that block direct user_roles reads. */
-export async function fetchUserRoles(uid: string): Promise<Role[]> {
+export async function fetchUserRoles(
+  uid: string,
+  metadata?: Record<string, unknown>,
+): Promise<Role[]> {
+  const signupIntent = intentFromMetadata(metadata);
   const allRoles: Role[] = ["customer", "driver", "admin"];
   const found = await Promise.all(
     allRoles.map(async (role) => {
@@ -27,43 +42,30 @@ export async function fetchUserRoles(uid: string): Promise<Role[]> {
     for (const row of data ?? []) roles.add(row.role as Role);
   }
 
-  if (!roles.has("driver")) {
-    const { data: app } = await supabase
-      .from("driver_applications")
-      .select("status")
-      .eq("user_id", uid)
-      .maybeSingle();
-    if (app?.status === "approved") roles.add("driver");
+  let approvedApp = false;
+  const { data: app } = await supabase
+    .from("driver_applications")
+    .select("status")
+    .eq("user_id", uid)
+    .maybeSingle();
+  if (app?.status === "approved") {
+    approvedApp = true;
+    roles.add("driver");
   }
+
+  applyCustomerGuard(roles, signupIntent, approvedApp);
 
   return [...roles];
 }
 
-/**
- * Where to send someone after sign-in on the client.
- * Login should never auto-open driver signup for returning customers — only
- * brand-new driver signups (session intent or metadata with no application yet).
- */
+/** Client fallback when server routing is unavailable. Never opens driver signup on login. */
 export async function resolveClientPostAuthDestination(
   userId: string,
-  options?: { sessionSignupIntent?: SignupIntent | null; metadata?: Record<string, unknown> },
+  metadata?: Record<string, unknown>,
 ): Promise<AuthDestination> {
-  const roles = await fetchUserRoles(userId);
+  const roles = await fetchUserRoles(userId, metadata);
+  if (roles.includes("admin")) return "/admin/dashboard";
   if (roles.includes("driver")) return "/driver/dashboard";
-
-  const sessionIntent = options?.sessionSignupIntent;
-  if (sessionIntent === "driver") return "/driver-signup";
-
-  const metaIntent = intentFromMetadata(options?.metadata);
-  if (metaIntent === "driver") {
-    const { data: app } = await supabase
-      .from("driver_applications")
-      .select("id")
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (!app) return "/driver-signup";
-  }
-
   return "/app/dashboard";
 }
 

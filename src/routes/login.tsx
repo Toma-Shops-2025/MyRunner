@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/lib/auth-google";
 import { resolvePostAuthDestination } from "@/lib/auth.functions";
 import { resolveClientPostAuthDestination } from "@/lib/auth-routing";
+import { clearSignupIntent } from "@/lib/signup-intent";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -33,6 +34,10 @@ function Login() {
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    clearSignupIntent();
+  }, []);
 
   async function google() {
     setGoogleBusy(true);

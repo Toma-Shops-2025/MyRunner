@@ -31,15 +31,15 @@ function DriverLayout() {
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      nav({ to: "/driver-signup" });
+      nav({ to: "/login" });
       return;
     }
     if (isDriver) {
       sessionStorage.removeItem(DRIVER_APPROVED_KEY);
       return;
     }
-    if (!recentlyApprovedDriver()) {
-      nav({ to: "/driver-signup" });
+    if (!isDriver && !recentlyApprovedDriver()) {
+      nav({ to: "/app/dashboard" });
     }
   }, [loading, user, isDriver, nav]);
 

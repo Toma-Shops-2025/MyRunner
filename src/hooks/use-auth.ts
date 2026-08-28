@@ -17,7 +17,13 @@ export function useAuth() {
       setUser(s?.user ?? null);
       if (s?.user) {
         setLoading(true);
-        setTimeout(() => fetchUserRoles(s.user.id).then(setRoles).finally(() => setLoading(false)), 0);
+        setTimeout(
+          () =>
+            fetchUserRoles(s.user.id, s.user.user_metadata as Record<string, unknown>)
+              .then(setRoles)
+              .finally(() => setLoading(false)),
+          0,
+        );
       } else {
         setRoles([]);
         setLoading(false);
@@ -27,7 +33,12 @@ export function useAuth() {
       setSession(data.session);
       setUser(data.session?.user ?? null);
       if (data.session?.user) {
-        fetchUserRoles(data.session.user.id).then(setRoles).finally(() => setLoading(false));
+        fetchUserRoles(
+          data.session.user.id,
+          data.session.user.user_metadata as Record<string, unknown>,
+        )
+          .then(setRoles)
+          .finally(() => setLoading(false));
       } else {
         setLoading(false);
       }

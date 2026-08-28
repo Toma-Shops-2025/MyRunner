@@ -1,12 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { PageShell } from "@/components/site/page-shell";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  clearSignupIntent,
-  readSignupIntent,
-} from "@/lib/signup-intent";
-import { resolveClientPostAuthDestination } from "@/lib/auth-routing";
+import { clearSignupIntent, readSignupIntent } from "@/lib/signup-intent";
+import { resolveOAuthCallbackDestination } from "@/lib/auth.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -19,26 +17,13 @@ export const Route = createFileRoute("/auth/callback")({
   component: AuthCallback,
 });
 
-type AuthDestination =
-  | "/driver/dashboard"
-  | "/driver-signup"
-  | "/app/dashboard";
-
-async function pickDestination(userId: string, metadata: Record<string, unknown>): Promise<AuthDestination> {
-  const sessionIntent = readSignupIntent();
-  clearSignupIntent();
-  return resolveClientPostAuthDestination(userId, {
-    sessionSignupIntent: sessionIntent,
-    metadata,
-  });
-}
-
 /**
  * Google OAuth return — Supabase exchanges the PKCE code on init (detectSessionInUrl).
  * Do not call exchangeCodeForSession here; a second exchange clears the verifier and fails.
  */
 function AuthCallback() {
   const nav = useNavigate();
+  const resolveOAuthDest = useServerFn(resolveOAuthCallbackDestination);
   const [message, setMessage] = useState("Finishing Google sign-in…");
   const routedRef = useRef(false);
 
@@ -64,11 +49,17 @@ function AuthCallback() {
         { onConflict: "id" },
       );
 
-      const to = await pickDestination(session.user.id, meta as Record<string, unknown>);
+      const sessionIntent = readSignupIntent();
+      clearSignupIntent();
+
+      const dest = await resolveOAuthDest({
+        data: { sessionSignupIntent: sessionIntent },
+      });
+
       if (cancelled) return;
 
       toast.success("Welcome to MyRunner.");
-      nav({ to });
+      nav({ to: dest.to });
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -108,7 +99,7 @@ function AuthCallback() {
       subscription.unsubscribe();
       window.clearTimeout(timeout);
     };
-  }, [nav]);
+  }, [nav, resolveOAuthDest]);
 
   return (
     <PageShell showBack={false}>
