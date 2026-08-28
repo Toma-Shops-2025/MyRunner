@@ -125,12 +125,7 @@ export const refreshAccountStatus = createServerFn({ method: "POST" })
 
       const { error: updErr } = await supabaseAdmin
         .from("profiles")
-        .update({
-          payouts_enabled: payoutsEnabled,
-          ...(payoutsEnabled && !profile.payouts_enabled
-            ? { onboarding_completed_at: new Date().toISOString() }
-            : {}),
-        })
+        .update({ payouts_enabled: payoutsEnabled })
         .eq("id", userId);
       if (updErr) return { error: updErr.message };
 

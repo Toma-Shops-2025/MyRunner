@@ -69,7 +69,6 @@ async function handler(): Promise<Response> {
       emergency_contact_phone: "555-0199",
       stripe_connect_account_id: "acct_demo",
       payouts_enabled: true,
-      onboarding_completed_at: new Date().toISOString(),
       background_check_status: "clear",
       background_check_updated_at: new Date().toISOString(),
       is_active: true,

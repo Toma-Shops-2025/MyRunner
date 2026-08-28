@@ -51,7 +51,6 @@ export const activateDriverRole = createServerFn({ method: "POST" })
         ? {
             stripe_connect_account_id: "acct_demo_driver_review",
             payouts_enabled: true,
-            onboarding_completed_at: new Date().toISOString(),
           }
         : {}),
     }).eq("id", userId);

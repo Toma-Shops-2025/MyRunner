@@ -108,10 +108,7 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
           const payoutsEnabled = isDriverConnectReady(account);
           await supabaseAdmin
             .from("profiles")
-            .update({
-              payouts_enabled: payoutsEnabled,
-              ...(payoutsEnabled ? { onboarding_completed_at: new Date().toISOString() } : {}),
-            })
+            .update({ payouts_enabled: payoutsEnabled })
             .eq("stripe_connect_account_id", account.id);
         }
 

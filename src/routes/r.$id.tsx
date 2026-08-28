@@ -23,7 +23,7 @@ const fetchRunner = createServerFn({ method: "GET" })
     );
     const { data: row } = await sb
       .from("profiles")
-      .select("id, full_name, payouts_enabled, onboarding_completed_at")
+      .select("id, full_name, payouts_enabled, created_at")
       .eq("id", data.id)
       .maybeSingle();
     if (!row) return null;
@@ -31,7 +31,7 @@ const fetchRunner = createServerFn({ method: "GET" })
       id: row.id,
       name: row.full_name ?? "MyRunner Runner",
       verified: Boolean(row.payouts_enabled),
-      since: row.onboarding_completed_at,
+      since: row.created_at,
     };
   });
 

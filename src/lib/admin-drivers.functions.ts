@@ -25,7 +25,7 @@ export const listDriversForAdmin = createServerFn({ method: "GET" })
     const [{ data: profiles }, { data: payouts }] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("id, email, full_name, phone, stripe_connect_account_id, payouts_enabled, onboarding_completed_at, created_at, background_check_status, background_check_updated_at, is_active")
+        .select("id, email, full_name, phone, stripe_connect_account_id, payouts_enabled, created_at, background_check_status, background_check_updated_at, is_active")
         .in("id", ids),
       supabaseAdmin
         .from("driver_payouts")
