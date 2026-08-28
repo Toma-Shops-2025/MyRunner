@@ -15,8 +15,8 @@ import track03 from "@/assets/bgm/03.mp3?url";
 
 const BGM_TRACKS = [track01, track02, track03] as const;
 
-/** ~0.1% — lowest practical HTML audio level before silence */
-const BGM_VOLUME = 0.001;
+/** 0.5% — fixed background music level */
+const BGM_VOLUME = 0.005;
 
 function shuffleTracks(tracks: readonly string[]): string[] {
   const next = [...tracks];
