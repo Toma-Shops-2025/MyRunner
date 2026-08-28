@@ -7,6 +7,7 @@ import {
   intentFromMetadata,
   readSignupIntent,
 } from "@/lib/signup-intent";
+import { fetchUserRoles } from "@/lib/auth-routing";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -69,11 +70,8 @@ function AuthCallback() {
         { onConflict: "id" },
       );
 
-      const { data: roleRows } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id);
-      const isDriver = (roleRows ?? []).some((r) => r.role === "driver");
+      const roles = await fetchUserRoles(session.user.id);
+      const isDriver = roles.includes("driver");
 
       const signupIntent =
         readSignupIntent() ?? intentFromMetadata(meta as Record<string, unknown>);

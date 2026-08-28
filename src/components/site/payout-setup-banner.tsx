@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,25 +6,34 @@ import { useAuth } from "@/hooks/use-auth";
 
 /**
  * Prominent payout-setup banner shown on every driver page until the runner
- * completes Stripe Connect onboarding. Mirrors AlgoRhythm's banner pattern.
+ * completes Stripe Connect onboarding.
  */
 export function PayoutSetupBanner() {
   const { user } = useAuth();
   const [show, setShow] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    supabase
+  const load = useCallback(async () => {
+    if (!user) {
+      setShow(false);
+      return;
+    }
+    const { data } = await supabase
       .from("profiles")
       .select("payouts_enabled")
       .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) setShow(!data?.payouts_enabled);
-      });
-    return () => { cancelled = true; };
+      .maybeSingle();
+    setShow(!data?.payouts_enabled);
   }, [user]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    const onRefresh = () => void load();
+    window.addEventListener("myrunner:payout-refresh", onRefresh);
+    return () => window.removeEventListener("myrunner:payout-refresh", onRefresh);
+  }, [load]);
 
   if (!show) return null;
 

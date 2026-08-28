@@ -13,6 +13,7 @@ import {
   createDashboardLink,
 } from "@/lib/connect.functions";
 import { toast } from "sonner";
+import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
 
 export const Route = createFileRoute("/driver/earnings")({
   head: () => ({
@@ -111,6 +112,7 @@ function DriverEarnings() {
     if ("payoutsEnabled" in res) {
       toast.success(res.payoutsEnabled ? "Payouts enabled — you're all set." : "Onboarding not complete yet.");
     }
+    notifyPayoutStatusChanged();
     load();
   }
 

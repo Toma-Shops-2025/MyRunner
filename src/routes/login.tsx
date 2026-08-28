@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/lib/auth-google";
+import { fetchUserRoles } from "@/lib/auth-routing";
 import { intentFromMetadata } from "@/lib/signup-intent";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -56,10 +57,8 @@ function Login() {
             });
             setBusy(false);
             if (error) return toast.error(error.message);
-            const { data: roleRows } = data.user
-              ? await supabase.from("user_roles").select("role").eq("user_id", data.user.id)
-              : { data: [] };
-            const isDriver = (roleRows ?? []).some((row) => row.role === "driver");
+            const roles = data.user ? await fetchUserRoles(data.user.id) : [];
+            const isDriver = roles.includes("driver");
             const signupIntent = intentFromMetadata(data.user?.user_metadata);
             toast.success("Welcome back.");
             if (isDriver) {

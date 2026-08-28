@@ -12,6 +12,7 @@ export const createConnectAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: profile } = await supabase
       .from("profiles")
       .select("stripe_connect_account_id, email, full_name")
@@ -44,10 +45,11 @@ export const createConnectAccount = createServerFn({ method: "POST" })
         metadata: { user_id: userId, public_url: publicUrl },
       });
 
-      await supabase
+      const { error: updErr } = await supabaseAdmin
         .from("profiles")
         .update({ stripe_connect_account_id: account.id })
         .eq("id", userId);
+      if (updErr) return { error: updErr.message };
 
       return { accountId: account.id };
     } catch (e) {
@@ -76,8 +78,8 @@ export const createOnboardingLink = createServerFn({ method: "POST" })
       const stripe = createStripeClient(getStripeEnv());
       const link = await stripe.accountLinks.create({
         account: profile.stripe_connect_account_id,
-        refresh_url: `${APP_URL}/driver/earnings?refresh=1`,
-        return_url: `${APP_URL}/driver/earnings?onboarded=1`,
+        refresh_url: `${APP_URL}/driver/dashboard?refresh=1`,
+        return_url: `${APP_URL}/driver/dashboard?onboarded=1`,
         type: "account_onboarding",
       });
       return { url: link.url };
@@ -93,6 +95,7 @@ export const refreshAccountStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: profile } = await supabase
       .from("profiles")
       .select("stripe_connect_account_id, payouts_enabled")
@@ -108,7 +111,6 @@ export const refreshAccountStatus = createServerFn({ method: "POST" })
       const account = await stripe.accounts.retrieve(profile.stripe_connect_account_id);
       const payoutsEnabled = Boolean(account.payouts_enabled && account.charges_enabled);
 
-      // Self-healing backfill: ensure business_profile.url is set (Stripe requires it for marketplaces).
       const expectedUrl = `${APP_URL}/r/${userId}`;
       const isDemo = profile.stripe_connect_account_id.startsWith("acct_demo");
       if (!isDemo && account.business_profile?.url !== expectedUrl) {
@@ -121,15 +123,16 @@ export const refreshAccountStatus = createServerFn({ method: "POST" })
         }
       }
 
-      await supabase
+      const { error: updErr } = await supabaseAdmin
         .from("profiles")
         .update({
           payouts_enabled: payoutsEnabled,
-          onboarding_completed_at: payoutsEnabled && !profile.payouts_enabled
-            ? new Date().toISOString()
-            : undefined,
+          ...(payoutsEnabled && !profile.payouts_enabled
+            ? { onboarding_completed_at: new Date().toISOString() }
+            : {}),
         })
         .eq("id", userId);
+      if (updErr) return { error: updErr.message };
 
       return {
         payoutsEnabled,

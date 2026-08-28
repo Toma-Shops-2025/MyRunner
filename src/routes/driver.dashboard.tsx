@@ -11,6 +11,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
 import { toast } from "sonner";
 import { setDriverPresence, acceptOffer, declineOffer } from "@/lib/dispatch.functions";
+import { refreshAccountStatus } from "@/lib/connect.functions";
+import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
 
 export const Route = createFileRoute("/driver/dashboard")({
   head: () => ({
@@ -62,6 +64,7 @@ function DriverDashboard() {
   const presenceFn = useServerFn(setDriverPresence);
   const acceptFn = useServerFn(acceptOffer);
   const declineFn = useServerFn(declineOffer);
+  const refreshPayoutFn = useServerFn(refreshAccountStatus);
   const navigate = useNavigate();
 
   const lastLocRef = useRef<{ lat: number; lng: number } | null>(null);
@@ -129,6 +132,29 @@ function DriverDashboard() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, load]);
+
+  // After Stripe Connect redirect, sync payout status and refresh UI
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get("onboarded") !== "1" && sp.get("refresh") !== "1") return;
+
+    window.history.replaceState({}, "", window.location.pathname);
+
+    void (async () => {
+      const res = await refreshPayoutFn();
+      if ("error" in res && res.error) {
+        toast.error(res.error);
+      } else if ("payoutsEnabled" in res) {
+        toast.success(
+          res.payoutsEnabled
+            ? "Payouts enabled — you're all set."
+            : "Stripe still needs a bit more info. Tap Set up payouts to continue.",
+        );
+      }
+      notifyPayoutStatusChanged();
+      await load();
+    })();
+  }, [refreshPayoutFn, load]);
 
   // Realtime: listen for incoming offers for me
   useEffect(() => {
