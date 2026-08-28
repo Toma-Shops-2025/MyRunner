@@ -8,8 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/lib/auth-google";
 import { resolvePostAuthDestination } from "@/lib/auth.functions";
-import { fetchUserRoles } from "@/lib/auth-routing";
-import { intentFromMetadata } from "@/lib/signup-intent";
+import { resolveClientPostAuthDestination } from "@/lib/auth-routing";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -67,24 +66,16 @@ function Login() {
                   setTimeout(() => reject(new Error("timeout")), 8000),
                 ),
               ]);
-              const signupIntent = intentFromMetadata(data.user?.user_metadata);
               toast.success("Welcome back.");
-              if (dest.to === "/app/dashboard" && signupIntent === "driver") {
-                nav({ to: "/driver-signup" });
-              } else {
-                nav({ to: dest.to });
-              }
+              nav({ to: dest.to });
             } catch {
-              const roles = data.user ? await fetchUserRoles(data.user.id) : [];
-              const signupIntent = intentFromMetadata(data.user?.user_metadata);
+              const to = data.user
+                ? await resolveClientPostAuthDestination(data.user.id, {
+                    metadata: data.user.user_metadata as Record<string, unknown>,
+                  })
+                : "/app/dashboard";
               toast.success("Welcome back.");
-              if (roles.includes("driver")) {
-                nav({ to: "/driver/dashboard" });
-              } else if (signupIntent === "driver") {
-                nav({ to: "/driver-signup" });
-              } else {
-                nav({ to: "/app/dashboard" });
-              }
+              nav({ to });
             }
           }}
           className="w-full max-w-md rounded-2xl border border-border bg-card p-8"

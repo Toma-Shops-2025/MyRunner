@@ -38,9 +38,6 @@ export const resolvePostAuthDestination = createServerFn({ method: "POST" })
     if (app?.status === "approved") {
       return { to: "/driver/dashboard" as AuthDestination };
     }
-    if (app && app.status !== "approved") {
-      return { to: "/driver-signup" as AuthDestination };
-    }
 
     return { to: "/app/dashboard" as AuthDestination };
   });

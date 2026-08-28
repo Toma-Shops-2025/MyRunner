@@ -4,10 +4,9 @@ import { PageShell } from "@/components/site/page-shell";
 import { supabase } from "@/integrations/supabase/client";
 import {
   clearSignupIntent,
-  intentFromMetadata,
   readSignupIntent,
 } from "@/lib/signup-intent";
-import { fetchUserRoles } from "@/lib/auth-routing";
+import { resolveClientPostAuthDestination } from "@/lib/auth-routing";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -26,13 +25,12 @@ type AuthDestination =
   | "/app/dashboard";
 
 async function pickDestination(userId: string, metadata: Record<string, unknown>): Promise<AuthDestination> {
-  const signupIntent = readSignupIntent() ?? intentFromMetadata(metadata);
+  const sessionIntent = readSignupIntent();
   clearSignupIntent();
-
-  const roles = await fetchUserRoles(userId);
-  if (roles.includes("driver")) return "/driver/dashboard";
-  if (signupIntent === "driver") return "/driver-signup";
-  return "/app/dashboard";
+  return resolveClientPostAuthDestination(userId, {
+    sessionSignupIntent: sessionIntent,
+    metadata,
+  });
 }
 
 /**
