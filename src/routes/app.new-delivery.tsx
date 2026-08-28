@@ -10,6 +10,7 @@ import { OrderMap } from "@/components/site/order-map";
 import { priceQuote, fmtUSD, BASE_FEE_CENTS, PER_MILE_CENTS, EXTRA_STOP_CENTS } from "@/lib/pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckoutSession } from "@/lib/checkout.functions";
+import { createOrder } from "@/lib/order.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/app/new-delivery")({
 function NewDelivery() {
   const nav = useNavigate();
   const checkoutFn = useServerFn(createCheckoutSession);
+  const createOrderFn = useServerFn(createOrder);
   const [miles, setMiles] = useState(3);
   const [type, setType] = useState<"standard" | "multi_pickup" | "multi_dropoff">("standard");
   const [agree, setAgree] = useState(false);
@@ -62,27 +64,36 @@ function NewDelivery() {
           const fd = new FormData(e.currentTarget);
           const { data: { user } } = await supabase.auth.getUser();
           if (!user) { setBusy(false); return toast.error("Please sign in again."); }
-          const { data: created, error } = await supabase.from("orders").insert({
-            customer_id: user.id,
-            pickup_address: pickup,
-            dropoff_address: dropoff,
-            item_description: String(fd.get("item")),
-            type,
-            price_cents: total,
-            tip_cents: Math.round(Number(fd.get("tip") || 0) * 100),
-            distance_miles: effectiveMiles,
-            pickup_lat: pickupCoord ? pickupCoord[1] : null,
-            pickup_lng: pickupCoord ? pickupCoord[0] : null,
-          }).select("id").single();
-          if (error || !created) { setBusy(false); return toast.error(error?.message ?? "Could not create order"); }
+
+          const created = await createOrderFn({
+            data: {
+              pickupAddress: pickup,
+              dropoffAddress: dropoff,
+              itemDescription: String(fd.get("item")),
+              type,
+              priceCents: total,
+              tipCents: Math.round(Number(fd.get("tip") || 0) * 100),
+              distanceMiles: effectiveMiles,
+              pickupLat: pickupCoord ? pickupCoord[1] : null,
+              pickupLng: pickupCoord ? pickupCoord[0] : null,
+            },
+          });
+          if ("error" in created && created.error) {
+            setBusy(false);
+            return toast.error(created.error);
+          }
+          if (!("orderId" in created) || !created.orderId) {
+            setBusy(false);
+            return toast.error("Could not create order");
+          }
 
           // Immediately open Stripe Checkout to take payment
-          const session = await checkoutFn({ data: { orderId: created.id } });
+          const session = await checkoutFn({ data: { orderId: created.orderId } });
           if ("error" in session && session.error) {
             setBusy(false);
             toast.error(session.error);
             // Order exists but not paid — send them to its page where they can retry
-            return nav({ to: "/app/orders/$id", params: { id: created.id } });
+            return nav({ to: "/app/orders/$id", params: { id: created.orderId } });
           }
           if ("url" in session && session.url) {
             window.location.href = session.url;
@@ -90,7 +101,7 @@ function NewDelivery() {
           }
           setBusy(false);
           toast.error("Could not start checkout.");
-          nav({ to: "/app/orders/$id", params: { id: created.id } });
+          nav({ to: "/app/orders/$id", params: { id: created.orderId } });
         }}
         className="grid gap-6 rounded-2xl border border-border bg-card p-8"
       >
