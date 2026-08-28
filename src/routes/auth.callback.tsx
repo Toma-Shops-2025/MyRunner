@@ -36,7 +36,8 @@ async function pickDestination(userId: string, metadata: Record<string, unknown>
 }
 
 /**
- * Google OAuth return — exchange PKCE code / wait for session, then route by role.
+ * Google OAuth return — Supabase exchanges the PKCE code on init (detectSessionInUrl).
+ * Do not call exchangeCodeForSession here; a second exchange clears the verifier and fails.
  */
 function AuthCallback() {
   const nav = useNavigate();
@@ -72,42 +73,28 @@ function AuthCallback() {
       nav({ to });
     }
 
-    async function bootstrap() {
-      // PKCE: Supabase redirects with ?code= — must exchange before getSession works
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      if (code) {
-        setMessage("Confirming with Google…");
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error && !cancelled) {
-          toast.error(error.message);
-          nav({ to: "/login" });
-          return;
-        }
-        window.history.replaceState({}, "", window.location.pathname);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled || routedRef.current) return;
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
+        void routeUser(session);
       }
+    });
 
-      const { data, error } = await supabase.auth.getSession();
-      if (cancelled) return;
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (cancelled || routedRef.current) return;
       if (error) {
         toast.error(error.message);
         nav({ to: "/login" });
         return;
       }
       if (data.session?.user) {
-        await routeUser(data.session);
+        void routeUser(data.session);
         return;
       }
-
-      setMessage("Waiting for Google…");
-    }
-
-    void bootstrap();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (cancelled || routedRef.current) return;
-      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
-        void routeUser(session);
+      if (new URLSearchParams(window.location.search).has("code")) {
+        setMessage("Confirming with Google…");
+      } else {
+        setMessage("Waiting for Google…");
       }
     });
 

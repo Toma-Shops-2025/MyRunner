@@ -2,14 +2,19 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 function createSupabaseClient() {
-  let url = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
-  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-              import.meta.env.VITE_SUPABASE_PUBLISHABLE_API ||
-              process.env.SUPABASE_PUBLISHABLE_KEY || "";
+  if (typeof window === "undefined") {
+    throw new Error("[Supabase] Browser client cannot be used during SSR.");
+  }
+
+  let url = import.meta.env.VITE_SUPABASE_URL || "";
+  const key =
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_API ||
+    "";
 
   // AGGRESSIVE CLEANUP: Remove /rest/v1 or trailing slashes
   if (url) {
-    url = url.split('/rest/v1')[0].replace(/\/$/, "");
+    url = url.split("/rest/v1")[0].replace(/\/$/, "");
   }
 
   if (!url || !key) {
@@ -19,20 +24,24 @@ function createSupabaseClient() {
 
   return createClient<Database>(url, key, {
     auth: {
-      storage: typeof window !== 'undefined' ? localStorage : undefined,
+      storage: window.localStorage,
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      flowType: 'pkce',
-    }
+      flowType: "pkce",
+    },
   });
 }
 
 let _supabase: ReturnType<typeof createSupabaseClient> | undefined;
 
+function getSupabaseClient() {
+  if (!_supabase) _supabase = createSupabaseClient();
+  return _supabase;
+}
+
 export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
   get(_, prop, receiver) {
-    if (!_supabase) _supabase = createSupabaseClient();
-    return Reflect.get(_supabase, prop, receiver);
+    return Reflect.get(getSupabaseClient(), prop, receiver);
   },
 });
