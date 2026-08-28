@@ -2,6 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/site/page-shell";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  clearSignupIntent,
+  intentFromMetadata,
+  readSignupIntent,
+} from "@/lib/signup-intent";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -70,8 +75,18 @@ function AuthCallback() {
         .eq("user_id", session.user.id);
       const isDriver = (roleRows ?? []).some((r) => r.role === "driver");
 
+      const signupIntent =
+        readSignupIntent() ?? intentFromMetadata(meta as Record<string, unknown>);
+      clearSignupIntent();
+
       toast.success("Welcome to MyRunner.");
-      nav({ to: isDriver ? "/driver/dashboard" : "/app/dashboard" });
+      if (isDriver) {
+        nav({ to: "/driver/dashboard" });
+      } else if (signupIntent === "driver") {
+        nav({ to: "/driver-signup" });
+      } else {
+        nav({ to: "/app/dashboard" });
+      }
     }
 
     void finish();

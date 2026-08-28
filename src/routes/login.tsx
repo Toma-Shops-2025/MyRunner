@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/lib/auth-google";
+import { intentFromMetadata } from "@/lib/signup-intent";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -59,8 +60,15 @@ function Login() {
               ? await supabase.from("user_roles").select("role").eq("user_id", data.user.id)
               : { data: [] };
             const isDriver = (roleRows ?? []).some((row) => row.role === "driver");
+            const signupIntent = intentFromMetadata(data.user?.user_metadata);
             toast.success("Welcome back.");
-            nav({ to: isDriver ? "/driver/dashboard" : "/app/dashboard" });
+            if (isDriver) {
+              nav({ to: "/driver/dashboard" });
+            } else if (signupIntent === "driver") {
+              nav({ to: "/driver-signup" });
+            } else {
+              nav({ to: "/app/dashboard" });
+            }
           }}
           className="w-full max-w-md rounded-2xl border border-border bg-card p-8"
         >

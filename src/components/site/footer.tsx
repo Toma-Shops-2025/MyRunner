@@ -15,7 +15,7 @@ const cols = [
     title: "For drivers",
     links: [
       { to: "/drivers", label: "Become a Runner" },
-      { to: "/driver-signup", label: "Driver application" },
+      { to: "/signup", search: { intent: "driver" }, label: "Driver application" },
       { to: "/faq", label: "Driver FAQ" },
     ],
   },
@@ -64,9 +64,10 @@ export function SiteFooter() {
                 </h4>
                 <ul className="mt-4 space-y-2">
                   {c.links.map((l) => (
-                    <li key={l.to}>
+                    <li key={l.label}>
                       <Link
                         to={l.to}
+                        {...("search" in l && l.search ? { search: l.search } : {})}
                         className="text-sm text-foreground/80 transition-colors hover:text-gold"
                       >
                         {l.label}

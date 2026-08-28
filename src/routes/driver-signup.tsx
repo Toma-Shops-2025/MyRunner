@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { LegalConsent } from "@/components/site/legal-consent";
 import { supabase } from "@/integrations/supabase/client";
 import { activateDriverRole } from "@/lib/driver-signup.functions";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/driver-signup")({
@@ -24,8 +25,36 @@ export const Route = createFileRoute("/driver-signup")({
 function DriverSignup() {
   const nav = useNavigate();
   const activateRole = useServerFn(activateDriverRole);
+  const { user, loading, isDriver } = useAuth();
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      nav({ to: "/signup", search: { intent: "driver" } });
+      return;
+    }
+    if (isDriver) {
+      nav({ to: "/driver/dashboard" });
+    }
+  }, [loading, user, isDriver, nav]);
+
+  if (loading || !user || isDriver) {
+    return (
+      <PageShell>
+        <section className="container-app grid min-h-[60vh] place-items-center py-16">
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </section>
+      </PageShell>
+    );
+  }
+
+  const profileName =
+    (user.user_metadata?.full_name as string | undefined) ||
+    user.email?.split("@")[0] ||
+    "";
+  const profileEmail = user.email ?? "";
 
   return (
     <PageShell>
@@ -45,46 +74,23 @@ function DriverSignup() {
             setBusy(true);
             const fd = new FormData(e.currentTarget);
 
-            const email = String(fd.get("email")).trim();
-            const password = String(fd.get("password") || "");
-            const fullName = String(fd.get("name")).trim();
+            const email = profileEmail;
+            const fullName = String(fd.get("name") || profileName).trim();
             const phone = String(fd.get("phone") || "").trim();
             const dob = String(fd.get("dob") || "");
             const ssnFull = String(fd.get("ssn") || "").replace(/\D/g, "");
             const ssnLast4 = ssnFull.slice(-4);
 
-            // Sign up + sign in
-            let { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-              if (password.length < 8) { setBusy(false); return toast.error("Create a password of 8+ characters."); }
-              if (ssnLast4.length !== 4) { setBusy(false); return toast.error("Please enter a valid SSN."); }
-              const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                  emailRedirectTo: `${window.location.origin}/driver/dashboard`,
-                  data: { full_name: fullName },
-                },
-              });
-              if (error) {
-                // Fallback: account already exists, try sign-in with provided password
-                const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-                if (signInErr) { setBusy(false); return toast.error(error.message); }
-                user = signInData.user;
-              } else {
-                user = data.user;
-                if (!data.session) {
-                  const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-                  if (signInErr) {
-                    setBusy(false);
-                    toast.success("Application submitted. Check your email to confirm and then sign in.");
-                    return nav({ to: "/login" });
-                  }
-                  user = signInData.user;
-                }
-              }
+            if (ssnLast4.length !== 4) {
+              setBusy(false);
+              return toast.error("Please enter a valid SSN.");
             }
-            if (!user) { setBusy(false); return toast.error("Could not create account."); }
+
+            const currentUser = user;
+            if (!currentUser) {
+              setBusy(false);
+              return toast.error("Please sign in to continue your application.");
+            }
 
             // Reviewer demo account: pre-approve + skip Stripe Connect so the reviewer
             // can immediately accept orders without finishing payout onboarding.
@@ -112,12 +118,12 @@ function DriverSignup() {
                     onboarding_completed_at: new Date().toISOString(),
                   }
                 : {}),
-            }).eq("id", user.id);
+            }).eq("id", currentUser.id);
             if (profileErr) console.warn("profile update warn:", profileErr.message);
 
             // Application record (auto-approved)
             await supabase.from("driver_applications").upsert({
-              user_id: user.id,
+              user_id: currentUser.id,
               vehicle_make: String(fd.get("make")),
               vehicle_model: String(fd.get("model")),
               vehicle_year: Number(fd.get("year")) || null,
@@ -154,10 +160,9 @@ function DriverSignup() {
           }}
           className="mt-10 grid max-w-3xl gap-6 rounded-2xl border border-border bg-card p-8"
         >
-          <Section title="Account">
-            <Field id="name" label="Full legal name" />
-            <Field id="email" label="Email" type="email" />
-            <Field id="password" label="Create password (8+ chars)" type="password" />
+          <Section title="Your account">
+            <Field id="name" label="Full legal name" defaultValue={profileName} />
+            <Field id="email" label="Email" type="email" defaultValue={profileEmail} readOnly />
             <Field id="phone" label="Mobile phone" type="tel" />
           </Section>
 
@@ -214,11 +219,34 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </div>
   );
 }
-function Field({ id, label, type = "text", placeholder }: { id: string; label: string; type?: string; placeholder?: string }) {
+function Field({
+  id,
+  label,
+  type = "text",
+  placeholder,
+  defaultValue,
+  readOnly,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  defaultValue?: string;
+  readOnly?: boolean;
+}) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} name={id} type={type} placeholder={placeholder} required={type !== "file"} />
+      <Input
+        id={id}
+        name={id}
+        type={type}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        readOnly={readOnly}
+        required={type !== "file" && !readOnly}
+        className={readOnly ? "bg-muted/50" : undefined}
+      />
     </div>
   );
 }

@@ -31,7 +31,7 @@ function Drivers() {
         </p>
         <div className="mt-8 flex gap-3">
           <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">
-            <Link to="/driver-signup">Apply now →</Link>
+            <Link to="/signup" search={{ intent: "driver" }}>Apply now →</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="border-border-strong">
             <Link to="/faq">Driver FAQ</Link>
