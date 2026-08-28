@@ -30,18 +30,6 @@ export async function fetchUserRoles(uid: string): Promise<Role[]> {
     if (app?.status === "approved") roles.add("driver");
   }
 
-  // Self-readable profile fields — strong signal for completed driver onboarding
-  if (!roles.has("driver")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("stripe_connect_account_id, driver_status")
-      .eq("id", uid)
-      .maybeSingle();
-    if (profile?.stripe_connect_account_id || profile?.driver_status) {
-      roles.add("driver");
-    }
-  }
-
   return [...roles];
 }
 

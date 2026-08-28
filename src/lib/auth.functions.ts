@@ -42,14 +42,5 @@ export const resolvePostAuthDestination = createServerFn({ method: "POST" })
       return { to: "/driver-signup" as AuthDestination };
     }
 
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("stripe_connect_account_id, driver_status")
-      .eq("id", userId)
-      .maybeSingle();
-    if (profile?.stripe_connect_account_id || profile?.driver_status) {
-      return { to: "/driver/dashboard" as AuthDestination };
-    }
-
     return { to: "/app/dashboard" as AuthDestination };
   });
