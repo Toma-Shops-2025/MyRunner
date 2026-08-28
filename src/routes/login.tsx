@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/lib/auth-google";
 import { resolvePostAuthDestination } from "@/lib/auth.functions";
+import { fetchUserRoles } from "@/lib/auth-routing";
 import { intentFromMetadata } from "@/lib/signup-intent";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
@@ -134,13 +135,6 @@ function Login() {
             >
               Sign in
             </Button>
-          </div>
-          <div className="mt-6 rounded-xl border border-dashed border-gold/40 bg-gold-soft/30 p-4">
-            <p className="text-xs uppercase tracking-widest text-gold">For reviewers</p>
-            <p className="mt-1 text-sm">
-              Sign in with <span className="font-mono">driver-review@myrunner.shop</span> to see the
-              full pre-approved driver flow.
-            </p>
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             New here?{" "}
