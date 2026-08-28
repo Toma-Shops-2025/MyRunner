@@ -1,14 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/lib/auth-google";
-import { fetchUserRoles } from "@/lib/auth-routing";
+import { resolvePostAuthDestination } from "@/lib/auth.functions";
 import { intentFromMetadata } from "@/lib/signup-intent";
 import { toast } from "sonner";
-import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const nav = useNavigate();
+  const resolveDest = useServerFn(resolvePostAuthDestination);
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -57,16 +59,17 @@ function Login() {
             });
             setBusy(false);
             if (error) return toast.error(error.message);
-            const roles = data.user ? await fetchUserRoles(data.user.id) : [];
-            const isDriver = roles.includes("driver");
-            const signupIntent = intentFromMetadata(data.user?.user_metadata);
-            toast.success("Welcome back.");
-            if (isDriver) {
-              nav({ to: "/driver/dashboard" });
-            } else if (signupIntent === "driver") {
-              nav({ to: "/driver-signup" });
-            } else {
-              nav({ to: "/app/dashboard" });
+            try {
+              const { to } = await resolveDest();
+              const signupIntent = intentFromMetadata(data.user?.user_metadata);
+              toast.success("Welcome back.");
+              if (to === "/app/dashboard" && signupIntent === "driver") {
+                nav({ to: "/driver-signup" });
+              } else {
+                nav({ to });
+              }
+            } catch (err) {
+              toast.error((err as Error).message || "Could not determine account type.");
             }
           }}
           className="w-full max-w-md rounded-2xl border border-border bg-card p-8"

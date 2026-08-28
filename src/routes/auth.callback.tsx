@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { PageShell } from "@/components/site/page-shell";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -7,7 +8,7 @@ import {
   intentFromMetadata,
   readSignupIntent,
 } from "@/lib/signup-intent";
-import { fetchUserRoles } from "@/lib/auth-routing";
+import { resolvePostAuthDestination } from "@/lib/auth.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/callback")({

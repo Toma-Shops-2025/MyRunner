@@ -14,21 +14,35 @@ export async function fetchUserRoles(uid: string): Promise<Role[]> {
       return data ? role : null;
     }),
   );
-  const fromRpc = found.filter(Boolean) as Role[];
-  if (fromRpc.length > 0) return fromRpc;
+  const roles = new Set<Role>(found.filter(Boolean) as Role[]);
 
-  const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
-  const fromTable = (data ?? []).map((r) => r.role as Role);
-  if (fromTable.length > 0) return fromTable;
+  if (roles.size === 0) {
+    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+    for (const row of data ?? []) roles.add(row.role as Role);
+  }
 
-  const { data: app } = await supabase
-    .from("driver_applications")
-    .select("status")
-    .eq("user_id", uid)
-    .maybeSingle();
-  if (app?.status === "approved") return ["driver"];
+  if (!roles.has("driver")) {
+    const { data: app } = await supabase
+      .from("driver_applications")
+      .select("status")
+      .eq("user_id", uid)
+      .maybeSingle();
+    if (app?.status === "approved") roles.add("driver");
+  }
 
-  return [];
+  // Self-readable profile fields — strong signal for completed driver onboarding
+  if (!roles.has("driver")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("stripe_connect_account_id, driver_status")
+      .eq("id", uid)
+      .maybeSingle();
+    if (profile?.stripe_connect_account_id || profile?.driver_status) {
+      roles.add("driver");
+    }
+  }
+
+  return [...roles];
 }
 
 export function notifyPayoutStatusChanged() {

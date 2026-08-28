@@ -6,7 +6,6 @@ import { SiteFooter } from "@/components/site/footer";
 import { BackButton } from "@/components/site/back-button";
 import { Button } from "@/components/ui/button";
 import { useAuth, signOut } from "@/hooks/use-auth";
-
 export const Route = createFileRoute("/app")({
   component: AppLayout,
 });
@@ -22,11 +21,15 @@ const tabs = [
 function AppLayout() {
   const nav = useNavigate();
   const router = useRouterState();
-  const { user, loading } = useAuth();
+  const { user, loading, isDriver } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login" });
   }, [loading, user, nav]);
+
+  useEffect(() => {
+    if (!loading && isDriver) nav({ to: "/driver/dashboard" });
+  }, [loading, isDriver, nav]);
 
   if (!user) return null;
 
