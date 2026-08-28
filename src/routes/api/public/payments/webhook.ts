@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createStripeClient } from "@/lib/stripe.server";
+import type Stripe from "stripe";
+import { createStripeClient, isDriverConnectReady } from "@/lib/stripe.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const Route = createFileRoute("/api/public/payments/webhook")({
@@ -103,13 +104,8 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         }
 
         if (event.type === "account.updated") {
-          const account = event.data.object as {
-            id: string;
-            payouts_enabled?: boolean;
-            charges_enabled?: boolean;
-            details_submitted?: boolean;
-          };
-          const payoutsEnabled = Boolean(account.payouts_enabled && account.charges_enabled);
+          const account = event.data.object as Stripe.Account;
+          const payoutsEnabled = isDriverConnectReady(account);
           await supabaseAdmin
             .from("profiles")
             .update({

@@ -32,3 +32,14 @@ export function getStripeErrorMessage(error: unknown): string {
   }
   return "Stripe request failed";
 }
+
+/** Express drivers receive platform transfers — charges_enabled on their account is not required. */
+export function isDriverConnectReady(account: Stripe.Account): boolean {
+  if (account.id.startsWith("acct_demo")) return true;
+  if (!account.details_submitted || !account.payouts_enabled) return false;
+
+  const transfers = account.capabilities?.transfers;
+  if (transfers === "inactive" || transfers === "paused") return false;
+
+  return true;
+}

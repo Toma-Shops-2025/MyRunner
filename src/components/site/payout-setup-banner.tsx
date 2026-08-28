@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { refreshAccountStatus } from "@/lib/connect.functions";
+import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
 import { useAuth } from "@/hooks/use-auth";
 
 /**
@@ -10,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
  */
 export function PayoutSetupBanner() {
   const { user } = useAuth();
+  const refreshPayoutFn = useServerFn(refreshAccountStatus);
   const [show, setShow] = useState(false);
 
   const load = useCallback(async () => {
@@ -19,11 +23,21 @@ export function PayoutSetupBanner() {
     }
     const { data } = await supabase
       .from("profiles")
-      .select("payouts_enabled")
+      .select("payouts_enabled, stripe_connect_account_id")
       .eq("id", user.id)
       .maybeSingle();
+
+    if (data?.stripe_connect_account_id && !data.payouts_enabled) {
+      const res = await refreshPayoutFn();
+      if ("payoutsEnabled" in res && res.payoutsEnabled) {
+        notifyPayoutStatusChanged();
+        setShow(false);
+        return;
+      }
+    }
+
     setShow(!data?.payouts_enabled);
-  }, [user]);
+  }, [user, refreshPayoutFn]);
 
   useEffect(() => {
     void load();

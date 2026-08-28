@@ -98,7 +98,7 @@ function DriverDashboard() {
       supabase.from("ratings").select("stars").eq("ratee_id", user.id),
       supabase
         .from("profiles")
-        .select("payouts_enabled, background_check_status, is_active, driver_status")
+        .select("payouts_enabled, background_check_status, is_active, driver_status, stripe_connect_account_id")
         .eq("id", user.id)
         .maybeSingle(),
     ]);
@@ -115,13 +115,22 @@ function DriverDashboard() {
       background_check_status?: "pending" | "clear" | "failed";
       is_active?: boolean;
       driver_status?: string;
+      stripe_connect_account_id?: string | null;
     } | null;
     setPayoutsEnabled(Boolean(prof?.payouts_enabled));
     setBgStatus(prof?.background_check_status ?? "pending");
     setIsActive(prof?.is_active ?? true);
     setOnline(prof?.driver_status === "online");
     setLoading(false);
-  }, [user]);
+
+    if (prof?.stripe_connect_account_id && !prof?.payouts_enabled) {
+      const res = await refreshPayoutFn();
+      if ("payoutsEnabled" in res && res.payoutsEnabled) {
+        setPayoutsEnabled(true);
+        notifyPayoutStatusChanged();
+      }
+    }
+  }, [user, refreshPayoutFn]);
 
   useEffect(() => {
     if (!user) return;

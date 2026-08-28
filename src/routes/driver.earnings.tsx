@@ -67,7 +67,15 @@ function DriverEarnings() {
     ]);
     setProfile(p.data ?? null);
     setPayouts((pays.data ?? []) as Payout[]);
-  }, [user]);
+
+    if (p.data?.stripe_connect_account_id && !p.data.payouts_enabled) {
+      const res = await fnRefresh();
+      if ("payoutsEnabled" in res && res.payoutsEnabled) {
+        notifyPayoutStatusChanged();
+        setProfile((prev) => (prev ? { ...prev, payouts_enabled: true } : prev));
+      }
+    }
+  }, [user, fnRefresh]);
 
   useEffect(() => { load(); }, [load]);
 

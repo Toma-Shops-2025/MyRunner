@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createStripeClient, getStripeEnv, getStripeErrorMessage } from "@/lib/stripe.server";
+import { createStripeClient, getStripeEnv, getStripeErrorMessage, isDriverConnectReady } from "@/lib/stripe.server";
 
 const APP_URL = process.env.PUBLIC_APP_URL ?? "https://myrunner.shop";
 
@@ -109,7 +109,7 @@ export const refreshAccountStatus = createServerFn({ method: "POST" })
     try {
       const stripe = createStripeClient(getStripeEnv());
       const account = await stripe.accounts.retrieve(profile.stripe_connect_account_id);
-      const payoutsEnabled = Boolean(account.payouts_enabled && account.charges_enabled);
+      const payoutsEnabled = isDriverConnectReady(account);
 
       const expectedUrl = `${APP_URL}/r/${userId}`;
       const isDemo = profile.stripe_connect_account_id.startsWith("acct_demo");
