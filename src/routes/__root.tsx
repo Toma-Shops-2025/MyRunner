@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { BgmProvider } from "@/components/bgm-provider";
 
 import appCss from "../styles.css?url";
 
@@ -138,9 +139,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <Toaster richColors position="top-center" />
+      <BgmProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        <Toaster richColors position="top-center" />
+      </BgmProvider>
     </QueryClientProvider>
   );
 }
