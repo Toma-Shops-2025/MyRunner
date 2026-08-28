@@ -7,6 +7,19 @@ import { PayoutSetupBanner } from "@/components/site/payout-setup-banner";
 import { Button } from "@/components/ui/button";
 import { useAuth, signOut } from "@/hooks/use-auth";
 
+const DRIVER_APPROVED_KEY = "myrunner-driver-just-approved";
+
+function recentlyApprovedDriver(): boolean {
+  const raw = sessionStorage.getItem(DRIVER_APPROVED_KEY);
+  if (!raw) return false;
+  const ts = Number(raw);
+  if (!Number.isFinite(ts) || Date.now() - ts > 60_000) {
+    sessionStorage.removeItem(DRIVER_APPROVED_KEY);
+    return false;
+  }
+  return true;
+}
+
 export const Route = createFileRoute("/driver")({
   component: DriverLayout,
 });
@@ -16,7 +29,18 @@ function DriverLayout() {
   const { user, loading, isDriver } = useAuth();
 
   useEffect(() => {
-    if (!loading && (!user || !isDriver)) nav({ to: "/driver-signup" });
+    if (loading) return;
+    if (!user) {
+      nav({ to: "/driver-signup" });
+      return;
+    }
+    if (isDriver) {
+      sessionStorage.removeItem(DRIVER_APPROVED_KEY);
+      return;
+    }
+    if (!recentlyApprovedDriver()) {
+      nav({ to: "/driver-signup" });
+    }
   }, [loading, user, isDriver, nav]);
 
   if (!user) return null;

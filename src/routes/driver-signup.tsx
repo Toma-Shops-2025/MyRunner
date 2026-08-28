@@ -11,6 +11,27 @@ import { activateDriverRole } from "@/lib/driver-signup.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
+const DRIVER_APPROVED_KEY = "myrunner-driver-just-approved";
+
+async function waitForDriverRole(userId: string, attempts = 15): Promise<boolean> {
+  for (let i = 0; i < attempts; i += 1) {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "driver")
+      .maybeSingle();
+    if (data) return true;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  return false;
+}
+
+function goToDriverDashboard() {
+  sessionStorage.setItem(DRIVER_APPROVED_KEY, String(Date.now()));
+  window.location.replace("/driver/dashboard");
+}
+
 export const Route = createFileRoute("/driver-signup")({
   head: () => ({
     meta: [
@@ -122,7 +143,7 @@ function DriverSignup() {
             if (profileErr) console.warn("profile update warn:", profileErr.message);
 
             // Application record (auto-approved)
-            await supabase.from("driver_applications").upsert({
+            const { error: appErr } = await supabase.from("driver_applications").upsert({
               user_id: currentUser.id,
               vehicle_make: String(fd.get("make")),
               vehicle_model: String(fd.get("model")),
@@ -132,6 +153,10 @@ function DriverSignup() {
               insurance_provider: String(fd.get("insurance_provider") || ""),
               status: "approved",
             }, { onConflict: "user_id" });
+            if (appErr) {
+              setBusy(false);
+              return toast.error(`Could not save application: ${appErr.message}`);
+            }
 
             // Grant driver role via server (service role) — client INSERT is blocked by grants/RLS
             try {
@@ -143,20 +168,30 @@ function DriverSignup() {
               );
             }
 
+            const roleReady = await waitForDriverRole(currentUser.id);
+            if (!roleReady) {
+              setBusy(false);
+              return toast.error(
+                "Application saved but driver access is still syncing. Refresh and try again in a moment.",
+              );
+            }
+
             // Fire-and-forget background check (no-op if Checkr keys not set yet)
             if (!isReviewer) {
               try {
                 const { startDriverBackgroundCheck } = await import("@/lib/checkr.functions");
-                await startDriverBackgroundCheck();
+                void startDriverBackgroundCheck();
               } catch (e) {
                 console.warn("background check kickoff failed:", (e as Error).message);
               }
             }
 
-            setBusy(false);
-            toast.success(isReviewer ? "Reviewer demo driver ready." : "You're approved! Finish payout setup to start accepting orders.");
-            // Hard reload so useAuth picks up the new role immediately
-            window.location.assign("/driver/dashboard");
+            toast.success(
+              isReviewer
+                ? "Reviewer demo driver ready — opening dashboard…"
+                : "You're approved! Opening your driver dashboard…",
+            );
+            goToDriverDashboard();
           }}
           className="mt-10 grid max-w-3xl gap-6 rounded-2xl border border-border bg-card p-8"
         >
