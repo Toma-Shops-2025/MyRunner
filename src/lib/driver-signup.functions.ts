@@ -1,45 +1,109 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+const driverApplicationInput = z.object({
+  fullName: z.string().min(1),
+  phone: z.string(),
+  dob: z.string().optional(),
+  ssnLast4: z.string().length(4),
+  homeAddress: z.string(),
+  homeCity: z.string(),
+  homeState: z.string().max(2),
+  homeZip: z.string(),
+  emergencyContactName: z.string(),
+  emergencyContactPhone: z.string(),
+  vehicleMake: z.string(),
+  vehicleModel: z.string(),
+  vehicleYear: z.number().nullable(),
+  licenseNumber: z.string(),
+  licenseState: z.string().max(2),
+  insuranceProvider: z.string(),
+  isReviewer: z.boolean().optional(),
+});
+
 /**
- * Grants the signed-in user the driver role via service role.
- * Client inserts into user_roles fail because authenticated only has SELECT
- * on that table (RLS policy alone is not enough without GRANT INSERT).
+ * Saves driver application + profile and grants the driver role via service role.
+ * Client writes to driver_applications / user_roles fail on live DB (RLS/grants).
  */
 export const activateDriverRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: unknown) => driverApplicationInput.parse(d))
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const userId = context.userId;
 
-    // Live DB may lack UNIQUE(user_id, role) required by upsert onConflict —
-    // check then insert so activation works either way.
-    const { data: existing, error: readErr } = await supabaseAdmin
-      .from("user_roles")
+    await supabaseAdmin.from("profiles").update({
+      full_name: data.fullName,
+      phone: data.phone,
+      date_of_birth: data.dob || null,
+      ssn_last4: data.ssnLast4,
+      home_address: data.homeAddress,
+      home_city: data.homeCity,
+      home_state: data.homeState.toUpperCase().slice(0, 2),
+      home_zip: data.homeZip,
+      emergency_contact_name: data.emergencyContactName,
+      emergency_contact_phone: data.emergencyContactPhone,
+      background_check_status: "clear",
+      background_check_updated_at: new Date().toISOString(),
+      is_active: true,
+      ...(data.isReviewer
+        ? {
+            stripe_connect_account_id: "acct_demo_driver_review",
+            payouts_enabled: true,
+            onboarding_completed_at: new Date().toISOString(),
+          }
+        : {}),
+    }).eq("id", userId);
+
+    const applicationPayload = {
+      vehicle_make: data.vehicleMake,
+      vehicle_model: data.vehicleModel,
+      vehicle_year: data.vehicleYear,
+      license_number: data.licenseNumber,
+      license_state: data.licenseState.toUpperCase().slice(0, 2),
+      insurance_provider: data.insuranceProvider,
+      status: "approved" as const,
+    };
+
+    const { data: existingApp, error: appReadErr } = await supabaseAdmin
+      .from("driver_applications")
       .select("id")
-      .eq("user_id", context.userId)
-      .eq("role", "driver")
+      .eq("user_id", userId)
       .maybeSingle();
-    if (readErr) throw new Error(readErr.message);
+    if (appReadErr) throw new Error(appReadErr.message);
 
-    if (!existing) {
-      const { error } = await supabaseAdmin.from("user_roles").insert({
+    if (existingApp) {
+      const { error } = await supabaseAdmin
+        .from("driver_applications")
+        .update(applicationPayload)
+        .eq("user_id", userId);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin.from("driver_applications").insert({
         id: crypto.randomUUID(),
-        user_id: context.userId,
-        role: "driver",
+        user_id: userId,
+        ...applicationPayload,
       });
       if (error) throw new Error(error.message);
     }
 
-    // Keep application + profile activation in sync for dashboards
-    await supabaseAdmin
-      .from("driver_applications")
-      .update({ status: "approved" })
-      .eq("user_id", context.userId);
+    const { data: existingRole, error: roleReadErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("role", "driver")
+      .maybeSingle();
+    if (roleReadErr) throw new Error(roleReadErr.message);
 
-    await supabaseAdmin
-      .from("profiles")
-      .update({ is_active: true, background_check_status: "clear" })
-      .eq("id", context.userId);
+    if (!existingRole) {
+      const { error } = await supabaseAdmin.from("user_roles").insert({
+        id: crypto.randomUUID(),
+        user_id: userId,
+        role: "driver",
+      });
+      if (error) throw new Error(error.message);
+    }
 
     return { ok: true as const };
   });

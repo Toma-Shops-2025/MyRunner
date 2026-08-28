@@ -113,83 +113,34 @@ function DriverSignup() {
               return toast.error("Please sign in to continue your application.");
             }
 
-            // Reviewer demo account: pre-approve + skip Stripe Connect so the reviewer
-            // can immediately accept orders without finishing payout onboarding.
             const isReviewer = email.toLowerCase() === "driver-review@myrunner.shop";
 
-            // Update profile with everything Checkr-style
-            const { error: profileErr } = await supabase.from("profiles").update({
-              full_name: fullName,
-              phone,
-              date_of_birth: dob || null,
-              ssn_last4: ssnLast4 || null,
-              home_address: String(fd.get("address") || ""),
-              home_city: String(fd.get("city") || ""),
-              home_state: String(fd.get("state") || "").toUpperCase().slice(0, 2),
-              home_zip: String(fd.get("zip") || ""),
-              emergency_contact_name: String(fd.get("ec_name") || ""),
-              emergency_contact_phone: String(fd.get("ec_phone") || ""),
-              background_check_status: "clear",
-              background_check_updated_at: new Date().toISOString(),
-              is_active: true,
-              ...(isReviewer
-                ? {
-                    stripe_connect_account_id: "acct_demo_driver_review",
-                    payouts_enabled: true,
-                    onboarding_completed_at: new Date().toISOString(),
-                  }
-                : {}),
-            }).eq("id", currentUser.id);
-            if (profileErr) console.warn("profile update warn:", profileErr.message);
-
-            // Application record (auto-approved) — live DB may lack UNIQUE(user_id) for upsert
-            const applicationPayload = {
-              vehicle_make: String(fd.get("make")),
-              vehicle_model: String(fd.get("model")),
-              vehicle_year: Number(fd.get("year")) || null,
-              license_number: String(fd.get("license_number") || ""),
-              license_state: String(fd.get("license_state") || "").toUpperCase().slice(0, 2),
-              insurance_provider: String(fd.get("insurance_provider") || ""),
-              status: "approved" as const,
-            };
-
-            const { data: existingApp, error: appReadErr } = await supabase
-              .from("driver_applications")
-              .select("id")
-              .eq("user_id", currentUser.id)
-              .maybeSingle();
-            if (appReadErr) {
-              setBusy(false);
-              return toast.error(`Could not save application: ${appReadErr.message}`);
-            }
-
-            const appErr = existingApp
-              ? (
-                  await supabase
-                    .from("driver_applications")
-                    .update(applicationPayload)
-                    .eq("user_id", currentUser.id)
-                ).error
-              : (
-                  await supabase.from("driver_applications").insert({
-                    id: crypto.randomUUID(),
-                    user_id: currentUser.id,
-                    ...applicationPayload,
-                  })
-                ).error;
-
-            if (appErr) {
-              setBusy(false);
-              return toast.error(`Could not save application: ${appErr.message}`);
-            }
-
-            // Grant driver role via server (service role) — client INSERT is blocked by grants/RLS
             try {
-              await activateRole();
+              await activateRole({
+                data: {
+                  fullName,
+                  phone,
+                  dob: dob || undefined,
+                  ssnLast4,
+                  homeAddress: String(fd.get("address") || ""),
+                  homeCity: String(fd.get("city") || ""),
+                  homeState: String(fd.get("state") || "").toUpperCase().slice(0, 2),
+                  homeZip: String(fd.get("zip") || ""),
+                  emergencyContactName: String(fd.get("ec_name") || ""),
+                  emergencyContactPhone: String(fd.get("ec_phone") || ""),
+                  vehicleMake: String(fd.get("make")),
+                  vehicleModel: String(fd.get("model")),
+                  vehicleYear: Number(fd.get("year")) || null,
+                  licenseNumber: String(fd.get("license_number") || ""),
+                  licenseState: String(fd.get("license_state") || "").toUpperCase().slice(0, 2),
+                  insuranceProvider: String(fd.get("insurance_provider") || ""),
+                  isReviewer,
+                },
+              });
             } catch (err) {
               setBusy(false);
               return toast.error(
-                `Could not activate driver account: ${(err as Error).message || "unknown error"}`,
+                `Could not save application: ${(err as Error).message || "unknown error"}`,
               );
             }
 
