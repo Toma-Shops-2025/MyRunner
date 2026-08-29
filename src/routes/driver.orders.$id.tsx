@@ -86,8 +86,14 @@ function DriverOrder() {
       if (data) setOrder(data as Order);
       if (next === "delivered") {
         const res = await runPayout({ data: { orderId: id } });
-        if ("error" in res && res.error) toast.error(`Payout: ${res.error}`);
-        else if ("amount" in res && res.amount) toast.success(`Payout sent: ${fmtUSD(res.amount)}`);
+        if ("error" in res && res.error) {
+          const msg = String(res.error);
+          if (/insufficient funds/i.test(msg)) {
+            toast.message("Delivery complete. Driver payout will retry once Stripe has available balance.");
+          } else {
+            toast.error(`Payout: ${msg}`);
+          }
+        } else if ("amount" in res && res.amount) toast.success(`Payout sent: ${fmtUSD(res.amount)}`);
       }
     } catch (e) {
       toast.error((e as Error).message || "Could not update order.");

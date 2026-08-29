@@ -111,7 +111,19 @@ function OrderDetail() {
       )
       .subscribe();
 
-    return () => { active = false; supabase.removeChannel(channel); };
+    // Polling backup when realtime publication/RLS isn't available on live DB
+    const poll = window.setInterval(() => {
+      void (async () => {
+        const { data: o } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
+        if (active && o) setOrder(o as Order);
+      })();
+    }, 3000);
+
+    return () => {
+      active = false;
+      window.clearInterval(poll);
+      supabase.removeChannel(channel);
+    };
   }, [id]);
 
   useEffect(() => {
