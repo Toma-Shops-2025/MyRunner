@@ -24,7 +24,6 @@ export const createOrder = createServerFn({ method: "POST" })
 
     const feeShareCents = Math.round(data.priceCents * 0.7);
     const platformFeeCents = data.priceCents - feeShareCents;
-    const extraStops = data.type === "standard" ? 0 : 1;
 
     const { data: created, error } = await supabaseAdmin
       .from("orders")
@@ -45,7 +44,6 @@ export const createOrder = createServerFn({ method: "POST" })
         payout_status: "pending",
         dispatch_status: "queued",
         dispatch_attempts: 0,
-        additional_pickups: extraStops,
       })
       .select("id")
       .single();
