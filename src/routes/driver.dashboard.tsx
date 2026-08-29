@@ -47,6 +47,8 @@ type Offer = {
   status: string;
 };
 
+const ONLINE_INTENT_KEY = "myrunner-driver-online";
+
 function DriverDashboard() {
   const { user } = useAuth();
   const [online, setOnline] = useState(false);
@@ -120,7 +122,8 @@ function DriverDashboard() {
     setPayoutsEnabled(Boolean(prof?.payouts_enabled));
     setBgStatus(prof?.background_check_status ?? "pending");
     setIsActive(prof?.is_active ?? true);
-    setOnline(prof?.driver_status === "online");
+    const intentOnline = sessionStorage.getItem(ONLINE_INTENT_KEY) === "1";
+    setOnline(prof?.driver_status === "online" || intentOnline);
     setLoading(false);
 
     if (prof?.stripe_connect_account_id && !prof?.payouts_enabled) {
@@ -131,6 +134,18 @@ function DriverDashboard() {
       }
     }
   }, [user, refreshPayoutFn]);
+
+  // Re-sync online status after navigating back (DB write may lag behind UI toggle)
+  useEffect(() => {
+    if (!user) return;
+    if (sessionStorage.getItem(ONLINE_INTENT_KEY) !== "1") return;
+    presenceFn({ data: { status: "online" } })
+      .then(() => setOnline(true))
+      .catch(() => {
+        sessionStorage.removeItem(ONLINE_INTENT_KEY);
+        setOnline(false);
+      });
+  }, [user, presenceFn]);
 
   useEffect(() => {
     if (!user) return;
@@ -261,9 +276,12 @@ function DriverDashboard() {
     setOnline(next);
     try {
       await presenceFn({ data: { status: next ? "online" : "offline" } });
+      if (next) sessionStorage.setItem(ONLINE_INTENT_KEY, "1");
+      else sessionStorage.removeItem(ONLINE_INTENT_KEY);
       toast.success(next ? "You're online." : "You're offline.");
     } catch {
       setOnline(!next);
+      if (next) sessionStorage.removeItem(ONLINE_INTENT_KEY);
       toast.error("Couldn't update status.");
     }
   }

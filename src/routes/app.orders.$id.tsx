@@ -9,7 +9,7 @@ import { OrderMap } from "@/components/site/order-map";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
-import { createCheckoutSession, createTipCheckoutSession } from "@/lib/checkout.functions";
+import { createCheckoutSession, createTipCheckoutSession, confirmOrderPayment } from "@/lib/checkout.functions";
 import { payoutDriverForOrder } from "@/lib/connect.functions";
 import { toast } from "sonner";
 
@@ -60,6 +60,7 @@ function OrderDetail() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const checkout = useServerFn(createCheckoutSession);
   const tipCheckout = useServerFn(createTipCheckoutSession);
+  const confirmPayment = useServerFn(confirmOrderPayment);
   const runPayout = useServerFn(payoutDriverForOrder);
 
   async function payNow() {
@@ -120,11 +121,23 @@ function OrderDetail() {
   // Handle Stripe redirect query params
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
-    if (sp.get("paid") === "1") { toast.success("Payment received — your Runner is on it!"); window.history.replaceState({}, "", window.location.pathname); }
+    if (sp.get("paid") === "1") {
+      window.history.replaceState({}, "", window.location.pathname);
+      void (async () => {
+        const res = await confirmPayment({ data: { orderId: id } });
+        if ("error" in res && res.error) {
+          toast.error(res.error);
+          return;
+        }
+        toast.success("Payment received — your Runner is on it!");
+        const { data } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
+        if (data) setOrder(data as Order);
+      })();
+    }
     if (sp.get("cancelled") === "1") { toast("Payment cancelled — you can try again anytime."); window.history.replaceState({}, "", window.location.pathname); }
     if (sp.get("tipped") === "1") { toast.success("Tip sent — thanks for taking care of your Runner!"); window.history.replaceState({}, "", window.location.pathname); }
     if (sp.get("tip_cancelled") === "1") { toast("Tip cancelled."); window.history.replaceState({}, "", window.location.pathname); }
-  }, []);
+  }, [confirmPayment, id]);
 
 
   // Load existing rating I left on this order

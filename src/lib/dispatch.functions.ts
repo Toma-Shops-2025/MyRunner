@@ -13,11 +13,7 @@ function pickRadius(attempt: number): number {
 }
 
 // Find the nearest eligible online driver and create an exclusive offer.
-// Called by:
-//  - the Stripe webhook on payment success
-//  - declineOffer (next attempt)
-//  - the dispatch-tick cron after an offer expires
-async function dispatchOrderInternal(orderId: string): Promise<{ ok: boolean; reason?: string }> {
+export async function dispatchOrderInternal(orderId: string): Promise<{ ok: boolean; reason?: string }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const { data: order } = await supabaseAdmin
@@ -58,9 +54,7 @@ async function dispatchOrderInternal(orderId: string): Promise<{ ok: boolean; re
     .eq("driver_status", "online")
     .eq("is_active", true)
     .eq("payouts_enabled", true)
-    .neq("background_check_status", "failed")
-    .not("current_lat", "is", null)
-    .not("current_lng", "is", null);
+    .neq("background_check_status", "failed");
 
   if (!candidates || candidates.length === 0) {
     // No one online — leave queued, cron will re-try
@@ -250,6 +244,7 @@ export const setDriverPresence = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { status: "online" | "offline"; lat?: number; lng?: number }) => d)
   .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const update: {
       driver_status: "online" | "offline";
       current_lat?: number;
@@ -261,6 +256,21 @@ export const setDriverPresence = createServerFn({ method: "POST" })
       update.current_lng = data.lng;
       update.location_updated_at = new Date().toISOString();
     }
-    await context.supabase.from("profiles").update(update).eq("id", context.userId);
+    const { error } = await supabaseAdmin.from("profiles").update(update).eq("id", context.userId);
+    if (error) throw new Error(error.message);
+
+    if (data.status === "online") {
+      const { data: queued } = await supabaseAdmin
+        .from("orders")
+        .select("id")
+        .eq("payment_status", "paid")
+        .is("driver_id", null)
+        .in("dispatch_status", ["queued", "offered"])
+        .limit(25);
+      for (const row of queued ?? []) {
+        await dispatchOrderInternal(row.id);
+      }
+    }
+
     return { ok: true };
   });

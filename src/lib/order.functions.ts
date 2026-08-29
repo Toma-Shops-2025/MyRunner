@@ -36,8 +36,13 @@ export const createOrder = createServerFn({ method: "POST" })
         price_cents: data.priceCents,
         tip_cents: data.tipCents,
         distance_miles: data.distanceMiles,
+        pickup_lat: data.pickupLat ?? null,
+        pickup_lng: data.pickupLng ?? null,
         platform_fee_cents: platformFeeCents,
         driver_payout_cents: 0,
+        payment_status: "pending",
+        dispatch_status: "queued",
+        dispatch_attempts: 0,
       })
       .select("id")
       .single();

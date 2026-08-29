@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createStripeClient, getStripeEnv, getStripeErrorMessage } from "@/lib/stripe.server";
+import { dispatchOrderInternal } from "@/lib/dispatch.functions";
 
 const input = z.object({ orderId: z.string().uuid() });
 
@@ -9,8 +10,9 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => input.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    const { data: order, error } = await supabase
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order, error } = await supabaseAdmin
       .from("orders")
       .select("id, customer_id, item_description, price_cents, tip_cents, payment_status")
       .eq("id", data.orderId)
@@ -46,10 +48,52 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         metadata: { order_id: order.id, env: stripeEnv },
       });
 
-      await supabase.from("orders").update({ stripe_session_id: session.id }).eq("id", order.id);
+      await supabaseAdmin.from("orders").update({ stripe_session_id: session.id }).eq("id", order.id);
       return { url: session.url };
     } catch (e) {
       console.error("createCheckoutSession failed:", e);
+      return { error: getStripeErrorMessage(e) };
+    }
+  });
+
+/** Confirm Stripe payment after redirect — webhook backup for live deploys. */
+export const confirmOrderPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ orderId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .select("id, customer_id, payment_status, stripe_session_id, driver_id")
+      .eq("id", data.orderId)
+      .single();
+
+    if (error || !order) return { error: "Order not found" };
+    if (order.customer_id !== context.userId) return { error: "Not authorized" };
+
+    if (order.payment_status === "paid") {
+      if (!order.driver_id) await dispatchOrderInternal(order.id);
+      return { ok: true as const, alreadyPaid: true };
+    }
+
+    if (!order.stripe_session_id) return { error: "No checkout session on this order" };
+
+    try {
+      const stripe = createStripeClient(getStripeEnv());
+      const session = await stripe.checkout.sessions.retrieve(order.stripe_session_id);
+      if (session.payment_status !== "paid") {
+        return { error: "Payment has not completed yet" };
+      }
+
+      await supabaseAdmin
+        .from("orders")
+        .update({ payment_status: "paid", paid_at: new Date().toISOString() })
+        .eq("id", order.id);
+
+      await dispatchOrderInternal(order.id);
+      return { ok: true as const };
+    } catch (e) {
+      console.error("confirmOrderPayment failed:", e);
       return { error: getStripeErrorMessage(e) };
     }
   });
