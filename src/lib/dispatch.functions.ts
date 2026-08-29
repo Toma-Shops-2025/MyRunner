@@ -245,30 +245,43 @@ export const setDriverPresence = createServerFn({ method: "POST" })
   .inputValidator((d: { status: "online" | "offline"; lat?: number; lng?: number }) => d)
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const update: {
-      driver_status: "online" | "offline";
-      current_lat?: number;
-      current_lng?: number;
-      location_updated_at?: string;
-    } = { driver_status: data.status };
+
+    // Status first — never block going online if location columns are missing on live DB
+    const { error: statusErr } = await supabaseAdmin
+      .from("profiles")
+      .update({ driver_status: data.status })
+      .eq("id", context.userId);
+    if (statusErr) throw new Error(statusErr.message);
+
     if (data.lat != null && data.lng != null) {
-      update.current_lat = data.lat;
-      update.current_lng = data.lng;
-      update.location_updated_at = new Date().toISOString();
+      const { error: locErr } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          current_lat: data.lat,
+          current_lng: data.lng,
+          location_updated_at: new Date().toISOString(),
+        })
+        .eq("id", context.userId);
+      if (locErr) {
+        // Location is best-effort; status already saved
+        console.warn("[setDriverPresence] location update skipped:", locErr.message);
+      }
     }
-    const { error } = await supabaseAdmin.from("profiles").update(update).eq("id", context.userId);
-    if (error) throw new Error(error.message);
 
     if (data.status === "online") {
-      const { data: queued } = await supabaseAdmin
-        .from("orders")
-        .select("id")
-        .eq("payment_status", "paid")
-        .is("driver_id", null)
-        .in("dispatch_status", ["queued", "offered"])
-        .limit(25);
-      for (const row of queued ?? []) {
-        await dispatchOrderInternal(row.id);
+      try {
+        const { data: queued } = await supabaseAdmin
+          .from("orders")
+          .select("id")
+          .eq("payment_status", "paid")
+          .is("driver_id", null)
+          .in("dispatch_status", ["queued", "offered"])
+          .limit(25);
+        for (const row of queued ?? []) {
+          await dispatchOrderInternal(row.id);
+        }
+      } catch (e) {
+        console.warn("[setDriverPresence] dispatch on online failed:", e);
       }
     }
 

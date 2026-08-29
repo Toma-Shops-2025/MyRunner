@@ -279,10 +279,10 @@ function DriverDashboard() {
       if (next) sessionStorage.setItem(ONLINE_INTENT_KEY, "1");
       else sessionStorage.removeItem(ONLINE_INTENT_KEY);
       toast.success(next ? "You're online." : "You're offline.");
-    } catch {
+    } catch (e) {
       setOnline(!next);
       if (next) sessionStorage.removeItem(ONLINE_INTENT_KEY);
-      toast.error("Couldn't update status.");
+      toast.error((e as Error)?.message || "Couldn't update status.");
     }
   }
 
