@@ -22,12 +22,34 @@ CREATE INDEX IF NOT EXISTS orders_stripe_session_id_idx ON public.orders (stripe
 
 GRANT SELECT, INSERT, UPDATE ON public.orders TO authenticated;
 
+-- Live schema stores some user ids as text; cast both sides like other policies.
 DROP POLICY IF EXISTS "orders customer insert" ON public.orders;
 CREATE POLICY "orders customer insert"
   ON public.orders
   FOR INSERT
   TO authenticated
-  WITH CHECK (customer_id = auth.uid());
+  WITH CHECK (customer_id::text = auth.uid()::text);
 
--- Refresh PostgREST schema cache after column changes.
+DROP POLICY IF EXISTS "orders customer read" ON public.orders;
+CREATE POLICY "orders customer read"
+  ON public.orders
+  FOR SELECT
+  TO authenticated
+  USING (
+    customer_id::text = auth.uid()::text
+    OR driver_id::text = auth.uid()::text
+    OR public.has_role(auth.uid(), 'admin'::app_role)
+  );
+
+DROP POLICY IF EXISTS "orders involved update" ON public.orders;
+CREATE POLICY "orders involved update"
+  ON public.orders
+  FOR UPDATE
+  TO authenticated
+  USING (
+    customer_id::text = auth.uid()::text
+    OR driver_id::text = auth.uid()::text
+    OR public.has_role(auth.uid(), 'admin'::app_role)
+  );
+
 NOTIFY pgrst, 'reload schema';

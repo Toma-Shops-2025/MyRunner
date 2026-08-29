@@ -6,4 +6,4 @@ CREATE POLICY "orders customer insert"
   ON public.orders
   FOR INSERT
   TO authenticated
-  WITH CHECK (customer_id = auth.uid());
+  WITH CHECK (customer_id::text = auth.uid()::text);
