@@ -37,15 +37,16 @@ export async function resolveEffectiveDriverAccess(
 
   if (
     options?.cleanupStaleDriverRole &&
-    signupIntent === "customer" &&
     !approvedApp &&
-    hasDriverRole
+    hasDriverRole &&
+    signupIntent !== "driver"
   ) {
     await supabaseAdmin.from("user_roles").delete().eq("user_id", userId).eq("role", "driver");
   }
 
   const isAdmin = roles.includes("admin");
-  const isDriver = approvedApp || (hasDriverRole && signupIntent !== "customer");
+  const isDriver =
+    approvedApp || (hasDriverRole && signupIntent === "driver");
 
   return { isAdmin, isDriver, signupIntent, approvedApp };
 }

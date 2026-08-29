@@ -8,14 +8,13 @@ export type AuthDestination =
   | "/app/dashboard"
   | "/admin/dashboard";
 
-function applyCustomerGuard(
+function applyDriverGuard(
   roles: Set<Role>,
   signupIntent: SignupIntent | null,
   approvedApp: boolean,
 ) {
-  if (signupIntent === "customer" && !approvedApp) {
-    roles.delete("driver");
-  }
+  if (approvedApp || signupIntent === "driver") return;
+  roles.delete("driver");
 }
 
 /** Uses has_role RPC with fallbacks for live DBs that block direct user_roles reads. */
@@ -53,7 +52,7 @@ export async function fetchUserRoles(
     roles.add("driver");
   }
 
-  applyCustomerGuard(roles, signupIntent, approvedApp);
+  applyDriverGuard(roles, signupIntent, approvedApp);
 
   return [...roles];
 }

@@ -21,15 +21,11 @@ const tabs = [
 function AppLayout() {
   const nav = useNavigate();
   const router = useRouterState();
-  const { user, loading, isDriver } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login" });
   }, [loading, user, nav]);
-
-  useEffect(() => {
-    if (!loading && isDriver) nav({ to: "/driver/dashboard" });
-  }, [loading, isDriver, nav]);
 
   if (!user) return null;
 
