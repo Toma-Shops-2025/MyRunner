@@ -22,31 +22,45 @@ export async function resolveEffectiveDriverAccess(
 ): Promise<EffectiveAccountAccess> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const [{ data: authData }, { data: roleRows }, { data: app }] = await Promise.all([
-    supabaseAdmin.auth.admin.getUserById(userId),
-    supabaseAdmin.from("user_roles").select("role").eq("user_id", userId),
-    supabaseAdmin.from("driver_applications").select("status").eq("user_id", userId).maybeSingle(),
-  ]);
+  const [{ data: authData }, { data: roleRows }, { data: app }, { data: profile }] =
+    await Promise.all([
+      supabaseAdmin.auth.admin.getUserById(userId),
+      supabaseAdmin.from("user_roles").select("role").eq("user_id", userId),
+      supabaseAdmin.from("driver_applications").select("status").eq("user_id", userId).maybeSingle(),
+      supabaseAdmin
+        .from("profiles")
+        .select("stripe_connect_account_id, payouts_enabled")
+        .eq("id", userId)
+        .maybeSingle(),
+    ]);
 
   const roles = (roleRows ?? []).map((r) => r.role);
   const signupIntent = intentFromMetadata(
     authData.user?.user_metadata as Record<string, unknown> | undefined,
   );
   const approvedApp = app?.status === "approved";
-  const hasDriverRole = roles.includes("driver");
+  let hasDriverRole = roles.includes("driver");
+  const completedDriverSetup = Boolean(
+    profile?.stripe_connect_account_id && profile?.payouts_enabled,
+  );
 
+  // Only strip driver access from accounts explicitly marked as customers.
   if (
     options?.cleanupStaleDriverRole &&
+    signupIntent === "customer" &&
     !approvedApp &&
-    hasDriverRole &&
-    signupIntent !== "driver"
+    !completedDriverSetup &&
+    hasDriverRole
   ) {
     await supabaseAdmin.from("user_roles").delete().eq("user_id", userId).eq("role", "driver");
+    hasDriverRole = false;
   }
 
   const isAdmin = roles.includes("admin");
   const isDriver =
-    approvedApp || (hasDriverRole && signupIntent === "driver");
+    approvedApp ||
+    completedDriverSetup ||
+    (hasDriverRole && signupIntent !== "customer");
 
   return { isAdmin, isDriver, signupIntent, approvedApp };
 }

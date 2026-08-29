@@ -8,13 +8,15 @@ export type AuthDestination =
   | "/app/dashboard"
   | "/admin/dashboard";
 
-function applyDriverGuard(
+function applyCustomerGuard(
   roles: Set<Role>,
   signupIntent: SignupIntent | null,
   approvedApp: boolean,
+  completedDriverSetup: boolean,
 ) {
-  if (approvedApp || signupIntent === "driver") return;
-  roles.delete("driver");
+  if (signupIntent === "customer" && !approvedApp && !completedDriverSetup) {
+    roles.delete("driver");
+  }
 }
 
 /** Uses has_role RPC with fallbacks for live DBs that block direct user_roles reads. */
@@ -42,17 +44,29 @@ export async function fetchUserRoles(
   }
 
   let approvedApp = false;
-  const { data: app } = await supabase
-    .from("driver_applications")
-    .select("status")
-    .eq("user_id", uid)
-    .maybeSingle();
+  let completedDriverSetup = false;
+  const [{ data: app }, { data: profile }] = await Promise.all([
+    supabase
+      .from("driver_applications")
+      .select("status")
+      .eq("user_id", uid)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("stripe_connect_account_id, payouts_enabled")
+      .eq("id", uid)
+      .maybeSingle(),
+  ]);
   if (app?.status === "approved") {
     approvedApp = true;
     roles.add("driver");
   }
+  if (profile?.stripe_connect_account_id && profile?.payouts_enabled) {
+    completedDriverSetup = true;
+    roles.add("driver");
+  }
 
-  applyDriverGuard(roles, signupIntent, approvedApp);
+  applyCustomerGuard(roles, signupIntent, approvedApp, completedDriverSetup);
 
   return [...roles];
 }
