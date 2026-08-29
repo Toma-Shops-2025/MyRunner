@@ -287,3 +287,83 @@ export const setDriverPresence = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+/** Claim an open paid order — service role so live RLS cannot silently no-op. */
+export const claimOpenOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orderId: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("payouts_enabled, is_active, background_check_status")
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (!profile?.payouts_enabled) throw new Error("Finish Stripe payout setup before accepting orders.");
+    if (profile.background_check_status === "failed" || profile.is_active === false) {
+      throw new Error("Your account is deactivated. Contact support.");
+    }
+
+    const { data: claimed, error } = await supabaseAdmin
+      .from("orders")
+      .update({
+        driver_id: context.userId,
+        status: "accepted",
+        dispatch_status: "assigned",
+      })
+      .eq("id", data.orderId)
+      .is("driver_id", null)
+      .eq("payment_status", "paid")
+      .select("id, status, driver_id")
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!claimed) throw new Error("Order was already claimed");
+
+    await supabaseAdmin.from("profiles").update({ driver_status: "on_delivery" }).eq("id", context.userId);
+    await supabaseAdmin
+      .from("offers")
+      .update({ status: "expired" })
+      .eq("order_id", data.orderId)
+      .eq("status", "pending");
+
+    return { ok: true as const, orderId: claimed.id };
+  });
+
+/** Advance delivery status for the assigned driver. */
+export const advanceDriverOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    orderId: string;
+    status: "accepted" | "picked_up" | "in_transit" | "delivered";
+    proofPhotoUrl?: string | null;
+    deliveredAt?: string | null;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: order } = await supabaseAdmin
+      .from("orders")
+      .select("id, driver_id, status")
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (!order) throw new Error("Order not found");
+    if (String(order.driver_id) !== String(context.userId)) throw new Error("Not your order");
+
+    const patch: Record<string, unknown> = { status: data.status };
+    if (data.proofPhotoUrl != null) patch.proof_photo_url = data.proofPhotoUrl;
+    if (data.deliveredAt != null) patch.delivered_at = data.deliveredAt;
+    if (data.status === "delivered") {
+      patch.delivered_at = data.deliveredAt ?? new Date().toISOString();
+    }
+
+    const { error } = await supabaseAdmin.from("orders").update(patch).eq("id", data.orderId);
+    if (error) throw new Error(error.message);
+
+    if (data.status === "delivered") {
+      await supabaseAdmin.from("profiles").update({ driver_status: "online" }).eq("id", context.userId);
+    }
+
+    return { ok: true as const };
+  });

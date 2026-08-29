@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
 import { toast } from "sonner";
-import { setDriverPresence, acceptOffer, declineOffer } from "@/lib/dispatch.functions";
+import { setDriverPresence, acceptOffer, declineOffer, claimOpenOrder } from "@/lib/dispatch.functions";
 import { refreshAccountStatus } from "@/lib/connect.functions";
 import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
 
@@ -66,6 +66,7 @@ function DriverDashboard() {
   const presenceFn = useServerFn(setDriverPresence);
   const acceptFn = useServerFn(acceptOffer);
   const declineFn = useServerFn(declineOffer);
+  const claimFn = useServerFn(claimOpenOrder);
   const refreshPayoutFn = useServerFn(refreshAccountStatus);
   const navigate = useNavigate();
 
@@ -313,14 +314,13 @@ function DriverDashboard() {
       if (!payoutsEnabled) return toast.error("Finish Stripe payout setup before accepting orders.");
       if (bgStatus === "failed" || !isActive) return toast.error("Your account is deactivated. Contact support.");
     }
-    const { error } = await supabase
-      .from("orders")
-      .update({ driver_id: user.id, status: "accepted", dispatch_status: "assigned" })
-      .eq("id", o.id)
-      .is("driver_id", null);
-    if (error) return toast.error(error.message);
-    toast.success("Order claimed — opening delivery.");
-    navigate({ to: "/driver/orders/$id", params: { id: o.id } });
+    try {
+      await claimFn({ data: { orderId: o.id } });
+      toast.success("Order claimed — opening delivery.");
+      navigate({ to: "/driver/orders/$id", params: { id: o.id } });
+    } catch (e) {
+      toast.error((e as Error).message || "Could not claim order.");
+    }
   }
 
   const todayMs = new Date(); todayMs.setHours(0, 0, 0, 0);

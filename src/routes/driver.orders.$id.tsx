@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
 import { payoutDriverForOrder } from "@/lib/connect.functions";
+import { advanceDriverOrder } from "@/lib/dispatch.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/driver/orders/$id")({
@@ -45,6 +46,7 @@ function DriverOrder() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const runPayout = useServerFn(payoutDriverForOrder);
+  const advanceFn = useServerFn(advanceDriverOrder);
 
   useEffect(() => {
     let active = true;
@@ -70,15 +72,27 @@ function DriverOrder() {
 
   async function advance(next: string, extra: Partial<Order> = {}) {
     setBusy(true);
-    const patch = { status: next, ...extra } as never;
-    const { error } = await supabase.from("orders").update(patch).eq("id", id);
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success(`Marked ${next.replace("_", " ")}`);
-    if (next === "delivered") {
-      const res = await runPayout({ data: { orderId: id } });
-      if ("error" in res && res.error) toast.error(`Payout: ${res.error}`);
-      else if ("amount" in res && res.amount) toast.success(`Payout sent: ${fmtUSD(res.amount)}`);
+    try {
+      await advanceFn({
+        data: {
+          orderId: id,
+          status: next as "accepted" | "picked_up" | "in_transit" | "delivered",
+          proofPhotoUrl: extra.proof_photo_url ?? undefined,
+          deliveredAt: (extra as { delivered_at?: string }).delivered_at ?? undefined,
+        },
+      });
+      toast.success(`Marked ${next.replace("_", " ")}`);
+      const { data } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
+      if (data) setOrder(data as Order);
+      if (next === "delivered") {
+        const res = await runPayout({ data: { orderId: id } });
+        if ("error" in res && res.error) toast.error(`Payout: ${res.error}`);
+        else if ("amount" in res && res.amount) toast.success(`Payout sent: ${fmtUSD(res.amount)}`);
+      }
+    } catch (e) {
+      toast.error((e as Error).message || "Could not update order.");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -105,7 +119,8 @@ function DriverOrder() {
   if (!order) return <p className="text-muted-foreground">Loading…</p>;
 
   const stepIdx = STEPS.indexOf(order.status as (typeof STEPS)[number]);
-  const isMine = order.driver_id === user?.id;
+  const isMine = String(order.driver_id ?? "") === String(user?.id ?? "");
+  const canActOnPickup = isMine && (order.status === "accepted" || order.status === "pending");
 
   return (
     <div className="space-y-6">
@@ -145,7 +160,7 @@ function DriverOrder() {
         {/* Driver action bar — status-aware */}
         {isMine && (
           <div className="mt-6 space-y-3 border-t border-border pt-4">
-            {order.status === "accepted" && (
+            {canActOnPickup && (
               <div className="flex flex-wrap gap-2">
                 <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
                   <a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.pickup_address)}`}>
@@ -189,6 +204,16 @@ function DriverOrder() {
             {order.status === "delivered" && (
               <p className="text-sm text-emerald-500">Delivered ✓ {order.proof_photo_url ? "(photo proof captured)" : ""}</p>
             )}
+          </div>
+        )}
+
+        {!isMine && (
+          <div className="mt-6 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+            <p className="font-medium text-amber-200">This order isn&apos;t assigned to you yet.</p>
+            <p className="mt-1 text-muted-foreground">Go back to the dashboard and tap Accept again after the next update deploys.</p>
+            <Button asChild variant="outline" size="sm" className="mt-3">
+              <Link to="/driver/dashboard">Back to dashboard</Link>
+            </Button>
           </div>
         )}
       </div>
