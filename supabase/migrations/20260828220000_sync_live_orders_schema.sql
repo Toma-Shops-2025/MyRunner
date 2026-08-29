@@ -22,7 +22,7 @@ CREATE INDEX IF NOT EXISTS orders_stripe_session_id_idx ON public.orders (stripe
 
 GRANT SELECT, INSERT, UPDATE ON public.orders TO authenticated;
 
--- Live schema stores some user ids as text; cast both sides like other policies.
+-- Live schema stores some user ids as text; cast both sides.
 DROP POLICY IF EXISTS "orders customer insert" ON public.orders;
 CREATE POLICY "orders customer insert"
   ON public.orders
@@ -38,7 +38,12 @@ CREATE POLICY "orders customer read"
   USING (
     customer_id::text = auth.uid()::text
     OR driver_id::text = auth.uid()::text
-    OR public.has_role(auth.uid(), 'admin'::app_role)
+    OR EXISTS (
+      SELECT 1
+      FROM public.user_roles ur
+      WHERE ur.user_id::text = auth.uid()::text
+        AND ur.role::text = 'admin'
+    )
   );
 
 DROP POLICY IF EXISTS "orders involved update" ON public.orders;
@@ -49,7 +54,12 @@ CREATE POLICY "orders involved update"
   USING (
     customer_id::text = auth.uid()::text
     OR driver_id::text = auth.uid()::text
-    OR public.has_role(auth.uid(), 'admin'::app_role)
+    OR EXISTS (
+      SELECT 1
+      FROM public.user_roles ur
+      WHERE ur.user_id::text = auth.uid()::text
+        AND ur.role::text = 'admin'
+    )
   );
 
 NOTIFY pgrst, 'reload schema';
