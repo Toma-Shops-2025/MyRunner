@@ -36,6 +36,7 @@ type Order = {
   tip_cents: number;
   distance_miles: number | null;
   created_at: string;
+  delivered_at?: string | null;
   driver_id: string | null;
 };
 
@@ -323,11 +324,22 @@ function DriverDashboard() {
     }
   }
 
-  const todayMs = new Date(); todayMs.setHours(0, 0, 0, 0);
+  const driverShare = (o: Order) => Math.round(o.price_cents * 0.7) + o.tip_cents;
+  const isSameLocalDay = (iso: string | null | undefined) => {
+    if (!iso) return false;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return false;
+    const now = new Date();
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    );
+  };
   const todayCents = completed
-    .filter((o) => new Date(o.created_at) >= todayMs)
-    .reduce((s, o) => s + o.price_cents + o.tip_cents, 0);
-  const lifetimeCents = completed.reduce((s, o) => s + o.price_cents + o.tip_cents, 0);
+    .filter((o) => isSameLocalDay(o.delivered_at) || isSameLocalDay(o.created_at))
+    .reduce((s, o) => s + driverShare(o), 0);
+  const lifetimeCents = completed.reduce((s, o) => s + driverShare(o), 0);
 
   return (
     <div className="space-y-8">
@@ -422,7 +434,7 @@ function DriverDashboard() {
                   <p className="truncate font-medium">{o.item_description}</p>
                   <p className="truncate text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}</p>
                 </div>
-                <p className="font-serif text-lg text-gold">{fmtUSD(o.price_cents + o.tip_cents)}</p>
+                <p className="font-serif text-lg text-gold">{fmtUSD(driverShare(o))}</p>
               </li>
             ))}
           </ul>

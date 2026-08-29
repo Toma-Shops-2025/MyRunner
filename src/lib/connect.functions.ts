@@ -175,9 +175,10 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => payoutInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: order, error: orderErr } = await supabase
+    const { data: order, error: orderErr } = await supabaseAdmin
       .from("orders")
       .select("id, driver_id, price_cents, tip_cents, payment_status, status, payout_status, stripe_transfer_id")
       .eq("id", data.orderId)
@@ -186,12 +187,14 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
     if (orderErr || !order) return { error: "Order not found" };
 
     // Authorization: only the assigned driver, or admins via has_role
-    if (order.driver_id !== userId) {
-      const { data: isAdmin } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "admin",
-      });
-      if (!isAdmin) return { error: "Not authorized" };
+    if (String(order.driver_id) !== String(userId)) {
+      const { data: role } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (!role) return { error: "Not authorized" };
     }
 
     if (order.payment_status !== "paid") return { error: "Order is not paid yet" };
@@ -201,14 +204,14 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
     }
     if (!order.driver_id) return { error: "No driver assigned" };
 
-    const { data: driverProfile } = await supabase
+    const { data: driverProfile } = await supabaseAdmin
       .from("profiles")
       .select("stripe_connect_account_id, payouts_enabled")
       .eq("id", order.driver_id)
       .single();
 
     if (!driverProfile?.stripe_connect_account_id || !driverProfile.payouts_enabled) {
-      await supabase
+      await supabaseAdmin
         .from("orders")
         .update({ payout_status: "blocked_no_account" })
         .eq("id", order.id);
@@ -223,14 +226,14 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
     // Demo driver: skip the actual Stripe transfer, write a simulated payout
     if (driverProfile.stripe_connect_account_id.startsWith("acct_demo")) {
       await Promise.all([
-        supabase.from("orders").update({
+        supabaseAdmin.from("orders").update({
           driver_payout_cents: driverTotal,
           platform_fee_cents: platformFee,
           stripe_transfer_id: "tr_demo",
           payout_status: "paid",
           paid_out_at: new Date().toISOString(),
         }).eq("id", order.id),
-        supabase.from("driver_payouts").insert({
+        supabaseAdmin.from("driver_payouts").insert({
           driver_id: order.driver_id,
           order_id: order.id,
           amount_cents: driverTotal,
@@ -258,7 +261,7 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
       );
 
       await Promise.all([
-        supabase
+        supabaseAdmin
           .from("orders")
           .update({
             driver_payout_cents: driverTotal,
@@ -268,7 +271,7 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
             paid_out_at: new Date().toISOString(),
           })
           .eq("id", order.id),
-        supabase.from("driver_payouts").insert({
+        supabaseAdmin.from("driver_payouts").insert({
           driver_id: order.driver_id,
           order_id: order.id,
           amount_cents: driverTotal,
@@ -282,11 +285,11 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
       return { ok: true, amount: driverTotal, transferId: transfer.id };
     } catch (e) {
       const msg = getStripeErrorMessage(e);
-      await supabase
+      await supabaseAdmin
         .from("orders")
         .update({ payout_status: "failed" })
         .eq("id", order.id);
-      await supabase.from("driver_payouts").insert({
+      await supabaseAdmin.from("driver_payouts").insert({
         driver_id: order.driver_id,
         order_id: order.id,
         amount_cents: driverTotal,

@@ -33,7 +33,22 @@ type Payout = {
   fee_share_cents: number;
   status: string;
   created_at: string;
+  error_message?: string | null;
 };
+
+type DeliveredOrder = {
+  id: string;
+  item_description: string;
+  price_cents: number;
+  tip_cents: number;
+  payout_status: string | null;
+  delivered_at: string | null;
+  created_at: string;
+};
+
+function driverShareCents(priceCents: number, tipCents: number) {
+  return Math.round(priceCents * 0.7) + tipCents;
+}
 
 function DriverEarnings() {
   const { user } = useAuth();
@@ -42,6 +57,7 @@ function DriverEarnings() {
     payouts_enabled: boolean;
   } | null>(null);
   const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [delivered, setDelivered] = useState<DeliveredOrder[]>([]);
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -52,7 +68,7 @@ function DriverEarnings() {
 
   const load = useCallback(async () => {
     if (!user) return;
-    const [p, pays] = await Promise.all([
+    const [p, pays, orders] = await Promise.all([
       supabase
         .from("profiles")
         .select("stripe_connect_account_id, payouts_enabled")
@@ -60,13 +76,21 @@ function DriverEarnings() {
         .maybeSingle(),
       supabase
         .from("driver_payouts")
-        .select("id, order_id, amount_cents, tip_cents, fee_share_cents, status, created_at")
+        .select("id, order_id, amount_cents, tip_cents, fee_share_cents, status, created_at, error_message")
         .eq("driver_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(100),
+      supabase
+        .from("orders")
+        .select("id, item_description, price_cents, tip_cents, payout_status, delivered_at, created_at")
+        .eq("driver_id", user.id)
+        .eq("status", "delivered")
         .order("created_at", { ascending: false })
         .limit(100),
     ]);
     setProfile(p.data ?? null);
     setPayouts((pays.data ?? []) as Payout[]);
+    setDelivered((orders.data ?? []) as DeliveredOrder[]);
 
     if (p.data?.stripe_connect_account_id && !p.data.payouts_enabled) {
       const res = await fnRefresh();
@@ -130,13 +154,36 @@ function DriverEarnings() {
     if ("url" in res && res.url) window.open(res.url, "_blank");
   }
 
-  const lifetime = payouts
-    .filter((p) => p.status === "paid")
-    .reduce((s, p) => s + p.amount_cents, 0);
-  const lifetimeTips = payouts
-    .filter((p) => p.status === "paid")
-    .reduce((s, p) => s + p.tip_cents, 0);
-  const pending = payouts.filter((p) => p.status !== "paid").length;
+  const payoutByOrder = new Map(payouts.map((p) => [p.order_id, p]));
+
+  const lifetimeEarned = delivered.reduce(
+    (s, o) => s + driverShareCents(o.price_cents, o.tip_cents),
+    0,
+  );
+  const lifetimeTips = delivered.reduce((s, o) => s + o.tip_cents, 0);
+  const pendingCount = delivered.filter((o) => {
+    const p = payoutByOrder.get(o.id);
+    const status = p?.status ?? o.payout_status ?? "pending";
+    return status !== "paid";
+  }).length;
+
+  const history = delivered.map((o) => {
+    const p = payoutByOrder.get(o.id);
+    const amount = p?.amount_cents ?? driverShareCents(o.price_cents, o.tip_cents);
+    const tip = p?.tip_cents ?? o.tip_cents;
+    const feeShare = p?.fee_share_cents ?? Math.round(o.price_cents * 0.7);
+    const status = p?.status ?? o.payout_status ?? "pending";
+    return {
+      key: o.id,
+      label: o.item_description,
+      when: o.delivered_at ?? o.created_at,
+      amount,
+      tip,
+      feeShare,
+      status,
+      error: p?.error_message ?? null,
+    };
+  });
 
   return (
     <div className="space-y-8">
@@ -187,34 +234,38 @@ function DriverEarnings() {
         </div>
       )}
 
-      {/* Stats */}
+      {/* Stats — based on completed deliveries, not only successful Stripe transfers */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Lifetime earnings" value={fmtUSD(lifetime)} />
+        <Stat label="Lifetime earnings" value={fmtUSD(lifetimeEarned)} />
         <Stat label="Tips earned" value={fmtUSD(lifetimeTips)} />
-        <Stat label="Pending transfers" value={String(pending)} />
+        <Stat label="Pending transfers" value={String(pendingCount)} />
       </div>
 
       {/* History */}
       <section>
-        <h2 className="font-serif text-2xl">Payout history</h2>
-        {payouts.length === 0 ? (
+        <h2 className="font-serif text-2xl">Delivery earnings</h2>
+        <p className="text-sm text-muted-foreground">Your 70% fee share + tips per completed delivery.</p>
+        {history.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-            No payouts yet. Complete your first delivery to see it here.
+            No deliveries yet. Complete your first delivery to see it here.
           </div>
         ) : (
           <ul className="mt-4 divide-y divide-border rounded-2xl border border-border bg-card">
-            {payouts.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
+            {history.map((row) => (
+              <li key={row.key} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
                 <div className="min-w-0">
-                  <p className="font-medium">Order {p.order_id.slice(0, 8)}</p>
+                  <p className="truncate font-medium">{row.label}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(p.created_at).toLocaleString()} · fee {fmtUSD(p.fee_share_cents)} + tip {fmtUSD(p.tip_cents)}
+                    {new Date(row.when).toLocaleString()} · fee {fmtUSD(row.feeShare)} + tip {fmtUSD(row.tip)}
                   </p>
+                  {row.error && (
+                    <p className="mt-0.5 text-xs text-amber-500">Transfer pending: platform Stripe balance needed</p>
+                  )}
                 </div>
                 <div className="text-right">
-                  <p className="font-serif text-lg text-gold">{fmtUSD(p.amount_cents)}</p>
-                  <p className={`text-[10px] uppercase tracking-widest ${p.status === "paid" ? "text-emerald-500" : "text-amber-500"}`}>
-                    {p.status}
+                  <p className="font-serif text-lg text-gold">{fmtUSD(row.amount)}</p>
+                  <p className={`text-[10px] uppercase tracking-widest ${row.status === "paid" ? "text-emerald-500" : "text-amber-500"}`}>
+                    {row.status === "paid" ? "paid" : row.status === "failed" ? "transfer failed" : "pending"}
                   </p>
                 </div>
               </li>
