@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { setDriverPresence, acceptOffer, declineOffer, claimOpenOrder } from "@/lib/dispatch.functions";
 import { refreshAccountStatus } from "@/lib/connect.functions";
 import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
+import { useBgmVolume } from "@/components/bgm-provider";
 
 export const Route = createFileRoute("/driver/dashboard")({
   head: () => ({
@@ -52,6 +53,7 @@ const ONLINE_INTENT_KEY = "myrunner-driver-online";
 
 function DriverDashboard() {
   const { user } = useAuth();
+  const { setMuted } = useBgmVolume();
   const [online, setOnline] = useState(false);
   const [pool, setPool] = useState<Order[]>([]);
   const [mine, setMine] = useState<Order[]>([]);
@@ -293,6 +295,7 @@ function DriverDashboard() {
     const orderId = currentOffer.order_id;
     try {
       await acceptFn({ data: { offerId: currentOffer.id } });
+      setMuted(true);
       toast.success("Order accepted — opening delivery.");
       setCurrentOffer(null);
       navigate({ to: "/driver/orders/$id", params: { id: orderId } });
@@ -317,6 +320,7 @@ function DriverDashboard() {
     }
     try {
       await claimFn({ data: { orderId: o.id } });
+      setMuted(true);
       toast.success("Order claimed — opening delivery.");
       navigate({ to: "/driver/orders/$id", params: { id: o.id } });
     } catch (e) {

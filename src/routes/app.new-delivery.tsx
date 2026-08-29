@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import { createCheckoutSession } from "@/lib/checkout.functions";
 import { createOrder } from "@/lib/order.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { useBgmVolume } from "@/components/bgm-provider";
 
 export const Route = createFileRoute("/app/new-delivery")({
   head: () => ({ meta: [{ title: "New delivery — MyRunner" }, { name: "robots", content: "noindex" }] }),
@@ -21,8 +22,15 @@ export const Route = createFileRoute("/app/new-delivery")({
 
 function NewDelivery() {
   const nav = useNavigate();
+  const { setMuted } = useBgmVolume();
   const checkoutFn = useServerFn(createCheckoutSession);
   const createOrderFn = useServerFn(createOrder);
+
+  // Quiet the BGM while placing an order — user can unmute via the floating button anytime
+  useEffect(() => {
+    setMuted(true);
+  }, [setMuted]);
+
   const [miles, setMiles] = useState(3);
   const [type, setType] = useState<"standard" | "multi_pickup" | "multi_dropoff">("standard");
   const [agree, setAgree] = useState(false);
