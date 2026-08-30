@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { routeDriverShareForOrder } from "@/lib/route-driver-share.server";
 
 const OFFER_TIMEOUT_SECONDS = 45;
 const MAX_ATTEMPTS = 5;
@@ -57,7 +58,7 @@ export async function dispatchOrderInternal(orderId: string): Promise<{ ok: bool
     .neq("background_check_status", "failed");
 
   if (!candidates || candidates.length === 0) {
-    // No one online â€” leave queued, cron will re-try
+    // No one online  leave queued, cron will re-try
     await supabaseAdmin
       .from("orders")
       .update({ dispatch_status: "queued", last_dispatched_at: new Date().toISOString() })
@@ -186,6 +187,11 @@ export const acceptOffer = createServerFn({ method: "POST" })
       .update({ driver_status: "on_delivery" })
       .eq("id", context.userId);
 
+    const routed = await routeDriverShareForOrder(supabaseAdmin, offer.order_id);
+    if ("error" in routed) {
+      console.warn("[acceptOffer] route driver share:", routed.error);
+    }
+
     return { ok: true, orderId: offer.order_id };
   });
 
@@ -246,7 +252,7 @@ export const setDriverPresence = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Status first â€” never block going online if location columns are missing on live DB
+    // Status first  never block going online if location columns are missing on live DB
     const { error: statusErr } = await supabaseAdmin
       .from("profiles")
       .update({ driver_status: data.status })
@@ -288,7 +294,7 @@ export const setDriverPresence = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Claim an open paid order — service role so live RLS cannot silently no-op. */
+/** Claim an open paid order  service role so live RLS cannot silently no-op. */
 export const claimOpenOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { orderId: string }) => d)
@@ -327,6 +333,11 @@ export const claimOpenOrder = createServerFn({ method: "POST" })
       .update({ status: "expired" })
       .eq("order_id", data.orderId)
       .eq("status", "pending");
+
+    const routed = await routeDriverShareForOrder(supabaseAdmin, claimed.id);
+    if ("error" in routed) {
+      console.warn("[claimOpenOrder] route driver share:", routed.error);
+    }
 
     return { ok: true as const, orderId: claimed.id };
   });

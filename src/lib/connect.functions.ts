@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createStripeClient, getStripeEnv, getStripeErrorMessage, isDriverConnectReady } from "@/lib/stripe.server";
+import { routeDriverShareForOrder } from "@/lib/route-driver-share.server";
 
 const APP_URL = process.env.PUBLIC_APP_URL ?? "https://myrunner.shop";
 
@@ -180,13 +181,12 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
 
     const { data: order, error: orderErr } = await supabaseAdmin
       .from("orders")
-      .select("id, driver_id, price_cents, tip_cents, payment_status, status, payout_status, stripe_transfer_id")
+      .select("id, driver_id, status, payout_status, stripe_transfer_id")
       .eq("id", data.orderId)
       .single();
 
     if (orderErr || !order) return { error: "Order not found" };
 
-    // Authorization: only the assigned driver, or admins via has_role
     if (String(order.driver_id) !== String(userId)) {
       const { data: role } = await supabaseAdmin
         .from("user_roles")
@@ -197,107 +197,12 @@ export const payoutDriverForOrder = createServerFn({ method: "POST" })
       if (!role) return { error: "Not authorized" };
     }
 
-    if (order.payment_status !== "paid") return { error: "Order is not paid yet" };
     if (order.status !== "delivered") return { error: "Order is not delivered yet" };
     if (order.payout_status === "paid" || order.stripe_transfer_id) {
       return { ok: true, alreadyPaid: true };
     }
-    if (!order.driver_id) return { error: "No driver assigned" };
 
-    const { data: driverProfile } = await supabaseAdmin
-      .from("profiles")
-      .select("stripe_connect_account_id, payouts_enabled")
-      .eq("id", order.driver_id)
-      .single();
-
-    if (!driverProfile?.stripe_connect_account_id || !driverProfile.payouts_enabled) {
-      await supabaseAdmin
-        .from("orders")
-        .update({ payout_status: "blocked_no_account" })
-        .eq("id", order.id);
-      return { error: "Driver has not completed payout onboarding" };
-    }
-
-    // Driver gets 70% of fee + 100% of tip
-    const feeShare = Math.round(order.price_cents * 0.7);
-    const platformFee = order.price_cents - feeShare;
-    const driverTotal = feeShare + order.tip_cents;
-
-    // Demo driver: skip the actual Stripe transfer, write a simulated payout
-    if (driverProfile.stripe_connect_account_id.startsWith("acct_demo")) {
-      await Promise.all([
-        supabaseAdmin.from("orders").update({
-          driver_payout_cents: driverTotal,
-          platform_fee_cents: platformFee,
-          stripe_transfer_id: "tr_demo",
-          payout_status: "paid",
-          paid_out_at: new Date().toISOString(),
-        }).eq("id", order.id),
-        supabaseAdmin.from("driver_payouts").insert({
-          driver_id: order.driver_id,
-          order_id: order.id,
-          amount_cents: driverTotal,
-          tip_cents: order.tip_cents,
-          fee_share_cents: feeShare,
-          stripe_transfer_id: "tr_demo",
-          status: "paid",
-        }),
-      ]);
-      return { ok: true, amount: driverTotal, transferId: "tr_demo", demo: true };
-    }
-
-    try {
-      const stripe = createStripeClient(getStripeEnv());
-      const transfer = await stripe.transfers.create(
-        {
-          amount: driverTotal,
-          currency: "usd",
-          destination: driverProfile.stripe_connect_account_id,
-          transfer_group: order.id,
-          description: `MyRunner delivery payout · order ${order.id.slice(0, 8)}`,
-          metadata: { order_id: order.id, driver_id: order.driver_id },
-        },
-        { idempotencyKey: `payout-${order.id}` },
-      );
-
-      await Promise.all([
-        supabaseAdmin
-          .from("orders")
-          .update({
-            driver_payout_cents: driverTotal,
-            platform_fee_cents: platformFee,
-            stripe_transfer_id: transfer.id,
-            payout_status: "paid",
-            paid_out_at: new Date().toISOString(),
-          })
-          .eq("id", order.id),
-        supabaseAdmin.from("driver_payouts").insert({
-          driver_id: order.driver_id,
-          order_id: order.id,
-          amount_cents: driverTotal,
-          tip_cents: order.tip_cents,
-          fee_share_cents: feeShare,
-          stripe_transfer_id: transfer.id,
-          status: "paid",
-        }),
-      ]);
-
-      return { ok: true, amount: driverTotal, transferId: transfer.id };
-    } catch (e) {
-      const msg = getStripeErrorMessage(e);
-      await supabaseAdmin
-        .from("orders")
-        .update({ payout_status: "failed" })
-        .eq("id", order.id);
-      await supabaseAdmin.from("driver_payouts").insert({
-        driver_id: order.driver_id,
-        order_id: order.id,
-        amount_cents: driverTotal,
-        tip_cents: order.tip_cents,
-        fee_share_cents: feeShare,
-        status: "failed",
-        error_message: msg,
-      });
-      return { error: msg };
-    }
+    const result = await routeDriverShareForOrder(supabaseAdmin, data.orderId);
+    if ("error" in result) return { error: result.error };
+    return { ok: true, alreadyPaid: result.alreadyPaid, amount: result.amount };
   });
