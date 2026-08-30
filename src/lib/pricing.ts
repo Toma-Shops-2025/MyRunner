@@ -1,5 +1,4 @@
-/** TEMP for testing — restore to 599 ($5.99) when done. */
-export const BASE_FEE_CENTS = 0;
+export const BASE_FEE_CENTS = 599;
 export const PER_MILE_CENTS = 150;
 export const EXTRA_STOP_CENTS = 300;
 
