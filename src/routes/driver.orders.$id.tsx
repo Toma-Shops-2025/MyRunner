@@ -72,7 +72,7 @@ function DriverOrder() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
-  async function advance(next: string, extra: Partial<Order> = {}) {
+  async function advance(next: string, extra: Partial<Order> = {}): Promise<boolean> {
     setBusy(true);
     try {
       await advanceFn({
@@ -96,8 +96,10 @@ function DriverOrder() {
           toast.success("Payout already routed to your account.");
         }
       }
+      return true;
     } catch (e) {
       toast.error((e as Error).message || "Could not update order.");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -121,6 +123,23 @@ function DriverOrder() {
     setBody("");
     const res = await sendMsg({ data: { orderId: id, body: text } });
     if ("error" in res && res.error) toast.error(res.error);
+  }
+
+  function openMaps(address: string) {
+    window.open(
+      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  }
+
+  async function navigateToDropoff() {
+    if (!order) return;
+    if (order.status === "picked_up") {
+      const ok = await advance("in_transit");
+      if (!ok) return;
+    }
+    openMaps(order.dropoff_address);
   }
 
   if (!order) return <p className="text-muted-foreground">Loading…</p>;
@@ -182,16 +201,13 @@ function DriverOrder() {
             {(order.status === "picked_up" || order.status === "in_transit") && (
               <>
                 <div className="flex flex-wrap gap-2">
-                  <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
-                    <a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.dropoff_address)}`}>
-                      <MapPin className="mr-1 size-4" /> Navigate to drop-off
-                    </a>
+                  <Button
+                    className="bg-gold text-primary-foreground hover:bg-gold/90"
+                    onClick={() => void navigateToDropoff()}
+                    disabled={busy}
+                  >
+                    <MapPin className="mr-1 size-4" /> Navigate to drop-off
                   </Button>
-                  {order.status === "picked_up" && (
-                    <Button variant="outline" onClick={() => advance("in_transit")} disabled={busy}>
-                      Start delivery
-                    </Button>
-                  )}
                 </div>
                 <div className="rounded-xl border border-border bg-muted/30 p-4">
                   <p className="text-sm font-medium">At the drop-off?</p>
