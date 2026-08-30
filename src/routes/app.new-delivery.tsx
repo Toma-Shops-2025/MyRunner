@@ -187,7 +187,6 @@ function NewDelivery() {
           <p className="mt-1 text-xs text-muted-foreground">
             {fmtUSD(BASE_FEE_CENTS)} base + {fmtUSD(Math.round(effectiveMiles * PER_MILE_CENTS))} miles
             {extraStops ? ` + ${fmtUSD(extraStops * EXTRA_STOP_CENTS)} extra stop` : ""}
-            {BASE_FEE_CENTS === 0 ? " · base fee waived for testing" : ""}
           </p>
         </div>
 
