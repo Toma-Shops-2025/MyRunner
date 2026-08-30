@@ -57,6 +57,7 @@ export async function routeDriverShareForOrder(
   }
 
   const { feeShare, platformFee, driverTotal } = driverShareCents(order.price_cents, order.tip_cents);
+  const retryToken = order.payout_status === "failed" ? String(Date.now()) : undefined;
 
   try {
     const routed = await captureAndRouteDriverShare({
@@ -66,6 +67,7 @@ export async function routeDriverShareForOrder(
       tipCents: order.tip_cents,
       orderId: order.id,
       driverId: order.driver_id,
+      retryToken,
     });
 
     await supabaseAdmin

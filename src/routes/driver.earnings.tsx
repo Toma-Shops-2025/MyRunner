@@ -11,6 +11,7 @@ import {
   createOnboardingLink,
   refreshAccountStatus,
   createDashboardLink,
+  payoutDriverForOrder,
 } from "@/lib/connect.functions";
 import { toast } from "sonner";
 import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
@@ -86,6 +87,8 @@ function DriverEarnings() {
   const fnLink = useServerFn(createOnboardingLink);
   const fnRefresh = useServerFn(refreshAccountStatus);
   const fnDashboard = useServerFn(createDashboardLink);
+  const fnRetryPayout = useServerFn(payoutDriverForOrder);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -173,6 +176,19 @@ function DriverEarnings() {
     const res = await fnDashboard();
     if ("error" in res && res.error) return toast.error(res.error);
     if ("url" in res && res.url) window.open(res.url, "_blank");
+  }
+
+  async function retryPayout(orderId: string) {
+    setRetryingId(orderId);
+    try {
+      const res = await fnRetryPayout({ data: { orderId } });
+      if ("error" in res && res.error) toast.error(res.error);
+      else if ("amount" in res && res.amount) toast.success(`Payout sent: ${fmtUSD(res.amount)}`);
+      else if ("alreadyPaid" in res && res.alreadyPaid) toast.success("Already paid out.");
+      await load();
+    } finally {
+      setRetryingId(null);
+    }
   }
 
   const lifetimeEarned = delivered.reduce(
@@ -278,6 +294,18 @@ function DriverEarnings() {
                   <p className={`text-[10px] uppercase tracking-widest ${row.status === "paid" ? "text-emerald-500" : "text-amber-500"}`}>
                     {row.status === "paid" ? "paid" : row.status === "failed" ? "transfer failed" : "pending"}
                   </p>
+                  {(row.status === "failed" || row.status === "pending") && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 h-7 px-2 text-[10px]"
+                      disabled={retryingId === row.key}
+                      onClick={() => void retryPayout(row.key)}
+                    >
+                      {retryingId === row.key ? <Loader2 className="size-3 animate-spin" /> : "Retry payout"}
+                    </Button>
+                  )}
                 </div>
               </li>
             ))}
