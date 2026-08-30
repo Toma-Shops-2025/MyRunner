@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { MapPin, RefreshCw, Share2 } from "lucide-react";
+import { Bell, MapPin, RefreshCw, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
@@ -13,7 +13,13 @@ import { toast } from "sonner";
 import { setDriverPresence, acceptOffer, declineOffer, claimOpenOrder } from "@/lib/dispatch.functions";
 import { refreshAccountStatus } from "@/lib/connect.functions";
 import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
-import { ensureDriverNotificationPermission, notifyDriverIfBackground } from "@/lib/driver-notifications";
+import {
+  ensureDriverNotificationPermission,
+  getDriverNotifyStatus,
+  notifyDriverIfBackground,
+  registerDriverServiceWorker,
+  type DriverNotifyStatus,
+} from "@/lib/driver-notifications";
 import { useBgmVolume } from "@/components/bgm-provider";
 
 export const Route = createFileRoute("/driver/dashboard")({
@@ -66,6 +72,7 @@ function DriverDashboard() {
   const [loading, setLoading] = useState(true);
   const [currentOffer, setCurrentOffer] = useState<(Offer & { order?: Order }) | null>(null);
   const [offerSecondsLeft, setOfferSecondsLeft] = useState(0);
+  const [notifyStatus, setNotifyStatus] = useState<DriverNotifyStatus>("default");
 
   const presenceFn = useServerFn(setDriverPresence);
   const acceptFn = useServerFn(acceptOffer);
@@ -164,6 +171,27 @@ function DriverDashboard() {
         setOnline(false);
       });
   }, [user, presenceFn]);
+
+  useEffect(() => {
+    setNotifyStatus(getDriverNotifyStatus());
+    void registerDriverServiceWorker();
+    const sync = () => setNotifyStatus(getDriverNotifyStatus());
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+
+  async function enableOrderAlerts() {
+    const status = await ensureDriverNotificationPermission();
+    setNotifyStatus(status);
+    if (status === "granted") toast.success("Order alerts on. Keep this tab open in Chrome.");
+    else if (status === "denied") {
+      toast.error("Chrome blocked alerts. Turn on notifications for Chrome in your phone Settings, then tap Enable alerts again.");
+    } else if (status === "unsupported") {
+      toast.error("This browser cannot show order alerts.");
+    } else {
+      toast.message("Allow notifications when Chrome asks, or enable them in phone Settings → Apps → Chrome.");
+    }
+  }
 
   useEffect(() => {
     if (!user) return;
@@ -298,7 +326,7 @@ function DriverDashboard() {
     }
     setOnline(next);
     try {
-      if (next) void ensureDriverNotificationPermission();
+      if (next) await enableOrderAlerts();
       await presenceFn({ data: { status: next ? "online" : "offline" } });
       if (next) sessionStorage.setItem(ONLINE_INTENT_KEY, "1");
       else sessionStorage.removeItem(ONLINE_INTENT_KEY);
@@ -382,6 +410,20 @@ function DriverDashboard() {
           <Switch id="online" checked={online} onCheckedChange={toggleOnline} />
         </div>
       </div>
+
+      {notifyStatus !== "granted" && notifyStatus !== "unsupported" && (
+        <div className="rounded-2xl border border-gold/40 bg-gold/5 p-5">
+          <p className="font-serif text-lg">Turn on order alerts</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            If your phone has notifications off for Chrome, the site cannot show a permission popup.
+            Open <span className="text-foreground">Settings → Apps → Chrome → Notifications</span> and turn them on, then tap the button below.
+          </p>
+          <Button type="button" className="mt-4 bg-gold text-primary-foreground hover:bg-gold/90" onClick={() => void enableOrderAlerts()}>
+            <Bell className="mr-2 size-4" />
+            Enable alerts
+          </Button>
+        </div>
+      )}
 
       {(bgStatus === "failed" || !isActive) && (
         <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-5">

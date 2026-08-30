@@ -1,39 +1,69 @@
-const PERMISSION_KEY = "myrunner-driver-notify-asked";
+export type DriverNotifyStatus = "unsupported" | "granted" | "denied" | "default";
 
-/** Ask once when the driver goes online (mobile browsers require a user gesture). */
-export async function ensureDriverNotificationPermission(): Promise<boolean> {
-  if (typeof window === "undefined" || !("Notification" in window)) return false;
-  if (Notification.permission === "granted") return true;
-  if (Notification.permission === "denied") return false;
-  if (sessionStorage.getItem(PERMISSION_KEY) === "1") return false;
+export function getDriverNotifyStatus(): DriverNotifyStatus {
+  if (typeof window === "undefined" || !("Notification" in window)) return "unsupported";
+  return Notification.permission as DriverNotifyStatus;
+}
 
-  sessionStorage.setItem(PERMISSION_KEY, "1");
+export async function registerDriverServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return null;
   try {
-    const result = await Notification.requestPermission();
-    return result === "granted";
+    return await navigator.serviceWorker.register("/sw.js", { scope: "/" });
   } catch {
-    return false;
+    return null;
   }
 }
 
-/** Show a system notification when the dashboard tab is in the background. */
+/**
+ * Ask for notification permission from a real tap (toggle or button).
+ * Android Chrome will not show a prompt if Chrome's OS notifications are off —
+ * permission then comes back as "denied" immediately.
+ */
+export async function ensureDriverNotificationPermission(): Promise<DriverNotifyStatus> {
+  if (typeof window === "undefined" || !("Notification" in window)) return "unsupported";
+  await registerDriverServiceWorker();
+  if (Notification.permission === "granted") return "granted";
+  if (Notification.permission === "denied") return "denied";
+
+  try {
+    const result = await Notification.requestPermission();
+    return result as DriverNotifyStatus;
+  } catch {
+    return "denied";
+  }
+}
+
 export function notifyDriverIfBackground(title: string, body: string, tag?: string) {
   if (typeof window === "undefined" || !("Notification" in window)) return;
   if (Notification.permission !== "granted") return;
   if (!document.hidden && document.hasFocus()) return;
 
-  try {
-    const n = new Notification(title, {
-      body,
-      tag,
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
+  const payload = {
+    body,
+    tag,
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    data: { url: "/driver/dashboard" },
+  };
+
+  const showViaWorker = navigator.serviceWorker?.ready?.then((reg) =>
+    reg.showNotification(title, payload),
+  );
+
+  if (showViaWorker) {
+    showViaWorker.catch(() => {
+      try {
+        new Notification(title, payload);
+      } catch {
+        /* ignore */
+      }
     });
-    n.onclick = () => {
-      window.focus();
-      n.close();
-    };
+    return;
+  }
+
+  try {
+    new Notification(title, payload);
   } catch {
-    /* ignore — some browsers block without service worker */
+    /* ignore */
   }
 }
