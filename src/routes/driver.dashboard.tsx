@@ -14,9 +14,12 @@ import { setDriverPresence, acceptOffer, declineOffer, claimOpenOrder } from "@/
 import { refreshAccountStatus } from "@/lib/connect.functions";
 import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
 import {
+  driverNotifyHelp,
   ensureDriverNotificationPermission,
   getDriverNotifyStatus,
+  isNativeDriverApp,
   notifyDriverIfBackground,
+  refreshNativeNotifyStatus,
   registerDriverServiceWorker,
   type DriverNotifyStatus,
 } from "@/lib/driver-notifications";
@@ -175,21 +178,33 @@ function DriverDashboard() {
   useEffect(() => {
     setNotifyStatus(getDriverNotifyStatus());
     void registerDriverServiceWorker();
-    const sync = () => setNotifyStatus(getDriverNotifyStatus());
+    if (isNativeDriverApp()) {
+      void refreshNativeNotifyStatus().then(setNotifyStatus);
+    }
+    const sync = () => {
+      if (isNativeDriverApp()) void refreshNativeNotifyStatus().then(setNotifyStatus);
+      else setNotifyStatus(getDriverNotifyStatus());
+    };
     document.addEventListener("visibilitychange", sync);
     return () => document.removeEventListener("visibilitychange", sync);
   }, []);
 
   async function enableOrderAlerts() {
+    const help = driverNotifyHelp(notifyStatus);
     const status = await ensureDriverNotificationPermission();
     setNotifyStatus(status);
-    if (status === "granted") toast.success("Order alerts on. Keep this tab open in Chrome.");
-    else if (status === "denied") {
-      toast.error("Chrome blocked alerts. Turn on notifications for Chrome in your phone Settings, then tap Enable alerts again.");
+    if (status === "granted") {
+      toast.success(
+        isNativeDriverApp()
+          ? "Order alerts on in the MyRunner app."
+          : "Order alerts on. Keep this Chrome tab open while you drive.",
+      );
+    } else if (status === "denied") {
+      toast.error(help.toastDenied);
     } else if (status === "unsupported") {
-      toast.error("This browser cannot show order alerts.");
+      toast.error("This browser cannot show order alerts. Use the MyRunner app or Chrome.");
     } else {
-      toast.message("Allow notifications when Chrome asks, or enable them in phone Settings → Apps → Chrome.");
+      toast.message("Allow notifications when your phone asks.");
     }
   }
 
@@ -413,11 +428,8 @@ function DriverDashboard() {
 
       {notifyStatus !== "granted" && notifyStatus !== "unsupported" && (
         <div className="rounded-2xl border border-gold/40 bg-gold/5 p-5">
-          <p className="font-serif text-lg">Turn on order alerts</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            If your phone has notifications off for Chrome, the site cannot show a permission popup.
-            Open <span className="text-foreground">Settings → Apps → Chrome → Notifications</span> and turn them on, then tap the button below.
-          </p>
+          <p className="font-serif text-lg">{driverNotifyHelp(notifyStatus).title}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{driverNotifyHelp(notifyStatus).body}</p>
           <Button type="button" className="mt-4 bg-gold text-primary-foreground hover:bg-gold/90" onClick={() => void enableOrderAlerts()}>
             <Bell className="mr-2 size-4" />
             Enable alerts
