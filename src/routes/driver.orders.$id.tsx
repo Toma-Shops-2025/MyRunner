@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
 import { payoutDriverForOrder } from "@/lib/connect.functions";
 import { advanceDriverOrder } from "@/lib/dispatch.functions";
+import { sendOrderMessage } from "@/lib/order.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/driver/orders/$id")({
@@ -47,6 +48,7 @@ function DriverOrder() {
   const fileRef = useRef<HTMLInputElement>(null);
   const runPayout = useServerFn(payoutDriverForOrder);
   const advanceFn = useServerFn(advanceDriverOrder);
+  const sendMsg = useServerFn(sendOrderMessage);
 
   useEffect(() => {
     let active = true;
@@ -117,8 +119,8 @@ function DriverOrder() {
     if (!body.trim() || !user) return;
     const text = body.trim();
     setBody("");
-    const { error } = await supabase.from("order_messages").insert({ order_id: id, sender_id: user.id, body: text });
-    if (error) toast.error(error.message);
+    const res = await sendMsg({ data: { orderId: id, body: text } });
+    if ("error" in res && res.error) toast.error(res.error);
   }
 
   if (!order) return <p className="text-muted-foreground">Loading…</p>;

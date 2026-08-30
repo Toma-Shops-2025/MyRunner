@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
 import { createCheckoutSession, createTipCheckoutSession, confirmOrderPayment } from "@/lib/checkout.functions";
 import { payoutDriverForOrder } from "@/lib/connect.functions";
+import { sendOrderMessage } from "@/lib/order.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/orders/$id")({
@@ -62,6 +63,7 @@ function OrderDetail() {
   const tipCheckout = useServerFn(createTipCheckoutSession);
   const confirmPayment = useServerFn(confirmOrderPayment);
   const runPayout = useServerFn(payoutDriverForOrder);
+  const sendMsg = useServerFn(sendOrderMessage);
 
   async function payNow() {
     setPayBusy(true);
@@ -177,10 +179,8 @@ function OrderDetail() {
     if (!body.trim() || !user) return;
     const text = body.trim();
     setBody("");
-    const { error } = await supabase
-      .from("order_messages")
-      .insert({ order_id: id, sender_id: user.id, body: text });
-    if (error) toast.error(error.message);
+    const res = await sendMsg({ data: { orderId: id, body: text } });
+    if ("error" in res && res.error) toast.error(res.error);
   }
 
   async function advanceStatus(next: string) {

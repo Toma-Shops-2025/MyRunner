@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { setDriverPresence, acceptOffer, declineOffer, claimOpenOrder } from "@/lib/dispatch.functions";
 import { refreshAccountStatus } from "@/lib/connect.functions";
 import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
+import { ensureDriverNotificationPermission, notifyDriverIfBackground } from "@/lib/driver-notifications";
 import { useBgmVolume } from "@/components/bgm-provider";
 
 export const Route = createFileRoute("/driver/dashboard")({
@@ -74,6 +75,7 @@ function DriverDashboard() {
   const navigate = useNavigate();
 
   const lastLocRef = useRef<{ lat: number; lng: number } | null>(null);
+  const knownPoolIdsRef = useRef<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -109,6 +111,18 @@ function DriverDashboard() {
         .maybeSingle(),
     ]);
     setPool((poolRes.data ?? []) as Order[]);
+    const poolOrders = (poolRes.data ?? []) as Order[];
+    const prevPool = knownPoolIdsRef.current;
+    for (const o of poolOrders) {
+      if (!prevPool.has(o.id) && prevPool.size > 0) {
+        notifyDriverIfBackground(
+          "Open delivery available",
+          o.item_description.slice(0, 80),
+          `pool-${o.id}`,
+        );
+      }
+    }
+    knownPoolIdsRef.current = new Set(poolOrders.map((o) => o.id));
     setMine((mineRes.data ?? []) as Order[]);
     setCompleted((doneRes.data ?? []) as Order[]);
     const stars = (ratingsRes.data ?? []).map((r: { stars: number }) => r.stars);
@@ -199,6 +213,11 @@ function DriverDashboard() {
       if (data && new Date(data.expires_at).getTime() > Date.now()) {
         const { data: order } = await supabase.from("orders").select("*").eq("id", data.order_id).maybeSingle();
         setCurrentOffer({ ...(data as Offer), order: (order ?? undefined) as Order | undefined });
+        notifyDriverIfBackground(
+          "New delivery offer",
+          (order as Order | null)?.item_description?.slice(0, 80) ?? "Tap to accept within 45 seconds",
+          `offer-${data.id}`,
+        );
         // Beep + vibrate
         try {
           const AC = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext);
@@ -279,6 +298,7 @@ function DriverDashboard() {
     }
     setOnline(next);
     try {
+      if (next) void ensureDriverNotificationPermission();
       await presenceFn({ data: { status: next ? "online" : "offline" } });
       if (next) sessionStorage.setItem(ONLINE_INTENT_KEY, "1");
       else sessionStorage.removeItem(ONLINE_INTENT_KEY);

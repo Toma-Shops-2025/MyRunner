@@ -53,3 +53,46 @@ export const createOrder = createServerFn({ method: "POST" })
 
     return { orderId: created.id };
   });
+
+const sendMessageInput = z.object({
+  orderId: z.string().uuid(),
+  body: z.string().min(1).max(2000),
+});
+
+/** Send in-order chat — service role so live RLS text/uuid mismatches cannot block messages. */
+export const sendOrderMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => sendMessageInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: order, error: orderErr } = await supabaseAdmin
+      .from("orders")
+      .select("id, customer_id, driver_id")
+      .eq("id", data.orderId)
+      .maybeSingle();
+
+    if (orderErr || !order) return { error: "Order not found" };
+
+    const involved =
+      String(order.customer_id) === String(userId) || String(order.driver_id) === String(userId);
+    if (!involved) {
+      const { data: role } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (!role) return { error: "Not authorized" };
+    }
+
+    const text = data.body.trim();
+    const { error } = await supabaseAdmin.from("order_messages").insert({
+      order_id: data.orderId,
+      sender_id: userId,
+      body: text,
+    });
+    if (error) return { error: error.message };
+    return { ok: true as const };
+  });

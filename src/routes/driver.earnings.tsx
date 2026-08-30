@@ -50,6 +50,27 @@ function driverShareCents(priceCents: number, tipCents: number) {
   return Math.round(priceCents * 0.7) + tipCents;
 }
 
+function payoutRowsForOrder(orderId: string, payouts: Payout[]) {
+  return payouts
+    .filter((p) => p.order_id === orderId)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}
+
+function resolvePayoutDisplay(order: DeliveredOrder, payouts: Payout[]) {
+  const rows = payoutRowsForOrder(order.id, payouts);
+  const paidRow = rows.find((p) => p.status === "paid");
+  const latest = rows[0];
+  const amount = paidRow?.amount_cents ?? latest?.amount_cents ?? driverShareCents(order.price_cents, order.tip_cents);
+  const tip = paidRow?.tip_cents ?? latest?.tip_cents ?? order.tip_cents;
+  const feeShare = paidRow?.fee_share_cents ?? latest?.fee_share_cents ?? Math.round(order.price_cents * 0.7);
+
+  let status = order.payout_status ?? latest?.status ?? "pending";
+  if (order.payout_status === "paid" || paidRow) status = "paid";
+
+  const error = status === "paid" ? null : latest?.error_message ?? null;
+  return { amount, tip, feeShare, status, error };
+}
+
 function DriverEarnings() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<{
@@ -154,34 +175,24 @@ function DriverEarnings() {
     if ("url" in res && res.url) window.open(res.url, "_blank");
   }
 
-  const payoutByOrder = new Map(payouts.map((p) => [p.order_id, p]));
-
   const lifetimeEarned = delivered.reduce(
     (s, o) => s + driverShareCents(o.price_cents, o.tip_cents),
     0,
   );
   const lifetimeTips = delivered.reduce((s, o) => s + o.tip_cents, 0);
-  const pendingCount = delivered.filter((o) => {
-    const p = payoutByOrder.get(o.id);
-    const status = p?.status ?? o.payout_status ?? "pending";
-    return status !== "paid";
-  }).length;
+  const pendingCount = delivered.filter((o) => resolvePayoutDisplay(o, payouts).status !== "paid").length;
 
   const history = delivered.map((o) => {
-    const p = payoutByOrder.get(o.id);
-    const amount = p?.amount_cents ?? driverShareCents(o.price_cents, o.tip_cents);
-    const tip = p?.tip_cents ?? o.tip_cents;
-    const feeShare = p?.fee_share_cents ?? Math.round(o.price_cents * 0.7);
-    const status = p?.status ?? o.payout_status ?? "pending";
+    const row = resolvePayoutDisplay(o, payouts);
     return {
       key: o.id,
       label: o.item_description,
       when: o.delivered_at ?? o.created_at,
-      amount,
-      tip,
-      feeShare,
-      status,
-      error: p?.error_message ?? null,
+      amount: row.amount,
+      tip: row.tip,
+      feeShare: row.feeShare,
+      status: row.status,
+      error: row.error,
     };
   });
 
@@ -258,8 +269,8 @@ function DriverEarnings() {
                   <p className="text-xs text-muted-foreground">
                     {new Date(row.when).toLocaleString()} · fee {fmtUSD(row.feeShare)} + tip {fmtUSD(row.tip)}
                   </p>
-                  {row.error && (
-                    <p className="mt-0.5 text-xs text-amber-500">Transfer pending: platform Stripe balance needed</p>
+                  {row.error && row.status !== "paid" && (
+                    <p className="mt-0.5 text-xs text-amber-500">{row.error}</p>
                   )}
                 </div>
                 <div className="text-right">
