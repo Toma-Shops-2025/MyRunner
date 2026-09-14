@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LegalConsent } from "@/components/site/legal-consent";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { triageSafetyReport } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/app/report")({
   head: () => ({ meta: [{ title: "Report an issue — MyRunner" }, { name: "robots", content: "noindex" }] }),
@@ -50,13 +51,18 @@ function ReportPage() {
           const fd = new FormData(e.currentTarget);
           const { data: { user } } = await supabase.auth.getUser();
           if (!user) { setBusy(false); return toast.error("Please sign in again."); }
-          const { error } = await supabase.from("reports").insert({
+          const { data: inserted, error } = await supabase.from("reports").insert({
             reporter_id: user.id,
             category: reason,
             details: `${String(fd.get("target"))}\n\n${String(fd.get("details"))}`,
-          });
+          }).select("id").single();
           setBusy(false);
           if (error) return toast.error(error.message);
+          if (inserted?.id) {
+            void triageSafetyReport({ data: { reportId: inserted.id } }).catch(() => {
+              /* triage is best-effort */
+            });
+          }
           toast.success("Report submitted. Thank you for keeping MyRunner safe.");
           nav({ to: "/app/dashboard" });
         }}

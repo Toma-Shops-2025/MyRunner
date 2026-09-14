@@ -10,6 +10,7 @@ import {
 import { type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { BgmProvider } from "@/components/bgm-provider";
+import { SupportChat } from "@/components/support-chat";
 
 import appCss from "../styles.css?url";
 
@@ -142,6 +143,7 @@ function RootComponent() {
       <BgmProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <SupportChat />
         <Toaster richColors position="top-center" />
       </BgmProvider>
     </QueryClientProvider>

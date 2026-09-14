@@ -18,7 +18,25 @@ type Report = {
   details: string;
   status: string;
   created_at: string;
+  ai_severity?: string | null;
+  ai_summary?: string | null;
+  ai_labels?: string[] | null;
+  ai_escalate?: boolean | null;
+  ai_suggested_action?: string | null;
 };
+
+function severityClass(s?: string | null) {
+  switch ((s || "").toLowerCase()) {
+    case "critical":
+      return "bg-destructive text-destructive-foreground";
+    case "high":
+      return "bg-destructive/20 text-destructive";
+    case "medium":
+      return "bg-gold/20 text-gold";
+    default:
+      return "bg-muted text-muted-foreground";
+  }
+}
 
 function Reports() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -30,7 +48,9 @@ function Reports() {
     const { data } = await q;
     setReports((data ?? []) as Report[]);
   }
-  useEffect(() => { load(); }, [filter]);
+  useEffect(() => {
+    load();
+  }, [filter]);
 
   async function setStatus(id: string, status: string) {
     const { error } = await supabase.from("reports").update({ status }).eq("id", id);
@@ -65,9 +85,24 @@ function Reports() {
           {reports.map((r) => (
             <li key={r.id} className="rounded-2xl border border-border bg-card p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="space-y-1 text-sm">
-                  <p className="font-medium uppercase tracking-widest text-gold">{r.category}</p>
-                  <p className="text-foreground/90">{r.details}</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium uppercase tracking-widest text-gold">{r.category}</p>
+                    {r.ai_severity && (
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-widest ${severityClass(r.ai_severity)}`}>
+                        {r.ai_severity}
+                        {r.ai_escalate ? " · escalate" : ""}
+                      </span>
+                    )}
+                  </div>
+                  {r.ai_summary && <p className="font-medium text-foreground">{r.ai_summary}</p>}
+                  {r.ai_suggested_action && (
+                    <p className="text-xs text-muted-foreground">Suggested: {r.ai_suggested_action}</p>
+                  )}
+                  {r.ai_labels && r.ai_labels.length > 0 && (
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{r.ai_labels.join(" · ")}</p>
+                  )}
+                  <p className="text-foreground/90 whitespace-pre-wrap">{r.details}</p>
                   <p className="font-mono text-xs text-muted-foreground">
                     reporter: {r.reporter_id}
                     {r.reported_user_id && <> · reported: {r.reported_user_id}</>}

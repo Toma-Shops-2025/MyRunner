@@ -19,7 +19,7 @@ export async function dispatchOrderInternal(orderId: string): Promise<{ ok: bool
 
   const { data: order } = await supabaseAdmin
     .from("orders")
-    .select("id, dispatch_attempts, dispatch_status, pickup_lat, pickup_lng, driver_id, payment_status, status, created_at")
+    .select("id, customer_id, dispatch_attempts, dispatch_status, pickup_lat, pickup_lng, driver_id, payment_status, status, created_at")
     .eq("id", orderId)
     .maybeSingle();
   if (!order) return { ok: false, reason: "order_not_found" };
@@ -46,6 +46,20 @@ export async function dispatchOrderInternal(orderId: string): Promise<{ ok: bool
     .eq("order_id", orderId);
   const seen = new Set((priorOffers ?? []).map((o) => o.driver_id));
 
+  // Customer blocked / preferred Runners
+  const blocked = new Set<string>();
+  const preferred = new Set<string>();
+  if (order.customer_id) {
+    const { data: prefs } = await supabaseAdmin
+      .from("driver_preferences")
+      .select("driver_id, preference")
+      .eq("customer_id", order.customer_id);
+    for (const p of prefs ?? []) {
+      if (p.preference === "blocked") blocked.add(p.driver_id);
+      if (p.preference === "preferred") preferred.add(p.driver_id);
+    }
+  }
+
   const radius = pickRadius(attempt);
 
   // Eligible candidate drivers
@@ -58,7 +72,7 @@ export async function dispatchOrderInternal(orderId: string): Promise<{ ok: bool
     .neq("background_check_status", "failed");
 
   if (!candidates || candidates.length === 0) {
-    // No one online  leave queued, cron will re-try
+    // No one online ï¿½ leave queued, cron will re-try
     await supabaseAdmin
       .from("orders")
       .update({ dispatch_status: "queued", last_dispatched_at: new Date().toISOString() })
@@ -72,7 +86,7 @@ export async function dispatchOrderInternal(orderId: string): Promise<{ ok: bool
 
   type Cand = { id: string; current_lat: number | null; current_lng: number | null };
   const eligible: Array<Cand & { distance: number }> = (candidates as Cand[])
-    .filter((c) => !seen.has(c.id))
+    .filter((c) => !seen.has(c.id) && !blocked.has(c.id))
     .map((c) => {
       let distance = Number.POSITIVE_INFINITY;
       if (pLat != null && pLng != null && c.current_lat != null && c.current_lng != null) {
@@ -89,8 +103,13 @@ export async function dispatchOrderInternal(orderId: string): Promise<{ ok: bool
       return { ...c, distance };
     })
     .filter((c) => c.distance === Number.POSITIVE_INFINITY || c.distance <= radius)
-    // Exclude drivers currently mid-delivery
-    .sort((a, b) => a.distance - b.distance);
+    // Preferred Runners first, then nearest
+    .sort((a, b) => {
+      const ap = preferred.has(a.id) ? 0 : 1;
+      const bp = preferred.has(b.id) ? 0 : 1;
+      if (ap !== bp) return ap - bp;
+      return a.distance - b.distance;
+    });
 
   if (eligible.length === 0) {
     await supabaseAdmin
@@ -252,7 +271,7 @@ export const setDriverPresence = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Status first  never block going online if location columns are missing on live DB
+    // Status first ï¿½ never block going online if location columns are missing on live DB
     const { error: statusErr } = await supabaseAdmin
       .from("profiles")
       .update({ driver_status: data.status })
@@ -294,7 +313,7 @@ export const setDriverPresence = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Claim an open paid order  service role so live RLS cannot silently no-op. */
+/** Claim an open paid order ï¿½ service role so live RLS cannot silently no-op. */
 export const claimOpenOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { orderId: string }) => d)
