@@ -6,7 +6,8 @@ Use with `/drivers` and `public/driver-flyer.html`.
 
 **Headline:** Keep DoorDash & Uber. Add MyRunner.  
 **Sub:** Same car. Same hours. Extra local deliveries when you’re already out.  
-**Bullets:** Keep other apps · 70% fee + 100% tips · No shifts · Early Runners first  
+**Bullets:** Keep other apps · 70% fee + 100% tips · No shifts · Payouts to debit/bank via Stripe · Early Runners first  
+**Bonus callout:** $25 referral — when your invite completes 3 deliveries, you both get $25  
 **CTA:** Scan QR → myrunner.shop/signup?intent=driver  
 **URL:** myrunner.shop/drivers
 

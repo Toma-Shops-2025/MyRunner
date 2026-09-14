@@ -167,6 +167,10 @@ function Drivers() {
           <p className="mt-4 max-w-lg text-muted-foreground">
             Customers are discovering MyRunner. Approved Runners get first offers in their area — keep doing your other apps and stay one tap away.
           </p>
+          <p className="mt-4 max-w-lg text-sm text-gold/90">
+            <strong>$25 referral:</strong> invite a driver. When they complete 3 deliveries, you both get $25.
+            Payouts go to your debit card or bank account via Stripe.
+          </p>
           <Button asChild className="mt-8 bg-gold text-primary-foreground hover:bg-gold/90">
             <Link to="/signup" search={{ intent: "driver" }}>
               Join as an early Runner
