@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fmtUSD } from "@/lib/pricing";
 import { toast } from "sonner";
 import { setDriverPresence, acceptOffer, declineOffer, claimOpenOrder } from "@/lib/dispatch.functions";
+import { getDriverReferralStats } from "@/lib/referral.functions";
 import { refreshAccountStatus } from "@/lib/connect.functions";
 import { notifyPayoutStatusChanged } from "@/lib/auth-routing";
 import {
@@ -76,8 +77,18 @@ function DriverDashboard() {
   const [currentOffer, setCurrentOffer] = useState<(Offer & { order?: Order }) | null>(null);
   const [offerSecondsLeft, setOfferSecondsLeft] = useState(0);
   const [notifyStatus, setNotifyStatus] = useState<DriverNotifyStatus>("default");
+  const [referral, setReferral] = useState<{
+    code: string;
+    link: string;
+    invited: number;
+    paidCount: number;
+    pendingCount: number;
+    deliveryGoal: number;
+    rewardCents: number;
+  } | null>(null);
 
   const presenceFn = useServerFn(setDriverPresence);
+  const referralFn = useServerFn(getDriverReferralStats);
   const acceptFn = useServerFn(acceptOffer);
   const declineFn = useServerFn(declineOffer);
   const claimFn = useServerFn(claimOpenOrder);
@@ -154,6 +165,21 @@ function DriverDashboard() {
     setOnline(prof?.driver_status === "online" || intentOnline);
     setLoading(false);
 
+    try {
+      const stats = await referralFn();
+      setReferral({
+        code: stats.code,
+        link: stats.link,
+        invited: stats.invited,
+        paidCount: stats.paidCount,
+        pendingCount: stats.pendingCount,
+        deliveryGoal: stats.deliveryGoal,
+        rewardCents: stats.rewardCents,
+      });
+    } catch (e) {
+      console.warn("referral stats:", e);
+    }
+
     if (prof?.stripe_connect_account_id && !prof?.payouts_enabled) {
       const res = await refreshPayoutFn();
       if ("payoutsEnabled" in res && res.payoutsEnabled) {
@@ -161,7 +187,7 @@ function DriverDashboard() {
         notifyPayoutStatusChanged();
       }
     }
-  }, [user, refreshPayoutFn]);
+  }, [user, refreshPayoutFn, referralFn]);
 
   // Re-sync online status after navigating back (DB write may lag behind UI toggle)
   useEffect(() => {
@@ -523,13 +549,34 @@ function DriverDashboard() {
         <div className="flex items-center gap-3">
           <Share2 className="size-6 text-gold" />
           <div>
-            <p className="font-serif text-xl">Refer & grow MyRunner</p>
-            <p className="text-sm text-muted-foreground">Grab your QR code and link to share with riders, shops, and neighbors.</p>
+            <p className="font-serif text-xl">$25 driver referral</p>
+            <p className="text-sm text-muted-foreground">
+              Invite a Runner. When they complete {referral?.deliveryGoal ?? 3} deliveries, you both get{" "}
+              {fmtUSD(referral?.rewardCents ?? 2500)} (Stripe debit/bank).
+              {referral
+                ? ` · ${referral.invited} invited · ${referral.paidCount} paid · ${referral.pendingCount} in progress`
+                : ""}
+            </p>
+            {referral?.link && (
+              <p className="mt-2 break-all font-mono text-xs text-gold">{referral.link}</p>
+            )}
           </div>
         </div>
-        <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
-          <Link to="/share">Open share page</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              if (!referral?.link) return toast.error("Referral link not ready yet — run the SQL setup.");
+              await navigator.clipboard.writeText(referral.link);
+              toast.success("Referral link copied");
+            }}
+          >
+            Copy invite link
+          </Button>
+          <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
+            <Link to="/share">Customer share page</Link>
+          </Button>
+        </div>
       </section>
 
       <Dialog open={!!currentOffer} onOpenChange={(open) => { if (!open) handleDecline(); }}>

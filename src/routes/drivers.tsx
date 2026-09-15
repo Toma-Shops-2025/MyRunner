@@ -71,7 +71,7 @@ function Drivers() {
             </Button>
           </div>
           <p className="mt-6 text-sm text-muted-foreground">
-            70% of every fee · 100% of tips · Stripe payouts to your bank
+            70% of every fee · 100% of tips · Payouts to your debit card or bank via Stripe
           </p>
         </div>
       </section>

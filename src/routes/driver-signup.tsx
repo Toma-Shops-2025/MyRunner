@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { LegalConsent } from "@/components/site/legal-consent";
 import { supabase } from "@/integrations/supabase/client";
 import { activateDriverRole } from "@/lib/driver-signup.functions";
+import { attachDriverReferrer } from "@/lib/referral.functions";
+import { clearDriverReferralCode, readDriverReferralCode } from "@/lib/signup-intent";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -137,6 +139,16 @@ function DriverSignup() {
               return toast.error(
                 `Could not save application: ${(err as Error).message || "unknown error"}`,
               );
+            }
+
+            const refCode = readDriverReferralCode();
+            if (refCode) {
+              try {
+                await attachDriverReferrer({ data: { code: refCode } });
+                clearDriverReferralCode();
+              } catch (e) {
+                console.warn("referral attach failed:", (e as Error).message);
+              }
             }
 
             // Fire-and-forget background check (no-op if Checkr keys not set yet)

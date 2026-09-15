@@ -393,6 +393,12 @@ export const advanceDriverOrder = createServerFn({ method: "POST" })
 
     if (data.status === "delivered") {
       await supabaseAdmin.from("profiles").update({ driver_status: "online" }).eq("id", context.userId);
+      try {
+        const { maybeCompleteDriverReferral } = await import("@/lib/referral.functions");
+        await maybeCompleteDriverReferral(context.userId);
+      } catch (e) {
+        console.warn("[advanceDriverOrder] referral check:", e);
+      }
     }
 
     return { ok: true as const };
