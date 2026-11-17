@@ -13,7 +13,7 @@ BEGIN
   ) THEN
     INSERT INTO public.user_roles (user_id, role)
     VALUES (NEW.id, 'admin')
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (user_id, role) DO NOTHING;
   END IF;
   RETURN NEW;
 END;
@@ -25,5 +25,6 @@ FROM public.profiles p
 WHERE lower(p.email) IN ('founder@myrunner.shop', 'mytomaai@gmail.com')
   AND NOT EXISTS (
     SELECT 1 FROM public.user_roles ur
-    WHERE ur.user_id = p.id AND ur.role = 'admin'::public.app_role
+    WHERE ur.user_id::text = p.id::text
+      AND ur.role::text = 'admin'
   );
