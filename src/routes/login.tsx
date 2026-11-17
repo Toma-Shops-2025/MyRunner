@@ -10,6 +10,7 @@ import { signInWithGoogle } from "@/lib/auth-google";
 import { resolvePostAuthDestination } from "@/lib/auth.functions";
 import { resolveClientPostAuthDestination } from "@/lib/auth-routing";
 import { clearSignupIntent } from "@/lib/signup-intent";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const nav = useNavigate();
   const resolveDest = useServerFn(resolvePostAuthDestination);
+  const { user, loading: authLoading, isAdmin, isDriver } = useAuth();
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +40,13 @@ function Login() {
   useEffect(() => {
     clearSignupIntent();
   }, []);
+
+  useEffect(() => {
+    if (authLoading || !user) return;
+    if (isAdmin) nav({ to: "/admin/dashboard" });
+    else if (isDriver) nav({ to: "/driver/dashboard" });
+    else nav({ to: "/app/dashboard" });
+  }, [authLoading, user, isAdmin, isDriver, nav]);
 
   async function google() {
     setGoogleBusy(true);

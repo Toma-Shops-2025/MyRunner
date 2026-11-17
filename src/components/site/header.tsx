@@ -67,6 +67,15 @@ export function SiteHeader() {
                 {n.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gold hover:bg-accent"
+                onClick={() => setOpen(false)}
+              >
+                <ShieldCheck className="size-4" /> Admin
+              </Link>
+            )}
             <div className="mt-2 flex gap-2 border-t border-border pt-3">
               <Button asChild variant="outline" size="sm" className="flex-1">
                 <Link to="/login" onClick={() => setOpen(false)}>Sign in</Link>
