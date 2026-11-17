@@ -25,11 +25,13 @@ export const Route = createFileRoute("/app/dashboard")({
 
 function Dashboard() {
   const nav = useNavigate();
-  const { loading, isDriver } = useAuth();
+  const { loading, isDriver, isAdmin } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   useEffect(() => {
-    if (!loading && isDriver) nav({ to: "/driver/dashboard" });
-  }, [loading, isDriver, nav]);
+    if (loading) return;
+    if (isAdmin) nav({ to: "/admin/dashboard" });
+    else if (isDriver) nav({ to: "/driver/dashboard" });
+  }, [loading, isAdmin, isDriver, nav]);
   useEffect(() => {
     supabase
       .from("orders")

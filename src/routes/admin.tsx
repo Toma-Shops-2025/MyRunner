@@ -32,6 +32,12 @@ function AdminLayout() {
     else if (!isAdmin) nav({ to: "/app/dashboard" });
   }, [loading, user, isAdmin, nav]);
 
+  if (loading) {
+    return (
+      <div className="container-app py-24 text-center text-muted-foreground">Loading admin…</div>
+    );
+  }
+
   if (!user || !isAdmin) return null;
 
   return (
