@@ -7,7 +7,7 @@ const cols = [
     links: [
       { to: "/how-it-works", label: "How it works" },
       { to: "/pricing", label: "Pricing" },
-      { to: "/safety", label: "Safety & insurance" },
+      { to: "/safety", label: "Safety" },
       { to: "/about", label: "About" },
     ],
   },
@@ -49,8 +49,8 @@ export function SiteFooter() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-              Anything. Anytime. Anywhere. On‑demand local delivery for the things
-              you can't go get yourself.
+              Anything. Anywhere. Anytime. Pickup and delivery for eligible items
+              between people and places. Launching first in Louisville, Kentucky.
             </p>
             <p className="mt-6 text-xs text-muted-foreground">
               support@myrunner.shop
@@ -80,8 +80,8 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} MyRunner Inc. All rights reserved.</p>
-          <p className="font-serif italic">Anything · Anytime · Anywhere</p>
+          <p>© {new Date().getFullYear()} MyRunner. All rights reserved.</p>
+          <p className="font-serif italic">Anything. Anywhere. Anytime.</p>
         </div>
       </div>
     </footer>

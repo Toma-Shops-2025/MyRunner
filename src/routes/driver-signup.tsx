@@ -24,7 +24,7 @@ export const Route = createFileRoute("/driver-signup")({
   head: () => ({
     meta: [
       { title: "Become a Runner — Apply to drive for MyRunner" },
-      { name: "description", content: "Apply to drive for MyRunner. Submit your license, insurance, vehicle info, and pass a background check." },
+      { name: "description", content: "Apply to drive for MyRunner in Kentucky. Submit your license, your own insurance, and vehicle info. Background screening is not connected yet." },
     ],
     links: [{ rel: "canonical", href: "/driver-signup" }],
   }),
@@ -80,9 +80,8 @@ function DriverSignup() {
         <p className="text-xs uppercase tracking-widest text-gold">Driver application</p>
         <h1 className="mt-3 font-serif text-5xl">Apply to drive</h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
-          Takes about 5 minutes. You'll be activated as a Runner immediately and can start accepting
-          orders once you finish payout setup. A background check runs in the background — your account
-          stays active unless something disqualifying turns up.
+          Takes about 5 minutes. After you submit, you can finish Stripe payout setup.
+          A third-party background check is not connected, so this form does not screen you.
         </p>
 
         <form
@@ -180,7 +179,7 @@ function DriverSignup() {
             <Field id="dob" label="Date of birth" type="date" />
             <Field id="ssn" label="Social Security Number" placeholder="123-45-6789" />
             <p className="col-span-full text-xs text-muted-foreground">
-              Required by our background-check provider (Checkr). We only store the last 4 digits — the full SSN is sent securely to Checkr and discarded.
+              Only the last 4 digits are saved. The full number is not stored and is not sent to a background-check provider, because none is connected.
             </p>
           </Section>
 

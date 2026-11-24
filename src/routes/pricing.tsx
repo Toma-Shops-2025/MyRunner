@@ -36,21 +36,21 @@ function Pricing() {
               <Row a="Base fee" b="$5.99" />
               <Row a="Per mile" b="$1.50" />
               <Row a="Extra stop (multi‑drop)" b="$3.00 each" />
-              <Row a="Tip" b="Optional · 100% to driver" />
-              <Row a="Promo & loyalty" b="Apply at checkout" />
+              <Row a="Tip" b="Optional · 100% to the Runner" />
+              <Row a="Runner share" b="70% of the delivery fee" />
+              <Row a="Platform fee" b="30% of the delivery fee" />
             </ul>
           </div>
           <div className="rounded-3xl border border-border bg-surface p-8">
             <h2 className="font-serif text-3xl">What you get</h2>
             <ul className="mt-6 space-y-3 text-sm">
               {[
-                "Background‑checked Runner",
-                "Live GPS tracking + in‑app chat",
+                "Live GPS while a Runner is on the job",
+                "In-app messages with your Runner",
                 "Photo proof of delivery",
-                "$100 cargo insurance per delivery",
-                "Stripe‑secured payments",
-                "24/7 availability",
-                "Refunds for issues (1–3 business days)",
+                "Stripe-secured payments",
+                "Price shown before you pay",
+                "Louisville first, then Lexington",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-gold" />
@@ -60,14 +60,13 @@ function Pricing() {
             </ul>
           </div>
         </div>
-        <div className="mt-10 rounded-3xl border border-border bg-gradient-to-br from-gold/5 to-transparent p-8">
-          <h3 className="font-serif text-2xl">High‑demand bonus</h3>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            If an order sits unaccepted for 5+ minutes, MyRunner adds a driver
-            bonus every 5 minutes to incentivize faster pickup. <strong className="text-foreground">You pay
-            the original quoted price.</strong> The platform absorbs the bonus.
-          </p>
-        </div>
+        <p className="mt-8 max-w-2xl text-sm text-muted-foreground">
+          Choosing multi-pickup or multi-dropoff adds one $3.00 stop charge. The order
+          form uses one pickup address and one drop-off address. There is no cargo
+          insurance, no promo code, and no loyalty discount at launch. Runners keep
+          70% of the delivery fee and 100% of tips. MyRunner keeps the other 30% of
+          the delivery fee.
+        </p>
         <div className="mt-12 text-center">
           <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">
             <Link to="/signup">Send a delivery</Link>

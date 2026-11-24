@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#0a0a0a" },
-      { name: "author", content: "MyRunner Inc." },
+      { name: "author", content: "MyRunner" },
       { property: "og:site_name", content: "MyRunner" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -19,16 +19,15 @@ export const Route = createFileRoute("/how-it-works")({
 const steps = [
   ["Enter pickup address", "Where the Runner should go to grab your item. Add a unit number or gate code if needed."],
   ["Describe the item", "A quick sentence so the Runner knows what they're picking up."],
-  ["Enter drop‑off address", "Add a recipient name and phone if it's going to someone else."],
-  ["Choose your delivery type", "Standard (1→1), multi‑pickup (many→1), or multi‑drop (1→many)."],
-  ["Review pricing", "Base fee + per‑mile + extra stops. No hidden charges."],
-  ["Optional add‑ons", "Schedule later, tip your driver, apply a promo, request a preferred Runner."],
+  ["Enter drop‑off address", "Use the item note to name a pickup contact or recipient when they are different from you. The form has one pickup and one drop-off."],
+  ["Choose your delivery type", "Standard, multi-pickup, or multi-dropoff. A multi-stop type adds $3.00."],
+  ["Review pricing", "Base fee + per mile + the multi-stop add-on when that type is selected."],
+  ["Optional tip", "Add a tip before you pay. You can prefer or block a Runner later in Settings."],
   ["Pay securely", "Stripe handles the transaction — your card details never touch our servers."],
   ["Track live", "Watch the Runner move in real time on a GPS map."],
   ["Chat in‑app", "Need to update the address or add a note? Message your Runner directly."],
   ["Photo proof", "A photo at drop‑off confirms delivery and goes straight to your order screen."],
-  ["Rate & review", "30 seconds to leave feedback. Drivers see your rating, you build their reputation."],
-  ["Earn loyalty points", "Points auto‑awarded after every delivery — redeem for discounts."],
+  ["Rate the delivery", "After a completed order you can leave a star rating. There is no published rating yet because there are no completed orders."],
 ];
 
 function HowItWorks() {
@@ -37,11 +36,11 @@ function HowItWorks() {
       <section className="container-app py-20">
         <p className="text-xs uppercase tracking-widest text-gold">How it works</p>
         <h1 className="mt-3 max-w-3xl font-serif text-6xl leading-[1.05]">
-          From your phone to their hands — in twelve simple beats.
+          From your phone to their hands.
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-          We designed MyRunner so anyone can send a delivery in under a minute.
-          Here's the full flow.
+          MyRunner arranges transportation of eligible items. Louisville is first.
+          Here's the order flow.
         </p>
       </section>
       <section className="container-app pb-20">

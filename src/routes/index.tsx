@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "MyRunner — On‑demand local delivery for anything, anywhere" },
-      { name: "description", content: "MyRunner connects you with vetted local Runners to pick up and deliver anything, anytime." },
+      { name: "description", content: "MyRunner is a pickup-and-delivery marketplace launching in Louisville, Kentucky. Arrange transportation of items you already own. Anything. Anywhere. Anytime." },
     ],
   }),
   component: Landing,
@@ -26,7 +26,7 @@ function Landing() {
             <div className="max-w-2xl text-white">
               <span className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs uppercase tracking-widest text-gold backdrop-blur-sm font-bold shadow-glow">
                 <span className="size-1.5 animate-pulse rounded-full bg-gold" />
-                Now live in 50+ cities · 24/7
+                Launching first in Louisville, Kentucky
               </span>
               <h1 className="mt-6 font-serif text-6xl leading-[1.02] sm:text-7xl lg:text-8xl drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] font-black">
                 Need it moved?
@@ -34,8 +34,9 @@ function Landing() {
                 <span className="italic text-gold italic">We're already on it.</span>
               </h1>
               <p className="mt-8 max-w-xl text-lg text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] font-bold">
-                MyRunner connects you with vetted local Runners who'll pick up and
-                deliver almost anything. Starting at <span className="text-gold font-black underline decoration-gold/50">$5.99</span>.
+                MyRunner arranges pickup and delivery of eligible items between people and places.
+                You do not have to buy the item through us. Launching in Louisville, with Lexington next.
+                Starting at <span className="text-gold font-black underline decoration-gold/50">$5.99</span>.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <Button asChild size="lg" className="bg-gold text-black hover:bg-gold/90 font-black rounded-full px-12 h-16 text-lg shadow-glow">
@@ -48,9 +49,9 @@ function Landing() {
                 </Button>
               </div>
               <div className="mt-16 flex items-center gap-8 text-xs text-white/60 font-black uppercase tracking-widest">
-                <Stat label="Avg pickup" value="< 12 min" />
-                <Stat label="Cargo insured" value="$100" />
-                <Stat label="Rating" value="4.9 ★" />
+                <Stat label="Tracking" value="Live GPS" />
+                <Stat label="Delivery" value="Photo proof" />
+                <Stat label="Payments" value="Stripe" />
               </div>
             </div>
           </div>
@@ -62,7 +63,7 @@ function Landing() {
 
             {/* TRUST MARQUEE */}
             <div className="grid grid-cols-2 gap-8 text-center text-[10px] font-black uppercase tracking-[0.3em] text-white/30 sm:grid-cols-4 mb-32 bg-white/2 p-10 rounded-[40px] border border-white/5">
-                <div className="flex flex-col items-center gap-3"><Shield className="size-6 text-gold" /> Vetted Drivers</div>
+                <div className="flex flex-col items-center gap-3"><Shield className="size-6 text-gold" /> In-app chat</div>
                 <div className="flex flex-col items-center gap-3"><MapPin className="size-6 text-gold" /> Live GPS</div>
                 <div className="flex flex-col items-center gap-3"><CheckCircle2 className="size-6 text-gold" /> Photo Proof</div>
                 <div className="flex flex-col items-center gap-3"><Zap className="size-6 text-gold" /> Secure Pay</div>
@@ -83,6 +84,30 @@ function Landing() {
                 </div>
             </div>
 
+            <div className="mb-48">
+                <p className="text-xs font-black uppercase tracking-[0.4em] text-gold mb-4">What MyRunner is</p>
+                <h2 className="text-5xl lg:text-6xl font-serif text-white mb-8 leading-tight">Anything. Anywhere. Anytime.</h2>
+                <p className="max-w-2xl text-white/60 text-lg leading-relaxed">
+                  MyRunner is a pickup-and-delivery marketplace. Customers arrange transportation of eligible items they already own. The item does not have to be purchased through MyRunner. A request can involve three different people: the person who places the order, the pickup contact, and the recipient.
+                </p>
+                <ul className="mt-8 max-w-2xl space-y-3 text-white/70">
+                  {[
+                    "Send belongings you already own to another person.",
+                    "Have forgotten keys, a wallet, a phone, or other belongings picked up and delivered.",
+                    "Pick up from a store, business, home, office, or another location.",
+                    "Send a gift, package, or supplies to a friend, family member, or other recipient.",
+                  ].map((line) => (
+                    <li key={line} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-1 size-4 shrink-0 text-gold" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-6 max-w-2xl text-sm text-white/40">
+                  Louisville is the first market. Lexington is next, after Louisville shows enough demand and the operation is ready. Deliveries stay subject to the law, prohibited-item rules, and what a Runner can carry. Service is not nationwide, and it is not staffed around the clock.
+                </p>
+            </div>
+
             {/* PRICING BLOCK */}
             <div className="rounded-[50px] bg-gradient-to-br from-[#1a1a1a] to-black p-12 lg:p-24 border border-gold/20 shadow-2xl mb-48">
                 <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -95,7 +120,7 @@ function Landing() {
                         </Button>
                     </div>
                     <div className="space-y-4">
-                       {["Base fee: $5.99", "Mileage: $1.50/mi", "Extra Stops: $3.00", "Cargo Insurance: Free", "100% Tips to Runner"].map(line => (
+                       {["Base fee: $5.99", "Mileage: $1.50/mi", "Multi-stop add-on: $3.00", "100% of tips to your Runner", "Stripe-secured payment"].map(line => (
                           <div key={line} className="bg-white/2 border border-white/5 p-6 rounded-2xl flex items-center gap-4 text-white/80 font-black uppercase text-[10px] tracking-widest">
                              <CheckCircle2 className="size-5 text-green-500" /> {line}
                           </div>
@@ -136,6 +161,6 @@ function Stat({ label, value }: { label: string; value: string }) {
 const steps = [
   { title: "Pickup & Drop", body: "Enter addresses and what we are moving." },
   { title: "Pick Service", body: "Standard or multi-stop delivery routes." },
-  { title: "Secure Pay", body: "Stripe-secured payments with full insurance." },
+  { title: "Secure Pay", body: "Stripe-secured payments. You see the price before you pay." },
   { title: "Track Live", body: "Watch your runner deliver on a live map." },
 ];

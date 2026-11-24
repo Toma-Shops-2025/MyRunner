@@ -3,7 +3,7 @@
 export const SUPPORT_FAQ = [
   {
     q: "What can I send with MyRunner?",
-    a: "Almost anything legal that fits in a vehicle — documents, packages, prescriptions, gifts, car parts, keys, groceries. See Community Guidelines for prohibited items.",
+    a: "Eligible items you already own, if they are legal and a Runner can carry them. Examples: belongings sent to another person, forgotten keys or a phone, a store or office pickup, or a gift. The buyer, pickup contact, and recipient can be different people. See Community Guidelines for prohibited items. Launching first in Louisville, Kentucky.",
   },
   {
     q: "How is pricing calculated?",
@@ -11,19 +11,19 @@ export const SUPPORT_FAQ = [
   },
   {
     q: "How fast is pickup?",
-    a: "Average pickup is under 12 minutes in covered metros. You'll see live ETA on your tracking screen.",
+    a: "There is no average pickup time yet. Louisville is the first market and there are no completed orders to measure. The order screen shows live GPS after a Runner accepts.",
   },
   {
     q: "Are deliveries insured?",
-    a: "Yes — every delivery includes up to $100 of cargo insurance at no extra cost.",
+    a: "No. MyRunner does not provide cargo insurance. Do not send anything you cannot afford to lose.",
   },
   {
     q: "How do I become a Runner?",
-    a: "Apply at /driver-signup. Submit your license, insurance, vehicle info, and pass a Checkr background check.",
+    a: "Apply at /driver-signup with your license, your own auto insurance, and vehicle info. A third-party background check is not connected yet.",
   },
   {
     q: "How much do drivers make?",
-    a: "70% of every fee plus 100% of tips. Average earnings are $20–$35/hour depending on demand.",
+    a: "70% of the delivery fee plus 100% of tips, paid through Stripe after a completed delivery. There is no hourly earnings figure yet.",
   },
   {
     q: "When do drivers get paid?",
@@ -53,7 +53,10 @@ export const SUPPORT_FAQ = [
 
 export const SUPPORT_POLICIES = `
 Contact email: support@myrunner.shop
-Support hours promise: AI chat 24/7; human follow-up usually within 24 hours for contact form messages.
+Support: email support@myrunner.shop or the contact form. There is no staffed 24/7 phone line. The in-app assistant answers from this FAQ only.
+Launch: Louisville, Kentucky first. Lexington later. Not nationwide.
+Insurance: MyRunner does not provide cargo, hired-auto, or other insurance.
+Background checks: not connected. Do not say every Runner passed Checkr.
 Safety: Never share passwords. For threats, theft, or assault — call local emergency services first, then file an in-app Report.
 Prohibited: illegal goods, weapons, hazardous materials, people transport (MyRunner is delivery only, not rideshare).
 Driver share: 70% of delivery fee + 100% of tips.
