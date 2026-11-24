@@ -13,14 +13,14 @@ export const Route = createFileRoute("/privacy")({
   }),
   component: () => (
     <LegalLayout title="Privacy Policy" updated="January 1, 2026">
-      <p>This Privacy Policy explains how MyRunner Inc. ("MyRunner", "we", "us") collects, uses, shares, and protects information about you when you use our website, mobile app, or services.</p>
+      <p>This Privacy Policy explains how MyRunner ("we", "us") collects, uses, shares, and protects information about you when you use our website, mobile app, or services. MyRunner is a brand name, not a registered corporation.</p>
       <h2>1. Information we collect</h2>
       <ul>
         <li><strong>Account info</strong>: name, email, phone, password (hashed).</li>
         <li><strong>Delivery info</strong>: pickup/drop‑off addresses, item descriptions, recipient details you provide.</li>
-        <li><strong>Driver info</strong>: license, insurance, vehicle data, background check results (via Checkr).</li>
+        <li><strong>Driver info</strong>: license, the Runner's own insurance details, vehicle data, and the last 4 digits of an SSN entered on the application. A third-party background-check provider is not connected at launch.</li>
         <li><strong>Payment info</strong>: processed by Stripe. We never see or store full card numbers.</li>
-        <li><strong>Location</strong>: real‑time GPS while a delivery is active. Drivers share location every ~30 seconds during active deliveries.</li>
+        <li><strong>Location</strong>: GPS while a Runner is online. The app refreshes that location about every 20 seconds.</li>
         <li><strong>Device & usage</strong>: device type, IP, app version, interactions for analytics and security.</li>
       </ul>
       <h2>2. How we use it</h2>
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/privacy")({
       <h2>3. Who we share with</h2>
       <ul>
         <li><strong>Drivers and customers</strong>: limited info needed to complete the delivery (first name, rating, vehicle).</li>
-        <li><strong>Service providers</strong>: Stripe (payments), Mapbox (maps), Checkr (background), email/SMS providers, hosting.</li>
+        <li><strong>Service providers</strong>: Stripe (payments), Mapbox (maps), and hosting. A background-check provider is not in use yet.</li>
         <li><strong>Legal</strong>: law enforcement when required by valid legal process.</li>
       </ul>
       <p>We do not sell your personal information.</p>

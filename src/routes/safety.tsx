@@ -5,9 +5,9 @@ import { ShieldCheck, Camera, MapPin, FileCheck2, Lock, Headphones } from "lucid
 export const Route = createFileRoute("/safety")({
   head: () => ({
     meta: [
-      { title: "Safety & insurance — How MyRunner protects you" },
-      { name: "description", content: "Background checks, $100 cargo insurance, HNOA driver coverage, live GPS, photo proof, and 24/7 support. Here's how we keep MyRunner safe." },
-      { property: "og:title", content: "Safety & insurance — MyRunner" },
+      { title: "Safety — How MyRunner handles a delivery" },
+      { name: "description", content: "Live GPS, in-app messages, photo proof, and Stripe payments. Cargo insurance and background screening are not in place at the Louisville launch." },
+      { property: "og:title", content: "Safety — MyRunner" },
       { property: "og:description", content: "Every layer of safety we've built into the platform." },
       { property: "og:url", content: "/safety" },
     ],
@@ -25,12 +25,12 @@ function Safety() {
       </section>
       <section className="container-app pb-24 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[
-          { icon: FileCheck2, t: "Background checks", b: "Every Runner passes a Checkr screening — criminal history, DUIs, sexual offenses." },
-          { icon: ShieldCheck, t: "$100 cargo insurance", b: "Every delivery is covered against loss or damage." },
-          { icon: MapPin, t: "Live GPS tracking", b: "Drivers share location every 30 seconds during active jobs." },
-          { icon: Camera, t: "Photo proof of delivery", b: "Confirmation photo at the drop‑off goes to your order screen." },
-          { icon: Lock, t: "Stripe‑secured payments", b: "We never store your card. PCI‑compliant by design." },
-          { icon: Headphones, t: "24/7 support", b: "AI agents + human escalation for any issue, any hour." },
+          { icon: FileCheck2, t: "Runner applications", b: "Applicants submit a license and their own auto insurance. A third-party background check is not running at launch." },
+          { icon: ShieldCheck, t: "No cargo insurance yet", b: "MyRunner does not insure the item. Do not send anything you cannot afford to lose." },
+          { icon: MapPin, t: "Live GPS tracking", b: "While a Runner is online, the app shares location from the device and refreshes about every 20 seconds." },
+          { icon: Camera, t: "Photo proof of delivery", b: "A confirmation photo at drop-off is stored on the order." },
+          { icon: Lock, t: "Stripe-secured payments", b: "Card payments go through Stripe. MyRunner does not store full card numbers." },
+          { icon: Headphones, t: "Support by email", b: "Email support@myrunner.shop or use the contact form. There is no staffed 24/7 support line." },
         ].map(({ icon: Icon, t, b }) => (
           <div key={t} className="rounded-2xl border border-border bg-card p-6">
             <Icon className="size-6 text-gold" />
@@ -41,13 +41,12 @@ function Safety() {
       </section>
       <section className="container-app pb-24">
         <div className="rounded-3xl border border-border bg-surface p-10">
-          <h2 className="font-serif text-3xl">Insurance coverage</h2>
+          <h2 className="font-serif text-3xl">What is not covered yet</h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <Row t="Cargo / Goods in transit" b="Up to $100 per delivery at no extra cost." />
-            <Row t="General liability" b="Platform coverage for third‑party claims." />
-            <Row t="HNOA (Hired & Non‑Owned Auto)" b="Covers drivers during active delivery windows." />
-            <Row t="Cyber liability" b="Customer data and payment security." />
-            <Row t="Professional liability" b="Covers negligence / service failure claims." />
+            <Row t="Cargo insurance" b="Not purchased. There is no $100 goods-in-transit policy." />
+            <Row t="Platform auto coverage" b="Runners must carry their own auto insurance. MyRunner does not provide hired-auto coverage." />
+            <Row t="Background screening" b="Checkr is not connected. Do not assume a Runner has passed a screening." />
+            <Row t="Support hours" b="Use support@myrunner.shop. Replies are not promised around the clock." />
           </div>
         </div>
       </section>

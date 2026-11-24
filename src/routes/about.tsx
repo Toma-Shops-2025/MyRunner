@@ -4,10 +4,10 @@ import { PageShell } from "@/components/site/page-shell";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About MyRunner — Built for the things food delivery forgot" },
-      { name: "description", content: "MyRunner is a general‑purpose, on‑demand local delivery platform for anything that fits in a vehicle. Built for the gaps the big apps don't fill." },
+      { title: "About MyRunner — Pickup and delivery, not just food" },
+      { name: "description", content: "MyRunner is a pickup-and-delivery marketplace launching in Louisville, Kentucky. Arrange transportation of eligible items between people and places." },
       { property: "og:title", content: "About MyRunner" },
-      { property: "og:description", content: "Why we built MyRunner, and who it's for." },
+      { property: "og:description", content: "Anything. Anywhere. Anytime. Launching first in Louisville." },
       { property: "og:url", content: "/about" },
     ],
     links: [{ rel: "canonical", href: "/about" }],
@@ -21,22 +21,39 @@ function About() {
       <section className="container-app py-20">
         <p className="text-xs uppercase tracking-widest text-gold">About</p>
         <h1 className="mt-3 max-w-3xl font-serif text-6xl leading-[1.05]">
-          We built MyRunner for everything <span className="italic text-gold">other</span> apps ignore.
+          A marketplace for moving what you already have.
         </h1>
         <div className="mt-10 max-w-2xl space-y-6 text-lg text-muted-foreground">
           <p>
-            A prescription when you're sick. The folder you left at the office.
-            Car parts when your vehicle is down. A forgotten gift. House keys to
-            someone locked out.
+            MyRunner is a broad pickup-and-delivery marketplace. It is not a restaurant
+            app and it is not a traditional courier company. Customers arrange
+            transportation of eligible items between locations and people. The item
+            does not have to be purchased through MyRunner.
           </p>
           <p>
-            Food delivery apps optimize for restaurants. MyRunner optimizes for
-            the rest of life — any item, any time, with the full infrastructure
-            of a professional platform: GPS tracking, in‑app chat, photo proof,
-            loyalty rewards, insurance.
+            That includes sending belongings you already own, recovering forgotten keys,
+            a wallet, or a phone, picking up from a store, business, home, or office,
+            and sending a gift, package, or supplies to someone else. The person who
+            places the order, the pickup contact, and the recipient can be three
+            different people.
+          </p>
+          <p>
+            Louisville, Kentucky is the first market. Lexington is prepared as the
+            second market and will open after Louisville shows enough demand and the
+            operation is ready. MyRunner is not advertising nationwide service.
+          </p>
+          <p>
+            Orders use live GPS while a Runner is on the job, in-app messages between
+            the customer and the Runner, a photo at drop-off, and Stripe for payment.
+            There are no completed-order statistics to publish yet, and MyRunner does
+            not provide cargo insurance or a staffed around-the-clock support line.
+          </p>
+          <p>
+            Every delivery stays subject to applicable law, the prohibited-item rules,
+            and what a Runner can carry.
           </p>
           <p className="font-serif text-2xl italic text-foreground">
-            Anything. Anytime. Anywhere.
+            Anything. Anywhere. Anytime.
           </p>
         </div>
       </section>

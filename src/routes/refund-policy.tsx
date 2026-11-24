@@ -17,13 +17,12 @@ export const Route = createFileRoute("/refund-policy")({
       <p>You may request a refund for: damaged or lost item, item not delivered, wrong item picked up, significantly late delivery, or driver misconduct.</p>
       <h2>How to file</h2>
       <ol className="list-decimal pl-6 space-y-1">
-        <li>Open My Orders, find the delivery.</li>
-        <li>Tap <strong>Request Refund</strong>.</li>
-        <li>Select a reason and upload photo evidence if applicable.</li>
-        <li>Submit. We review within 1–3 business days.</li>
+        <li>Email <a className="text-gold underline" href="mailto:support@myrunner.shop">support@myrunner.shop</a> or use the contact form.</li>
+        <li>Include the order ID, what happened, and a photo if you have one.</li>
+        <li>There is no Request Refund button on the order screen yet.</li>
       </ol>
       <h2>Approved refunds</h2>
-      <p>Refunds return to your original payment method. For damaged or lost items, our $100 cargo insurance may apply on top of a base refund.</p>
+      <p>Approved refunds return to the original payment method through Stripe. MyRunner does not add cargo insurance on top of a refund.</p>
       <h2>Not eligible</h2>
       <ul>
         <li>Requests filed more than 7 days after delivery.</li>

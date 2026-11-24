@@ -15,7 +15,7 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact MyRunner — support@myrunner.shop" },
       { name: "description", content: "Reach the MyRunner team. Email support@myrunner.shop or use our contact form for help with deliveries, drivers, refunds, or partnerships." },
       { property: "og:title", content: "Contact MyRunner" },
-      { property: "og:description", content: "We answer fast. Real humans + AI support 24/7." },
+      { property: "og:description", content: "Email support@myrunner.shop or use the contact form. There is no staffed 24/7 line." },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
@@ -31,9 +31,9 @@ function Contact() {
     <PageShell>
       <section className="container-app py-20">
         <p className="text-xs uppercase tracking-widest text-gold">Contact</p>
-        <h1 className="mt-3 font-serif text-6xl">Real humans. Fast replies.</h1>
-        <p className="mt-4 text-muted-foreground">
-          support@myrunner.shop · Use the Help button (bottom right) for instant AI answers, or send a message below.
+        <h1 className="mt-3 font-serif text-6xl">Contact support.</h1>
+        <p className="mt-4 max-w-xl text-muted-foreground">
+          Email support@myrunner.shop or send the form below. There is no staffed 24/7 phone line. The Help button can answer common questions from the FAQ. The form asks for a reply within 24 hours, and that is a target, not a guarantee.
         </p>
       </section>
       <section className="container-app pb-24">
@@ -52,7 +52,7 @@ function Contact() {
                   message: String(fd.get("msg") || ""),
                 },
               });
-              toast.success("Message sent — we'll reply within 24h.");
+              toast.success("Message sent. We'll reply by email when we can.");
               form.reset();
               setAgree(false);
             } catch (err) {

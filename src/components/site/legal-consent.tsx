@@ -22,8 +22,8 @@ export function LegalConsent({
       case "driver":
         return (
           <>
-            I confirm I am at least 18, have a valid license and insurance, and
-            consent to a background check (Checkr). I agree to the{" "}
+            I confirm I am at least 18 and have a valid license and my own auto
+            insurance. I agree to the{" "}
             <Link to="/terms" className="text-gold underline">Terms</Link>,{" "}
             <Link to="/privacy" className="text-gold underline">Privacy Policy</Link>,
             and{" "}

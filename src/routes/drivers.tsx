@@ -117,8 +117,8 @@ function Drivers() {
             {[
               { icon: DollarSign, t: "70% of the fee", b: "The delivery fee split favors the Runner." },
               { icon: Gift, t: "100% of tips", b: "Every tip goes to you — not the platform." },
-              { icon: Clock, t: "Your schedule", b: "Average drivers aim for $20–$35/hr depending on demand." },
-              { icon: ShieldCheck, t: "Insured on job", b: "Coverage while you're on an active delivery." },
+              { icon: Clock, t: "Your schedule", b: "No shifts and no minimum hours. Pay depends on completed deliveries." },
+              { icon: ShieldCheck, t: "Your own insurance", b: "You must carry your own auto insurance. MyRunner does not cover the vehicle or the cargo." },
             ].map(({ icon: Icon, t, b }) => (
               <div key={t}>
                 <Icon className="size-5 text-gold" />
@@ -138,7 +138,7 @@ function Drivers() {
             "18+ with a valid driver's license",
             "Proof of auto insurance",
             "Smartphone (iOS or Android)",
-            "Background check via Checkr",
+            "Background screening is not automated yet",
             "Reliable vehicle — car, SUV, truck, van, or motorcycle",
             "Bank account for Stripe payouts",
           ].map((x) => (
@@ -165,7 +165,7 @@ function Drivers() {
             Get approved now. Be ready when your city lights up.
           </h2>
           <p className="mt-4 max-w-lg text-muted-foreground">
-            Customers are discovering MyRunner. Approved Runners get first offers in their area — keep doing your other apps and stay one tap away.
+            Louisville is the first market. Approved Runners there get the first offers. Lexington opens after Louisville is ready. Keep your other apps and stay one tap away.
           </p>
           <p className="mt-4 max-w-lg text-sm text-gold/90">
             <strong>$25 referral:</strong> invite a driver. When they complete 3 deliveries, you both get $25.
