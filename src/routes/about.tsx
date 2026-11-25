@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/page-shell";
+import { CARGO_INSURANCE_STATEMENT, DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -44,9 +45,9 @@ function About() {
           </p>
           <p>
             Orders use live GPS while a Runner is on the job, in-app messages between
-            the customer and the Runner, a photo at drop-off, Stripe for payment, and
-            cargo insurance. Choose standard, multi-pickup, or multi-dropoff. 24-hour
-            support is (502) 812-2456.
+            the customer and the Runner, a photo at drop-off, and Stripe for payment.
+            Choose standard, multi-pickup, or multi-dropoff. {CARGO_INSURANCE_STATEMENT}{" "}
+            {SUPPORT_STATEMENT} {DRIVER_SCREENING_STATEMENT}
           </p>
           <p>
             Every delivery stays subject to applicable law, the prohibited-item rules,

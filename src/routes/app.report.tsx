@@ -39,7 +39,7 @@ function ReportPage() {
       <div>
         <h1 className="font-serif text-4xl">Report an issue</h1>
         <p className="text-muted-foreground">
-          Report a customer, Runner, or order for illegal or rule‑breaking behavior. We review every report and respond within 1–3 business days.
+          Report a customer, Runner, or order for illegal or rule-breaking behavior. After MyRunner launches in a city or state, support is available 24/7. Contact MyRunner support by phone or email. Support is handled directly by the founder during posted support hours.
         </p>
       </div>
       <form

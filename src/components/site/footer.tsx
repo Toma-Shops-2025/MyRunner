@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./logo";
+import {
+  CARGO_INSURANCE_STATEMENT,
+  DRIVER_SCREENING_STATEMENT,
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_PHONE_TEL,
+  SUPPORT_STATEMENT,
+} from "@/lib/public-facts";
 
 const cols = [
   {
@@ -55,14 +63,17 @@ export function SiteFooter() {
               Anything. Anywhere. Anytime. Pickup and delivery for eligible items
               between people and places. Louisville is first. Lexington is next.
             </p>
-            <p className="mt-6 text-xs text-muted-foreground">
-              24-hour support{" "}
-              <a className="text-foreground hover:text-gold" href="tel:+15028122456">
-                (502) 812-2456
+            <p className="mt-6 max-w-xs text-xs text-muted-foreground">
+              {SUPPORT_STATEMENT}
+              <br />
+              <a className="text-foreground hover:text-gold" href={`tel:${SUPPORT_PHONE_TEL}`}>
+                {SUPPORT_PHONE_DISPLAY}
               </a>
               <br />
-              support@myrunner.shop
+              {SUPPORT_EMAIL}
             </p>
+            <p className="mt-4 max-w-xs text-xs text-muted-foreground">{CARGO_INSURANCE_STATEMENT}</p>
+            <p className="mt-4 max-w-xs text-xs text-muted-foreground">{DRIVER_SCREENING_STATEMENT}</p>
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {cols.map((c) => (
@@ -92,7 +103,7 @@ export function SiteFooter() {
           <p className="mt-3">Anything. Anywhere. Anytime.</p>
           <p className="mt-6">© {new Date().getFullYear()} MyRunner. All rights reserved.</p>
           <p className="mt-2 flex flex-wrap items-center gap-2">
-            A venture developed under the Toma Ventures Group
+            A venture developed under the Toma Ventures Group{" "}
             <img
               src="/toma-ventures-mark.jpg"
               alt="Toma Ventures Group"

@@ -3,6 +3,14 @@ import { ArrowRight, Package, Clock, MapPin, Shield, Star, Zap, Smartphone, User
 import { PageShell } from "@/components/site/page-shell";
 import { HeroBackgroundVideo } from "@/components/site/hero-background-video";
 import { Button } from "@/components/ui/button";
+import {
+  CARGO_INSURANCE_STATEMENT,
+  DRIVER_SCREENING_STATEMENT,
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_PHONE_TEL,
+  SUPPORT_STATEMENT,
+} from "@/lib/public-facts";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -104,7 +112,8 @@ function Landing() {
                   ))}
                 </ul>
                 <p className="mt-6 max-w-2xl text-sm text-white/40">
-                  Coming to your city very soon!!! Louisville is the first market. Lexington is next, after Louisville shows enough demand and the operation is ready. Deliveries stay subject to the law, prohibited-item rules, and what a Runner can carry. Cargo insurance is included. 24-hour support is (502) 812-2456.
+                  Coming to your city very soon!!! Louisville is the first market. Lexington is next, after Louisville shows enough demand and the operation is ready. Deliveries stay subject to the law, prohibited-item rules, and what a Runner can carry. {CARGO_INSURANCE_STATEMENT} {SUPPORT_STATEMENT}{" "}
+                  <a className="underline" href={`tel:${SUPPORT_PHONE_TEL}`}>{SUPPORT_PHONE_DISPLAY}</a> · {SUPPORT_EMAIL}. {DRIVER_SCREENING_STATEMENT}
                 </p>
             </div>
 
@@ -120,7 +129,7 @@ function Landing() {
                         </Button>
                     </div>
                     <div className="space-y-4">
-                       {["Base fee: $5.99", "Mileage: $1.50/mi", "Multi-stop add-on: $3.00", "Cargo insurance included", "100% of tips to your Runner"].map(line => (
+                       {["Base fee: $5.99", "Mileage: $1.50/mi", "Multi-stop add-on: $3.00", CARGO_INSURANCE_STATEMENT, "100% of tips to your Runner"].map(line => (
                           <div key={line} className="bg-white/2 border border-white/5 p-6 rounded-2xl flex items-center gap-4 text-white/80 font-black uppercase text-[10px] tracking-widest">
                              <CheckCircle2 className="size-5 text-green-500" /> {line}
                           </div>
@@ -143,6 +152,9 @@ function Landing() {
                  <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
               </div>
               <p className="text-white/70">Anything. Anywhere. Anytime.</p>
+              <p className="mx-auto mt-6 max-w-xl text-sm normal-case tracking-normal text-white/60">{SUPPORT_STATEMENT} {SUPPORT_PHONE_DISPLAY} · {SUPPORT_EMAIL}</p>
+              <p className="mx-auto mt-3 max-w-xl text-sm normal-case tracking-normal text-white/60">{CARGO_INSURANCE_STATEMENT}</p>
+              <p className="mx-auto mt-3 max-w-xl text-sm normal-case tracking-normal text-white/60">{DRIVER_SCREENING_STATEMENT}</p>
               <p className="mt-4 text-sm text-white/60">© {new Date().getFullYear()} MyRunner. All rights reserved.</p>
               <p className="mt-2 flex flex-wrap items-center justify-center gap-2 text-sm text-white/60">
                 A venture developed under the Toma Ventures Group

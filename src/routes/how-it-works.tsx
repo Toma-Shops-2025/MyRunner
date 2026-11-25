@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
+import { CARGO_INSURANCE_STATEMENT, DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
@@ -39,7 +40,8 @@ function HowItWorks() {
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
           Coming to your city very soon!!! Louisville is first. Multi-pickup and
-          multi-dropoff are available. Here's the order flow.
+          multi-dropoff are available. {CARGO_INSURANCE_STATEMENT} {SUPPORT_STATEMENT}{" "}
+          {DRIVER_SCREENING_STATEMENT} Here's the order flow.
         </p>
       </section>
       <section className="container-app pb-20">

@@ -84,4 +84,4 @@ Already delivering with other apps? Add MyRunner for extra local jobs (packages,
 Apply: https://myrunner.shop/signup?intent=driver  
 Info: https://myrunner.shop/drivers  
 
-Must be 18+, licensed, insured, pass background check.
+Must be 18+, licensed, and insured. After MyRunner launches in a city or state, drivers there can start once the application, a driver's license, and auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found. Support is 24/7 after that launch.

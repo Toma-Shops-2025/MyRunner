@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2 } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
+import { CARGO_INSURANCE_STATEMENT, DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -50,7 +51,7 @@ function Pricing() {
                 "Photo proof of delivery",
                 "Stripe-secured payments",
                 "Price shown before you pay",
-                "Cargo insurance included",
+                CARGO_INSURANCE_STATEMENT,
                 "Multi-pickup and multi-dropoff",
                 "Coming to your city very soon!!!",
               ].map((t) => (
@@ -65,10 +66,10 @@ function Pricing() {
         <p className="mt-8 max-w-2xl text-sm text-muted-foreground">
           Standard, multi-pickup, and multi-dropoff are available. Multi-pickup asks
           for every pickup address. Multi-dropoff asks for every drop-off address.
-          Each extra address adds $3.00. Cargo insurance is included. There is no promo
+          Each extra address adds $3.00. {CARGO_INSURANCE_STATEMENT} There is no promo
           code and no loyalty discount yet. Runners keep 70% of the delivery fee and
-          100% of tips. MyRunner keeps the other 30% of the delivery fee. 24-hour
-          support is (502) 812-2456.
+          100% of tips. MyRunner keeps the other 30% of the delivery fee. {SUPPORT_STATEMENT}{" "}
+          {DRIVER_SCREENING_STATEMENT}
         </p>
         <div className="mt-12 text-center">
           <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">
