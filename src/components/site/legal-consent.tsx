@@ -23,9 +23,10 @@ export function LegalConsent({
         return (
           <>
             I confirm I am at least 18, have a valid license and my own auto
-            insurance, and understand MyRunner may run a Checkr background check
-            at its discretion and deactivate my account if disqualifying charges
-            appear. I agree to the{" "}
+            insurance, and understand that after launch Louisville drivers can
+            start once the application, a driver's license, and auto insurance
+            are provided. Once MyRunner uses Checkr, a driver is deactivated if
+            any disqualifying charges are found. I agree to the{" "}
             <Link to="/terms" className="text-gold underline">Terms</Link>,{" "}
             <Link to="/privacy" className="text-gold underline">Privacy Policy</Link>,
             and{" "}

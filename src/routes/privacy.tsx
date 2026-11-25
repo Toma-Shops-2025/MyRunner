@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout } from "@/components/site/page-shell";
+import { DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -12,13 +13,13 @@ export const Route = createFileRoute("/privacy")({
     links: [{ rel: "canonical", href: "/privacy" }],
   }),
   component: () => (
-    <LegalLayout title="Privacy Policy" updated="January 1, 2026">
+    <LegalLayout title="Privacy Policy" updated="November 25, 2026">
       <p>This Privacy Policy explains how MyRunner ("we", "us") collects, uses, shares, and protects information about you when you use our website, mobile app, or services. MyRunner is a brand name, not a registered corporation.</p>
       <h2>1. Information we collect</h2>
       <ul>
         <li><strong>Account info</strong>: name, email, phone, password (hashed).</li>
         <li><strong>Delivery info</strong>: pickup/drop‑off addresses, item descriptions, recipient details you provide.</li>
-        <li><strong>Driver info</strong>: license, the Runner's own auto insurance details, vehicle data, and the last 4 digits of an SSN entered on the application. MyRunner may, at its discretion, share application details with Checkr for a background check. That screening is pending.</li>
+        <li><strong>Driver info</strong>: license, the Runner's own auto insurance details, vehicle data, and the last 4 digits of an SSN entered on the application. {DRIVER_SCREENING_STATEMENT}</li>
         <li><strong>Payment info</strong>: processed by Stripe. We never see or store full card numbers.</li>
         <li><strong>Location</strong>: GPS while a Runner is online. The app refreshes that location about every 20 seconds.</li>
         <li><strong>Device & usage</strong>: device type, IP, app version, interactions for analytics and security.</li>
@@ -27,14 +28,14 @@ export const Route = createFileRoute("/privacy")({
       <ul>
         <li>To match customers and Runners, calculate quotes, and complete deliveries.</li>
         <li>To process payments and payouts.</li>
-        <li>To verify identity and run background checks for drivers.</li>
+        <li>To verify identity and, once MyRunner uses Checkr, to screen drivers. A driver is deactivated if any disqualifying charges are found.</li>
         <li>To prevent fraud, investigate disputes, and enforce our Terms.</li>
         <li>To send transactional messages (order updates, receipts) and, with consent, marketing.</li>
       </ul>
       <h2>3. Who we share with</h2>
       <ul>
         <li><strong>Drivers and customers</strong>: limited info needed to complete the delivery (first name, rating, vehicle).</li>
-        <li><strong>Service providers</strong>: Stripe (payments), Mapbox (maps), hosting, and Checkr when MyRunner chooses to run a background check.</li>
+        <li><strong>Service providers</strong>: Stripe (payments), Mapbox (maps), hosting, and Checkr once MyRunner uses it for driver screening.</li>
         <li><strong>Legal</strong>: law enforcement when required by valid legal process.</li>
       </ul>
       <p>We do not sell your personal information.</p>
@@ -49,7 +50,7 @@ export const Route = createFileRoute("/privacy")({
       <h2>8. Changes</h2>
       <p>We'll notify you of material changes. Continued use of the service constitutes acceptance.</p>
       <h2>9. Contact</h2>
-      <p>Email <a className="text-gold underline" href="mailto:support@myrunner.shop">support@myrunner.shop</a> with privacy questions.</p>
+      <p>{SUPPORT_STATEMENT} Email <a className="text-gold underline" href="mailto:support@myrunner.shop">support@myrunner.shop</a> with privacy questions.</p>
     </LegalLayout>
   ),
 });

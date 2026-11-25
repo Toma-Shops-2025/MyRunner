@@ -1,12 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/page-shell";
 import { ShieldCheck, Camera, MapPin, FileCheck2, Lock, Headphones } from "lucide-react";
+import {
+  CARGO_INSURANCE_STATEMENT,
+  DRIVER_SCREENING_STATEMENT,
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_STATEMENT,
+} from "@/lib/public-facts";
 
 export const Route = createFileRoute("/safety")({
   head: () => ({
     meta: [
       { title: "Safety — How MyRunner handles a delivery" },
-      { name: "description", content: "Cargo insurance, live GPS, photo proof, and 24-hour support at (502) 812-2456. Runners can start immediately. Checkr screening is at MyRunner's discretion." },
+      { name: "description", content: "Cargo insurance is planned before commercial launch. Live GPS, photo proof, and founder support during posted hours. Louisville drivers start after launch once the application, license, and auto insurance are provided." },
       { property: "og:title", content: "Safety — MyRunner" },
       { property: "og:description", content: "Every layer of safety we've built into the platform." },
       { property: "og:url", content: "/safety" },
@@ -26,12 +33,12 @@ function Safety() {
       </section>
       <section className="container-app pb-24 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[
-          { icon: FileCheck2, t: "Start driving now", b: "Approved applicants can start immediately. MyRunner may, at its discretion, run a Checkr background check. A disqualifying result can deactivate the account. Checkr screening is pending." },
-          { icon: ShieldCheck, t: "Cargo insurance", b: "MyRunner provides cargo insurance on deliveries." },
+          { icon: FileCheck2, t: "Driver screening", b: DRIVER_SCREENING_STATEMENT },
+          { icon: ShieldCheck, t: "Cargo insurance", b: CARGO_INSURANCE_STATEMENT },
           { icon: MapPin, t: "Live GPS tracking", b: "While a Runner is online, the app shares location from the device and refreshes about every 20 seconds." },
           { icon: Camera, t: "Photo proof of delivery", b: "A confirmation photo at drop-off is stored on the order." },
           { icon: Lock, t: "Stripe-secured payments", b: "Card payments go through Stripe. MyRunner does not store full card numbers." },
-          { icon: Headphones, t: "24-hour support", b: "Call (502) 812-2456 any hour, or email support@myrunner.shop." },
+          { icon: Headphones, t: "Support", b: `${SUPPORT_STATEMENT} ${SUPPORT_PHONE_DISPLAY} or ${SUPPORT_EMAIL}.` },
         ].map(({ icon: Icon, t, b }) => (
           <div key={t} className="rounded-2xl border border-border bg-card p-6">
             <Icon className="size-6 text-gold" />
@@ -44,10 +51,10 @@ function Safety() {
         <div className="rounded-3xl border border-border bg-surface p-10">
           <h2 className="font-serif text-3xl">Coverage and screening</h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <Row t="Cargo insurance" b="Included on MyRunner deliveries." />
+            <Row t="Cargo insurance" b={CARGO_INSURANCE_STATEMENT} />
             <Row t="Auto insurance" b="Runners carry their own auto insurance." />
-            <Row t="Checkr" b="A Runner can start immediately. MyRunner may run Checkr at its discretion and deactivate the account if disqualifying charges appear. That screening is pending." />
-            <Row t="24-hour support" b="(502) 812-2456 and support@myrunner.shop." />
+            <Row t="Checkr" b={DRIVER_SCREENING_STATEMENT} />
+            <Row t="Support" b={`${SUPPORT_STATEMENT} ${SUPPORT_PHONE_DISPLAY} · ${SUPPORT_EMAIL}.`} />
           </div>
         </div>
       </section>

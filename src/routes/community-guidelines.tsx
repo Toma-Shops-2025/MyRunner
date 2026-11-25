@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout } from "@/components/site/page-shell";
+import { DRIVER_SCREENING_STATEMENT } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/community-guidelines")({
   head: () => ({
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/community-guidelines")({
         <li>Handle items with care; don't open packages.</li>
         <li>Take photo proof at every drop‑off.</li>
         <li>Be punctual, respectful, and professional.</li>
+        <li>{DRIVER_SCREENING_STATEMENT}</li>
       </ul>
       <h2>Reporting</h2>
       <p>Found something? Tap <strong>Report</strong> on any order or visit <a className="text-gold underline" href="/app/report">App → Report</a>. We review every report.</p>

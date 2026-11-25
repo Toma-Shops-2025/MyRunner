@@ -189,7 +189,6 @@ function Landing() {
           /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/safety", className: "hover:text-gold transition-colors", children: "Safety" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/privacy", className: "hover:text-gold transition-colors", children: "Privacy" })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/20 text-[8px] font-black uppercase tracking-[0.8em]", children: "Toma Shops Ecosystem · 2025" })
       ] }) })
     ] })
   ] });

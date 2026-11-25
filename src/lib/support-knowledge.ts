@@ -15,11 +15,11 @@ export const SUPPORT_FAQ = [
   },
   {
     q: "Are deliveries insured?",
-    a: "Yes. MyRunner provides cargo insurance on deliveries.",
+    a: "Cargo insurance is planned and will be obtained before commercial launch.",
   },
   {
     q: "How do I become a Runner?",
-    a: "Apply at /driver-signup with your license, your own auto insurance, and vehicle info. You can start driving immediately. MyRunner may, at its discretion, run a Checkr background check and deactivate your account if disqualifying charges appear. That Checkr screening is pending.",
+    a: "Apply at /driver-signup with your license, your own auto insurance, and vehicle info. After launch, Louisville drivers can start driving after the application, a driver's license, and their own auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found.",
   },
   {
     q: "How much do drivers make?",
@@ -47,16 +47,18 @@ export const SUPPORT_FAQ = [
   },
   {
     q: "How do refunds work?",
-    a: "Call 24-hour support at (502) 812-2456, email support@myrunner.shop, or use Contact with your order ID. Approved refunds return to your original payment method. Cargo insurance may also apply if an item is damaged or lost.",
+    a: "After launch, and once cargo insurance is established, the refund policy will be in effect. Refunds are arranged by contacting support. Contact MyRunner support by phone or email at (502) 812-2456 or support@myrunner.shop. Support is currently handled directly by the founder during posted support hours. Include the order ID. If a refund is approved, it is returned to the original payment method.",
   },
 ] as const;
 
 export const SUPPORT_POLICIES = `
 Contact email: support@myrunner.shop
-24-hour support phone: (502) 812-2456
+Support phone: (502) 812-2456
+Support: Contact MyRunner support by phone or email. Support is currently handled directly by the founder during posted support hours. Do not say support is 24/7 or that there is no support line.
 Launch: Coming to your city very soon!!! Louisville, Kentucky is first. Lexington is next.
-Insurance: MyRunner provides cargo insurance on deliveries. Runners carry their own auto insurance.
-Background checks: Runners can start immediately. MyRunner may run Checkr at its discretion and deactivate a driver if disqualifying charges appear. Checkr screening is pending. Do not say every Runner has already passed Checkr.
+Insurance: Cargo insurance is planned and will be obtained before commercial launch. Do not say cargo insurance is already included. Runners carry their own auto insurance.
+Background checks: After launch, Louisville drivers can start driving after the application, a driver's license, and their own auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found. Do not say a clean background check is required before a driver can start. Do not say every Runner has already passed Checkr. Do not say screening is pending as a different rule.
+Refunds: After launch, and once cargo insurance is established, the refund policy will be in effect. Refunds are arranged by contacting support. If a refund is approved, it is returned to the original payment method. Do not say there is no refund button.
 Delivery types: standard (one pickup and one drop-off), multi-pickup (two or more pickups and one drop-off), and multi-dropoff (one pickup and two or more drop-offs). Each extra address is $3. Do not say the service is limited to one pickup and one drop-off.
 Safety: Never share passwords. For threats, theft, or assault — call local emergency services first, then file an in-app Report.
 Prohibited: illegal goods, weapons, hazardous materials, people transport (MyRunner is delivery only, not rideshare).

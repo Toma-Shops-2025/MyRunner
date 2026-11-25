@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout } from "@/components/site/page-shell";
+import { SUPPORT_STATEMENT } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/accessibility")({
   head: () => ({
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/accessibility")({
         <li>Voice guidance through the delivery form.</li>
       </ul>
       <h2>Found a barrier?</h2>
-      <p>Email <a className="text-gold underline" href="mailto:support@myrunner.shop">support@myrunner.shop</a> with the page and issue. We respond within 5 business days.</p>
+      <p>{SUPPORT_STATEMENT} Email <a className="text-gold underline" href="mailto:support@myrunner.shop">support@myrunner.shop</a> with the page and issue.</p>
     </LegalLayout>
   ),
 });

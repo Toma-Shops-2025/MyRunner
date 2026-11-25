@@ -8,6 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { LegalConsent } from "@/components/site/legal-consent";
 import { submitContactMessage } from "@/lib/support.functions";
+import {
+  CARGO_INSURANCE_STATEMENT,
+  DRIVER_SCREENING_STATEMENT,
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_PHONE_TEL,
+  SUPPORT_STATEMENT,
+} from "@/lib/public-facts";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -15,7 +23,7 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact MyRunner — support@myrunner.shop" },
       { name: "description", content: "Reach the MyRunner team. Email support@myrunner.shop or use our contact form for help with deliveries, drivers, refunds, or partnerships." },
       { property: "og:title", content: "Contact MyRunner" },
-      { property: "og:description", content: "24-hour support at (502) 812-2456 or support@myrunner.shop." },
+      { property: "og:description", content: "Contact MyRunner support by phone or email. Support is currently handled directly by the founder during posted support hours." },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
@@ -33,9 +41,10 @@ function Contact() {
         <p className="text-xs uppercase tracking-widest text-gold">Contact</p>
         <h1 className="mt-3 font-serif text-6xl">Contact support.</h1>
         <p className="mt-4 max-w-xl text-muted-foreground">
-          Coming to your city very soon!!! Call 24-hour support at{" "}
-          <a className="text-gold underline" href="tel:+15028122456">(502) 812-2456</a>,
-          email support@myrunner.shop, or send the form below. The Help button can answer common questions from the FAQ.
+          Coming to your city very soon!!! {SUPPORT_STATEMENT} Call{" "}
+          <a className="text-gold underline" href={`tel:${SUPPORT_PHONE_TEL}`}>{SUPPORT_PHONE_DISPLAY}</a>{" "}
+          or email {SUPPORT_EMAIL}, or send the form below. {CARGO_INSURANCE_STATEMENT}{" "}
+          {DRIVER_SCREENING_STATEMENT} The Help button can answer common questions from the FAQ.
         </p>
       </section>
       <section className="container-app pb-24">
