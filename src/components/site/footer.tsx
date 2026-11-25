@@ -48,11 +48,19 @@ export function SiteFooter() {
         <div className="grid gap-12 lg:grid-cols-[1.2fr_3fr]">
           <div>
             <Logo />
+            <p className="mt-4 max-w-xs text-sm font-semibold uppercase tracking-wide text-gold">
+              Coming to your city very soon!!!
+            </p>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
               Anything. Anywhere. Anytime. Pickup and delivery for eligible items
-              between people and places. Launching first in Louisville, Kentucky.
+              between people and places. Louisville is first. Lexington is next.
             </p>
             <p className="mt-6 text-xs text-muted-foreground">
+              24-hour support{" "}
+              <a className="text-foreground hover:text-gold" href="tel:+15028122456">
+                (502) 812-2456
+              </a>
+              <br />
               support@myrunner.shop
             </p>
           </div>
@@ -79,9 +87,20 @@ export function SiteFooter() {
             ))}
           </div>
         </div>
-        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} MyRunner. All rights reserved.</p>
-          <p className="font-serif italic">Anything. Anywhere. Anytime.</p>
+        <div className="mt-12 border-t border-border pt-8 text-sm text-muted-foreground">
+          <p className="font-serif text-3xl text-foreground">MyRunner</p>
+          <p className="mt-3">Anything. Anywhere. Anytime.</p>
+          <p className="mt-6">© {new Date().getFullYear()} MyRunner. All rights reserved.</p>
+          <p className="mt-2 flex flex-wrap items-center gap-2">
+            A venture developed under the Toma Ventures Group
+            <img
+              src="/toma-ventures-mark.jpg"
+              alt="Toma Ventures Group"
+              className="inline-block size-6 rounded-full object-cover"
+            />
+            brand.
+          </p>
+          <p className="mt-2">Building Ideas. Creating Opportunity.</p>
         </div>
       </div>
     </footer>

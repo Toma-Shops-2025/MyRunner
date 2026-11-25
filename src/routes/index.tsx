@@ -26,7 +26,7 @@ function Landing() {
             <div className="max-w-2xl text-white">
               <span className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs uppercase tracking-widest text-gold backdrop-blur-sm font-bold shadow-glow">
                 <span className="size-1.5 animate-pulse rounded-full bg-gold" />
-                Launching first in Louisville, Kentucky
+                Coming to your city very soon!!!
               </span>
               <h1 className="mt-6 font-serif text-6xl leading-[1.02] sm:text-7xl lg:text-8xl drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] font-black">
                 Need it moved?
@@ -104,7 +104,7 @@ function Landing() {
                   ))}
                 </ul>
                 <p className="mt-6 max-w-2xl text-sm text-white/40">
-                  Louisville is the first market. Lexington is next, after Louisville shows enough demand and the operation is ready. Deliveries stay subject to the law, prohibited-item rules, and what a Runner can carry. Service is not nationwide, and it is not staffed around the clock.
+                  Coming to your city very soon!!! Louisville is the first market. Lexington is next, after Louisville shows enough demand and the operation is ready. Deliveries stay subject to the law, prohibited-item rules, and what a Runner can carry. Cargo insurance is included. 24-hour support is (502) 812-2456.
                 </p>
             </div>
 
@@ -120,7 +120,7 @@ function Landing() {
                         </Button>
                     </div>
                     <div className="space-y-4">
-                       {["Base fee: $5.99", "Mileage: $1.50/mi", "Multi-stop add-on: $3.00", "100% of tips to your Runner", "Stripe-secured payment"].map(line => (
+                       {["Base fee: $5.99", "Mileage: $1.50/mi", "Multi-stop add-on: $3.00", "Cargo insurance included", "100% of tips to your Runner"].map(line => (
                           <div key={line} className="bg-white/2 border border-white/5 p-6 rounded-2xl flex items-center gap-4 text-white/80 font-black uppercase text-[10px] tracking-widest">
                              <CheckCircle2 className="size-5 text-green-500" /> {line}
                           </div>
@@ -135,13 +135,21 @@ function Landing() {
         {/* FOOTER FIX - HIGH CONTRAST */}
         <footer className="bg-[#111] border-t border-white/10 pt-32 pb-20 text-center relative z-20">
            <div className="container-app">
-              <h2 className="text-gold font-serif text-4xl mb-6 italic tracking-tighter">MyRunner</h2>
+              <h2 className="text-gold font-serif text-4xl mb-3 italic tracking-tighter">MyRunner</h2>
+              <p className="mb-6 text-xs font-black uppercase tracking-[0.25em] text-gold">Coming to your city very soon!!!</p>
               <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-12">
                  <Link to="/pricing" className="hover:text-gold transition-colors">Pricing</Link>
                  <Link to="/safety" className="hover:text-gold transition-colors">Safety</Link>
                  <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
               </div>
-              <p className="text-white/20 text-[8px] font-black uppercase tracking-[0.8em]">Toma Shops Ecosystem · 2025</p>
+              <p className="text-white/70">Anything. Anywhere. Anytime.</p>
+              <p className="mt-4 text-sm text-white/60">© {new Date().getFullYear()} MyRunner. All rights reserved.</p>
+              <p className="mt-2 flex flex-wrap items-center justify-center gap-2 text-sm text-white/60">
+                A venture developed under the Toma Ventures Group
+                <img src="/toma-ventures-mark.jpg" alt="Toma Ventures Group" className="inline-block size-6 rounded-full object-cover" />
+                brand.
+              </p>
+              <p className="mt-2 text-sm text-white/60">Building Ideas. Creating Opportunity.</p>
            </div>
         </footer>
       </div>

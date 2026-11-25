@@ -24,7 +24,7 @@ export const Route = createFileRoute("/driver-signup")({
   head: () => ({
     meta: [
       { title: "Become a Runner — Apply to drive for MyRunner" },
-      { name: "description", content: "Apply to drive for MyRunner in Kentucky. Submit your license, your own insurance, and vehicle info. Background screening is not connected yet." },
+      { name: "description", content: "Apply to drive for MyRunner. Start immediately. MyRunner may run a Checkr background check at its discretion." },
     ],
     links: [{ rel: "canonical", href: "/driver-signup" }],
   }),
@@ -80,8 +80,7 @@ function DriverSignup() {
         <p className="text-xs uppercase tracking-widest text-gold">Driver application</p>
         <h1 className="mt-3 font-serif text-5xl">Apply to drive</h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
-          Takes about 5 minutes. After you submit, you can finish Stripe payout setup.
-          A third-party background check is not connected, so this form does not screen you.
+          Coming to your city very soon!!! Takes about 5 minutes. After you submit, you can finish Stripe payout setup and start driving. MyRunner may, at its discretion, run a Checkr background check and deactivate your account if disqualifying charges appear. That Checkr screening is pending.
         </p>
 
         <form
@@ -179,7 +178,7 @@ function DriverSignup() {
             <Field id="dob" label="Date of birth" type="date" />
             <Field id="ssn" label="Social Security Number" placeholder="123-45-6789" />
             <p className="col-span-full text-xs text-muted-foreground">
-              Only the last 4 digits are saved. The full number is not stored and is not sent to a background-check provider, because none is connected.
+              Only the last 4 digits are saved. MyRunner may use them if it chooses to run a Checkr background check. That screening is pending.
             </p>
           </Section>
 

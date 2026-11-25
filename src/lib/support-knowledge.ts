@@ -3,7 +3,7 @@
 export const SUPPORT_FAQ = [
   {
     q: "What can I send with MyRunner?",
-    a: "Eligible items you already own, if they are legal and a Runner can carry them. Examples: belongings sent to another person, forgotten keys or a phone, a store or office pickup, or a gift. The buyer, pickup contact, and recipient can be different people. See Community Guidelines for prohibited items. Launching first in Louisville, Kentucky.",
+    a: "Eligible items you already own, if they are legal and a Runner can carry them. Examples: belongings sent to another person, forgotten keys or a phone, a store or office pickup, or a gift. The buyer, pickup contact, and recipient can be different people. Standard, multi-pickup, and multi-dropoff are available. See Community Guidelines for prohibited items. Coming to your city very soon!!! Louisville is first.",
   },
   {
     q: "How is pricing calculated?",
@@ -15,11 +15,11 @@ export const SUPPORT_FAQ = [
   },
   {
     q: "Are deliveries insured?",
-    a: "No. MyRunner does not provide cargo insurance. Do not send anything you cannot afford to lose.",
+    a: "Yes. MyRunner provides cargo insurance on deliveries.",
   },
   {
     q: "How do I become a Runner?",
-    a: "Apply at /driver-signup with your license, your own auto insurance, and vehicle info. A third-party background check is not connected yet.",
+    a: "Apply at /driver-signup with your license, your own auto insurance, and vehicle info. You can start driving immediately. MyRunner may, at its discretion, run a Checkr background check and deactivate your account if disqualifying charges appear. That Checkr screening is pending.",
   },
   {
     q: "How much do drivers make?",
@@ -47,16 +47,17 @@ export const SUPPORT_FAQ = [
   },
   {
     q: "How do refunds work?",
-    a: "Email support@myrunner.shop or use Contact with your order ID. Admin reviews within 1–3 business days. Approved refunds return to your original payment method.",
+    a: "Call 24-hour support at (502) 812-2456, email support@myrunner.shop, or use Contact with your order ID. Approved refunds return to your original payment method. Cargo insurance may also apply if an item is damaged or lost.",
   },
 ] as const;
 
 export const SUPPORT_POLICIES = `
 Contact email: support@myrunner.shop
-Support: email support@myrunner.shop or the contact form. There is no staffed 24/7 phone line. The in-app assistant answers from this FAQ only.
-Launch: Louisville, Kentucky first. Lexington later. Not nationwide.
-Insurance: MyRunner does not provide cargo, hired-auto, or other insurance.
-Background checks: not connected. Do not say every Runner passed Checkr.
+24-hour support phone: (502) 812-2456
+Launch: Coming to your city very soon!!! Louisville, Kentucky is first. Lexington is next.
+Insurance: MyRunner provides cargo insurance on deliveries. Runners carry their own auto insurance.
+Background checks: Runners can start immediately. MyRunner may run Checkr at its discretion and deactivate a driver if disqualifying charges appear. Checkr screening is pending. Do not say every Runner has already passed Checkr.
+Delivery types: standard, multi-pickup, and multi-dropoff. Do not say the service is limited to one pickup and one drop-off.
 Safety: Never share passwords. For threats, theft, or assault — call local emergency services first, then file an in-app Report.
 Prohibited: illegal goods, weapons, hazardous materials, people transport (MyRunner is delivery only, not rideshare).
 Driver share: 70% of delivery fee + 100% of tips.

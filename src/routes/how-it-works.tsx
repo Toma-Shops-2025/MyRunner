@@ -19,8 +19,8 @@ export const Route = createFileRoute("/how-it-works")({
 const steps = [
   ["Enter pickup address", "Where the Runner should go to grab your item. Add a unit number or gate code if needed."],
   ["Describe the item", "A quick sentence so the Runner knows what they're picking up."],
-  ["Enter drop‑off address", "Use the item note to name a pickup contact or recipient when they are different from you. The form has one pickup and one drop-off."],
-  ["Choose your delivery type", "Standard, multi-pickup, or multi-dropoff. A multi-stop type adds $3.00."],
+  ["Enter drop-off address", "Use the item note to name a pickup contact or recipient when they are different from you."],
+  ["Choose your delivery type", "Standard, multi-pickup, or multi-dropoff. Multi-pickup and multi-dropoff add $3.00."],
   ["Review pricing", "Base fee + per mile + the multi-stop add-on when that type is selected."],
   ["Optional tip", "Add a tip before you pay. You can prefer or block a Runner later in Settings."],
   ["Pay securely", "Stripe handles the transaction — your card details never touch our servers."],
@@ -39,8 +39,8 @@ function HowItWorks() {
           From your phone to their hands.
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-          MyRunner arranges transportation of eligible items. Louisville is first.
-          Here's the order flow.
+          Coming to your city very soon!!! Louisville is first. Multi-pickup and
+          multi-dropoff are available. Here's the order flow.
         </p>
       </section>
       <section className="container-app pb-20">

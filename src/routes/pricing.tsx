@@ -50,7 +50,9 @@ function Pricing() {
                 "Photo proof of delivery",
                 "Stripe-secured payments",
                 "Price shown before you pay",
-                "Louisville first, then Lexington",
+                "Cargo insurance included",
+                "Multi-pickup and multi-dropoff",
+                "Coming to your city very soon!!!",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-gold" />
@@ -61,11 +63,11 @@ function Pricing() {
           </div>
         </div>
         <p className="mt-8 max-w-2xl text-sm text-muted-foreground">
-          Choosing multi-pickup or multi-dropoff adds one $3.00 stop charge. The order
-          form uses one pickup address and one drop-off address. There is no cargo
-          insurance, no promo code, and no loyalty discount at launch. Runners keep
-          70% of the delivery fee and 100% of tips. MyRunner keeps the other 30% of
-          the delivery fee.
+          Standard, multi-pickup, and multi-dropoff are available. A multi-pickup or
+          multi-dropoff adds $3.00. Cargo insurance is included. There is no promo
+          code and no loyalty discount yet. Runners keep 70% of the delivery fee and
+          100% of tips. MyRunner keeps the other 30% of the delivery fee. 24-hour
+          support is (502) 812-2456.
         </p>
         <div className="mt-12 text-center">
           <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">

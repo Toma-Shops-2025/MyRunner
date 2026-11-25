@@ -18,7 +18,7 @@ export const Route = createFileRoute("/privacy")({
       <ul>
         <li><strong>Account info</strong>: name, email, phone, password (hashed).</li>
         <li><strong>Delivery info</strong>: pickup/drop‑off addresses, item descriptions, recipient details you provide.</li>
-        <li><strong>Driver info</strong>: license, the Runner's own insurance details, vehicle data, and the last 4 digits of an SSN entered on the application. A third-party background-check provider is not connected at launch.</li>
+        <li><strong>Driver info</strong>: license, the Runner's own auto insurance details, vehicle data, and the last 4 digits of an SSN entered on the application. MyRunner may, at its discretion, share application details with Checkr for a background check. That screening is pending.</li>
         <li><strong>Payment info</strong>: processed by Stripe. We never see or store full card numbers.</li>
         <li><strong>Location</strong>: GPS while a Runner is online. The app refreshes that location about every 20 seconds.</li>
         <li><strong>Device & usage</strong>: device type, IP, app version, interactions for analytics and security.</li>
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/privacy")({
       <h2>3. Who we share with</h2>
       <ul>
         <li><strong>Drivers and customers</strong>: limited info needed to complete the delivery (first name, rating, vehicle).</li>
-        <li><strong>Service providers</strong>: Stripe (payments), Mapbox (maps), and hosting. A background-check provider is not in use yet.</li>
+        <li><strong>Service providers</strong>: Stripe (payments), Mapbox (maps), hosting, and Checkr when MyRunner chooses to run a background check.</li>
         <li><strong>Legal</strong>: law enforcement when required by valid legal process.</li>
       </ul>
       <p>We do not sell your personal information.</p>
