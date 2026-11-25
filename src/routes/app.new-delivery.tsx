@@ -62,7 +62,7 @@ function NewDelivery() {
     <div className="space-y-6">
       <div>
         <h1 className="font-serif text-4xl">Send a delivery</h1>
-        <p className="text-muted-foreground">Tell us what to move and where.</p>
+        <p className="text-muted-foreground">Tell us what to move and where. Standard, multi-pickup, and multi-dropoff are available. Coming to your city very soon!!!</p>
       </div>
       <form
         onSubmit={async (e) => {

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact MyRunner — support@myrunner.shop" },
       { name: "description", content: "Reach the MyRunner team. Email support@myrunner.shop or use our contact form for help with deliveries, drivers, refunds, or partnerships." },
       { property: "og:title", content: "Contact MyRunner" },
-      { property: "og:description", content: "Email support@myrunner.shop or use the contact form. There is no staffed 24/7 line." },
+      { property: "og:description", content: "24-hour support at (502) 812-2456 or support@myrunner.shop." },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
@@ -33,7 +33,9 @@ function Contact() {
         <p className="text-xs uppercase tracking-widest text-gold">Contact</p>
         <h1 className="mt-3 font-serif text-6xl">Contact support.</h1>
         <p className="mt-4 max-w-xl text-muted-foreground">
-          Email support@myrunner.shop or send the form below. There is no staffed 24/7 phone line. The Help button can answer common questions from the FAQ. The form asks for a reply within 24 hours, and that is a target, not a guarantee.
+          Coming to your city very soon!!! Call 24-hour support at{" "}
+          <a className="text-gold underline" href="tel:+15028122456">(502) 812-2456</a>,
+          email support@myrunner.shop, or send the form below. The Help button can answer common questions from the FAQ.
         </p>
       </section>
       <section className="container-app pb-24">

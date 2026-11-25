@@ -38,15 +38,15 @@ function About() {
             different people.
           </p>
           <p>
-            Louisville, Kentucky is the first market. Lexington is prepared as the
-            second market and will open after Louisville shows enough demand and the
-            operation is ready. MyRunner is not advertising nationwide service.
+            Coming to your city very soon!!! Louisville, Kentucky is the first market.
+            Lexington is prepared as the second market and will open after Louisville
+            shows enough demand and the operation is ready.
           </p>
           <p>
             Orders use live GPS while a Runner is on the job, in-app messages between
-            the customer and the Runner, a photo at drop-off, and Stripe for payment.
-            There are no completed-order statistics to publish yet, and MyRunner does
-            not provide cargo insurance or a staffed around-the-clock support line.
+            the customer and the Runner, a photo at drop-off, Stripe for payment, and
+            cargo insurance. Choose standard, multi-pickup, or multi-dropoff. 24-hour
+            support is (502) 812-2456.
           </p>
           <p>
             Every delivery stays subject to applicable law, the prohibited-item rules,

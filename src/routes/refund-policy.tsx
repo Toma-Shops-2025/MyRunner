@@ -22,7 +22,7 @@ export const Route = createFileRoute("/refund-policy")({
         <li>There is no Request Refund button on the order screen yet.</li>
       </ol>
       <h2>Approved refunds</h2>
-      <p>Approved refunds return to the original payment method through Stripe. MyRunner does not add cargo insurance on top of a refund.</p>
+      <p>Approved refunds return to the original payment method through Stripe. Cargo insurance may also apply when an item is damaged or lost. For help any hour, call <a className="text-gold underline" href="tel:+15028122456">(502) 812-2456</a>.</p>
       <h2>Not eligible</h2>
       <ul>
         <li>Requests filed more than 7 days after delivery.</li>
