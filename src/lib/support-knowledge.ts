@@ -7,7 +7,7 @@ export const SUPPORT_FAQ = [
   },
   {
     q: "How is pricing calculated?",
-    a: "$5.99 base + $1.50 per mile + $3 per extra stop. Tips are optional and 100% go to the driver.",
+    a: "$5.99 base + $1.50 per mile + $3 for each extra pickup or drop-off address. Multi-pickup asks for every pickup. Multi-dropoff asks for every drop-off. Tips are optional and 100% go to the driver.",
   },
   {
     q: "How fast is pickup?",
@@ -57,7 +57,7 @@ Contact email: support@myrunner.shop
 Launch: Coming to your city very soon!!! Louisville, Kentucky is first. Lexington is next.
 Insurance: MyRunner provides cargo insurance on deliveries. Runners carry their own auto insurance.
 Background checks: Runners can start immediately. MyRunner may run Checkr at its discretion and deactivate a driver if disqualifying charges appear. Checkr screening is pending. Do not say every Runner has already passed Checkr.
-Delivery types: standard, multi-pickup, and multi-dropoff. Do not say the service is limited to one pickup and one drop-off.
+Delivery types: standard (one pickup and one drop-off), multi-pickup (two or more pickups and one drop-off), and multi-dropoff (one pickup and two or more drop-offs). Each extra address is $3. Do not say the service is limited to one pickup and one drop-off.
 Safety: Never share passwords. For threats, theft, or assault — call local emergency services first, then file an in-app Report.
 Prohibited: illegal goods, weapons, hazardous materials, people transport (MyRunner is delivery only, not rideshare).
 Driver share: 70% of delivery fee + 100% of tips.

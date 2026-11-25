@@ -11,6 +11,7 @@ export function AddressAutocomplete({
   defaultValue,
   required,
   onSelect,
+  onValueChange,
 }: {
   name: string;
   id?: string;
@@ -18,6 +19,7 @@ export function AddressAutocomplete({
   defaultValue?: string;
   required?: boolean;
   onSelect?: (s: Suggestion) => void;
+  onValueChange?: (value: string) => void;
 }) {
   const [value, setValue] = useState(defaultValue ?? "");
   const [token, setToken] = useState<string>("");
@@ -57,6 +59,7 @@ export function AddressAutocomplete({
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
+          onValueChange?.(e.target.value);
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
@@ -75,6 +78,7 @@ export function AddressAutocomplete({
                   setValue(s.place_name);
                   setSuggestions([]);
                   setOpen(false);
+                  onValueChange?.(s.place_name);
                   onSelect?.(s);
                 }}
                 className="w-full rounded px-3 py-2 text-left text-sm hover:bg-accent"

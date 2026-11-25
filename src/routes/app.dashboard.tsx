@@ -4,12 +4,14 @@ import { Package, Star, Wallet, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtUSD } from "@/lib/pricing";
+import { parseRouteStops } from "@/lib/route-stops";
 import { useAuth } from "@/hooks/use-auth";
 
 type Order = {
   id: string;
   pickup_address: string;
   dropoff_address: string;
+  route_stops?: unknown;
   item_description: string;
   status: string;
   price_cents: number;
@@ -35,7 +37,7 @@ function Dashboard() {
   useEffect(() => {
     supabase
       .from("orders")
-      .select("id,pickup_address,dropoff_address,item_description,status,price_cents,tip_cents")
+      .select("id,pickup_address,dropoff_address,route_stops,item_description,status,price_cents,tip_cents")
       .order("created_at", { ascending: false })
       .then(({ data }) => setOrders((data ?? []) as Order[]));
   }, []);
@@ -77,7 +79,7 @@ function Dashboard() {
                 <div>
                   <p className="font-medium">{o.item_description}</p>
                   <p className="text-xs text-muted-foreground">
-                    {o.pickup_address} → {o.dropoff_address}
+                    {o.pickup_address} → {o.dropoff_address}{parseRouteStops(o.route_stops).length ? ` + ${parseRouteStops(o.route_stops).length} more` : ""}
                   </p>
                 </div>
                 <div className="text-right">
