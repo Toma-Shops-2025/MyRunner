@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { DRIVER_SCREENING_STATEMENT } from "@/lib/public-facts";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -23,10 +24,7 @@ export function LegalConsent({
         return (
           <>
             I confirm I am at least 18, have a valid license and my own auto
-            insurance, and understand that after launch Louisville drivers can
-            start once the application, a driver's license, and auto insurance
-            are provided. Once MyRunner uses Checkr, a driver is deactivated if
-            any disqualifying charges are found. I agree to the{" "}
+            insurance, and I understand: {DRIVER_SCREENING_STATEMENT} I agree to the{" "}
             <Link to="/terms" className="text-gold underline">Terms</Link>,{" "}
             <Link to="/privacy" className="text-gold underline">Privacy Policy</Link>,
             and{" "}

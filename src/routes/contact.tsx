@@ -23,7 +23,7 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact MyRunner — support@myrunner.shop" },
       { name: "description", content: "Reach the MyRunner team. Email support@myrunner.shop or use our contact form for help with deliveries, drivers, refunds, or partnerships." },
       { property: "og:title", content: "Contact MyRunner" },
-      { property: "og:description", content: "Contact MyRunner support by phone or email. Support is currently handled directly by the founder during posted support hours." },
+      { property: "og:description", content: "After MyRunner launches in a city or state, support is available 24/7 by phone or email. Support is handled directly by the founder during posted support hours." },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],

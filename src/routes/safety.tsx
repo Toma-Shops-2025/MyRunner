@@ -13,7 +13,7 @@ export const Route = createFileRoute("/safety")({
   head: () => ({
     meta: [
       { title: "Safety — How MyRunner handles a delivery" },
-      { name: "description", content: "Cargo insurance is planned before commercial launch. Live GPS, photo proof, and founder support during posted hours. Louisville drivers start after launch once the application, license, and auto insurance are provided." },
+      { name: "description", content: "After MyRunner launches in a city or state: 24/7 support, cargo insurance obtained before that launch, and drivers start once the application, license, and auto insurance are provided." },
       { property: "og:title", content: "Safety — MyRunner" },
       { property: "og:description", content: "Every layer of safety we've built into the platform." },
       { property: "og:url", content: "/safety" },

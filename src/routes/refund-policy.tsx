@@ -13,7 +13,7 @@ export const Route = createFileRoute("/refund-policy")({
   head: () => ({
     meta: [
       { title: "Refund Policy — MyRunner" },
-      { name: "description", content: "After launch, and once cargo insurance is established, the MyRunner refund policy will be in effect. Refunds are arranged by contacting support." },
+      { name: "description", content: REFUND_POLICY_STATEMENT },
       { property: "og:title", content: "MyRunner Refund Policy" },
       { property: "og:url", content: "/refund-policy" },
     ],

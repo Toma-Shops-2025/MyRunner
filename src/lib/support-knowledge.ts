@@ -1,4 +1,13 @@
 /** Shared FAQ + policy facts for the AI assistant (keep in sync with marketing pages). */
+import {
+  APPROVED_REFUND_STATEMENT,
+  CARGO_INSURANCE_STATEMENT,
+  DRIVER_SCREENING_STATEMENT,
+  REFUND_POLICY_STATEMENT,
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_STATEMENT,
+} from "@/lib/public-facts";
 
 export const SUPPORT_FAQ = [
   {
@@ -15,11 +24,11 @@ export const SUPPORT_FAQ = [
   },
   {
     q: "Are deliveries insured?",
-    a: "Cargo insurance is planned and will be obtained before commercial launch.",
+    a: CARGO_INSURANCE_STATEMENT,
   },
   {
     q: "How do I become a Runner?",
-    a: "Apply at /driver-signup with your license, your own auto insurance, and vehicle info. After launch, Louisville drivers can start driving after the application, a driver's license, and their own auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found.",
+    a: `Apply at /driver-signup with your license, your own auto insurance, and vehicle info. ${DRIVER_SCREENING_STATEMENT}`,
   },
   {
     q: "How much do drivers make?",
@@ -47,18 +56,18 @@ export const SUPPORT_FAQ = [
   },
   {
     q: "How do refunds work?",
-    a: "After launch, and once cargo insurance is established, the refund policy will be in effect. Refunds are arranged by contacting support. Contact MyRunner support by phone or email at (502) 812-2456 or support@myrunner.shop. Support is currently handled directly by the founder during posted support hours. Include the order ID. If a refund is approved, it is returned to the original payment method.",
+    a: `${REFUND_POLICY_STATEMENT} ${SUPPORT_STATEMENT} Phone ${SUPPORT_PHONE_DISPLAY}. Email ${SUPPORT_EMAIL}. Include the order ID. ${APPROVED_REFUND_STATEMENT}`,
   },
 ] as const;
 
 export const SUPPORT_POLICIES = `
 Contact email: support@myrunner.shop
 Support phone: (502) 812-2456
-Support: Contact MyRunner support by phone or email. Support is currently handled directly by the founder during posted support hours. Do not say support is 24/7 or that there is no support line.
-Launch: Coming to your city very soon!!! Louisville, Kentucky is first. Lexington is next.
-Insurance: Cargo insurance is planned and will be obtained before commercial launch. Do not say cargo insurance is already included. Runners carry their own auto insurance.
-Background checks: After launch, Louisville drivers can start driving after the application, a driver's license, and their own auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found. Do not say a clean background check is required before a driver can start. Do not say every Runner has already passed Checkr. Do not say screening is pending as a different rule.
-Refunds: After launch, and once cargo insurance is established, the refund policy will be in effect. Refunds are arranged by contacting support. If a refund is approved, it is returned to the original payment method. Do not say there is no refund button.
+Support: ${SUPPORT_STATEMENT} Phone ${SUPPORT_PHONE_DISPLAY}. Email ${SUPPORT_EMAIL}. Say support is 24/7 after launch in a city or state. Do not say there is no support line.
+Launch: Coming to your city very soon!!! Louisville, Kentucky is first. Lexington is next. Pricing, 24/7 support, cargo insurance, refunds, and driver rules apply after MyRunner launches in that city or state.
+Insurance: ${CARGO_INSURANCE_STATEMENT} Do not say cargo insurance is already included today. Runners carry their own auto insurance.
+Background checks: ${DRIVER_SCREENING_STATEMENT} Do not say a clean background check is required before a driver can start. Do not say every Runner has already passed Checkr. Do not limit the start rule to Louisville only.
+Refunds: ${REFUND_POLICY_STATEMENT} ${APPROVED_REFUND_STATEMENT} Do not say there is no refund button.
 Delivery types: standard (one pickup and one drop-off), multi-pickup (two or more pickups and one drop-off), and multi-dropoff (one pickup and two or more drop-offs). Each extra address is $3. Do not say the service is limited to one pickup and one drop-off.
 Safety: Never share passwords. For threats, theft, or assault — call local emergency services first, then file an in-app Report.
 Prohibited: illegal goods, weapons, hazardous materials, people transport (MyRunner is delivery only, not rideshare).

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/driver-signup")({
   head: () => ({
     meta: [
       { title: "Become a Runner — Apply to drive for MyRunner" },
-      { name: "description", content: "Apply to drive for MyRunner. After launch, Louisville drivers can start once the application, a driver's license, and auto insurance are provided. Disqualifying charges found once Checkr is used deactivate the driver." },
+      { name: "description", content: "Apply to drive for MyRunner. After launch in a city or state, drivers there can start once the application, a driver's license, and auto insurance are provided. Disqualifying charges found once Checkr is used deactivate the driver." },
     ],
     links: [{ rel: "canonical", href: "/driver-signup" }],
   }),
@@ -80,7 +80,7 @@ function DriverSignup() {
         <p className="text-xs uppercase tracking-widest text-gold">Driver application</p>
         <h1 className="mt-3 font-serif text-5xl">Apply to drive</h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
-          Coming to your city very soon!!! Takes about 5 minutes. After launch, Louisville drivers can start driving after the application, a driver's license, and their own auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found.
+          Coming to your city very soon!!! Takes about 5 minutes. After MyRunner launches in a city or state, drivers there can start driving after the application, a driver's license, and their own auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found. Support is available 24/7 after that launch.
         </p>
 
         <form
@@ -162,7 +162,7 @@ function DriverSignup() {
             toast.success(
               isReviewer
                 ? "Reviewer demo driver ready — opening dashboard…"
-                : "Application saved. After launch, Louisville drivers can start once the application, a driver's license, and auto insurance are provided.",
+                : "Application saved. After MyRunner launches in a city or state, drivers there can start once the application, a driver's license, and auto insurance are provided.",
             );
             goToDriverDashboard();
           }}
