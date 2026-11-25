@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtUSD } from "@/lib/pricing";
+import { parseRouteStops } from "@/lib/route-stops";
 
 export const Route = createFileRoute("/admin/orders")({
   head: () => ({ meta: [{ title: "All orders — MyRunner Admin" }, { name: "robots", content: "noindex" }] }),
@@ -14,6 +15,7 @@ type Order = {
   driver_id: string | null;
   pickup_address: string;
   dropoff_address: string;
+  route_stops?: unknown;
   item_description: string;
   type: string;
   status: string;
@@ -70,6 +72,7 @@ function AdminOrders() {
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">
                   {o.pickup_address} <br /> → {o.dropoff_address}
+                  {parseRouteStops(o.route_stops).length ? <><br />+ {parseRouteStops(o.route_stops).length} more</> : null}
                 </td>
                 <td className="px-4 py-3 uppercase tracking-widest text-xs">{o.status}</td>
                 <td className="px-4 py-3 text-right font-serif text-gold">{fmtUSD(o.price_cents + o.tip_cents)}</td>

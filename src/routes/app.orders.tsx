@@ -3,12 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtUSD } from "@/lib/pricing";
+import { parseRouteStops } from "@/lib/route-stops";
 import { toast } from "sonner";
 
 type Order = {
   id: string;
   pickup_address: string;
   dropoff_address: string;
+  route_stops?: unknown;
   item_description: string;
   type: string;
   status: string;
@@ -87,7 +89,7 @@ function Orders() {
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="font-medium">{o.item_description}</p>
-                    <p className="text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}</p>
+                    <p className="text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}{parseRouteStops(o.route_stops).length ? ` + ${parseRouteStops(o.route_stops).length} more` : ""}</p>
                     <p className="mt-1 text-xs text-muted-foreground capitalize">{o.type.replace("_", " ")}</p>
                   </div>
                   <div className="text-right">

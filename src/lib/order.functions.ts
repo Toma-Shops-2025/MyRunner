@@ -1,10 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { priceQuote } from "@/lib/pricing";
+
+const stopInput = z.object({
+  role: z.enum(["pickup", "dropoff"]),
+  address: z.string().trim().min(3).max(300),
+  lat: z.number().nullable().optional(),
+  lng: z.number().nullable().optional(),
+});
 
 const createOrderInput = z.object({
-  pickupAddress: z.string().min(3),
-  dropoffAddress: z.string().min(3),
+  pickupAddress: z.string().trim().min(3),
+  dropoffAddress: z.string().trim().min(3),
   itemDescription: z.string().min(2),
   type: z.enum(["standard", "multi_pickup", "multi_dropoff"]),
   priceCents: z.number().int().min(0),
@@ -12,6 +20,7 @@ const createOrderInput = z.object({
   distanceMiles: z.number().min(1).max(50),
   pickupLat: z.number().nullable().optional(),
   pickupLng: z.number().nullable().optional(),
+  extraStops: z.array(stopInput).max(8).default([]),
 });
 
 /** Create a delivery order — service role insert bypasses live DB RLS gaps. */
@@ -21,6 +30,18 @@ export const createOrder = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const extraStops =
+      data.type === "standard"
+        ? []
+        : data.extraStops.filter((stop) => stop.role === (data.type === "multi_pickup" ? "pickup" : "dropoff"));
+    if (data.type !== "standard" && extraStops.length < 1) {
+      return { error: "Add at least one more address for this delivery type." };
+    }
+    const expectedPrice = priceQuote(data.distanceMiles, extraStops.length);
+    if (data.priceCents !== expectedPrice) {
+      return { error: "The price no longer matches these stops. Review the quote and try again." };
+    }
 
     const feeShareCents = Math.round(data.priceCents * 0.7);
     const platformFeeCents = data.priceCents - feeShareCents;
@@ -34,6 +55,8 @@ export const createOrder = createServerFn({ method: "POST" })
         item_description: data.itemDescription,
         type: data.type,
         price_cents: data.priceCents,
+        additional_pickups: extraStops.filter((stop) => stop.role === "pickup").length,
+        route_stops: extraStops,
         tip_cents: data.tipCents,
         distance_miles: data.distanceMiles,
         pickup_lat: data.pickupLat ?? null,

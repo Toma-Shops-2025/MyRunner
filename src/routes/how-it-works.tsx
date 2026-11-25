@@ -17,11 +17,10 @@ export const Route = createFileRoute("/how-it-works")({
 });
 
 const steps = [
-  ["Enter pickup address", "Where the Runner should go to grab your item. Add a unit number or gate code if needed."],
-  ["Describe the item", "A quick sentence so the Runner knows what they're picking up."],
-  ["Enter drop-off address", "Use the item note to name a pickup contact or recipient when they are different from you."],
-  ["Choose your delivery type", "Standard, multi-pickup, or multi-dropoff. Multi-pickup and multi-dropoff add $3.00."],
-  ["Review pricing", "Base fee + per mile + the multi-stop add-on when that type is selected."],
+  ["Choose your delivery type", "Standard is one pickup and one drop-off. Multi-pickup adds more pickup addresses. Multi-dropoff adds more drop-off addresses."],
+  ["Enter every address", "The form opens a field for each pickup or drop-off. Add a unit number or gate code if needed."],
+  ["Describe the item", "A quick sentence so the Runner knows what they're picking up. Name a pickup contact or recipient when they are different from you."],
+  ["Review pricing", "Base fee + per mile + $3.00 for each extra address."],
   ["Optional tip", "Add a tip before you pay. You can prefer or block a Runner later in Settings."],
   ["Pay securely", "Stripe handles the transaction — your card details never touch our servers."],
   ["Track live", "Watch the Runner move in real time on a GPS map."],

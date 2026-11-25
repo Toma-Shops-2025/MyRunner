@@ -11,6 +11,8 @@ import { payoutDriverForOrder } from "@/lib/connect.functions";
 import { advanceDriverOrder } from "@/lib/dispatch.functions";
 import { sendOrderMessage } from "@/lib/order.functions";
 import { toast } from "sonner";
+import { RouteAddressList } from "@/components/site/route-address-list";
+import { mapsDirectionsUrl, orderedAddresses, parseRouteStops } from "@/lib/route-stops";
 
 export const Route = createFileRoute("/driver/orders/$id")({
   head: () => ({ meta: [{ title: "Delivery — MyRunner Driver" }, { name: "robots", content: "noindex" }] }),
@@ -23,6 +25,7 @@ type Order = {
   driver_id: string | null;
   pickup_address: string;
   dropoff_address: string;
+  route_stops?: unknown;
   item_description: string;
   notes: string | null;
   type: string;
@@ -139,7 +142,8 @@ function DriverOrder() {
       const ok = await advance("in_transit");
       if (!ok) return;
     }
-    openMaps(order.dropoff_address);
+    const { dropoffs } = orderedAddresses(order.pickup_address, order.dropoff_address, parseRouteStops(order.route_stops));
+    window.open(mapsDirectionsUrl(dropoffs), "_blank", "noopener,noreferrer");
   }
 
   if (!order) return <p className="text-muted-foreground">Loading…</p>;
@@ -155,8 +159,7 @@ function DriverOrder() {
           <div>
             <p className="text-xs uppercase tracking-widest text-gold">{order.type.replace("_", " ")}</p>
             <h1 className="mt-1 font-serif text-3xl">{order.item_description}</h1>
-            <p className="mt-3 text-sm"><span className="text-muted-foreground">Pickup:</span> {order.pickup_address}</p>
-            <p className="text-sm"><span className="text-muted-foreground">Drop:</span> {order.dropoff_address}</p>
+            <RouteAddressList pickup={order.pickup_address} dropoff={order.dropoff_address} stops={order.route_stops} />
             {order.notes && <p className="mt-2 text-xs italic text-muted-foreground">"{order.notes}"</p>}
           </div>
           <div className="text-right">
@@ -189,7 +192,7 @@ function DriverOrder() {
             {canActOnPickup && (
               <div className="flex flex-wrap gap-2">
                 <Button asChild className="bg-gold text-primary-foreground hover:bg-gold/90">
-                  <a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.pickup_address)}`}>
+                  <a target="_blank" rel="noreferrer" href={mapsDirectionsUrl(orderedAddresses(order.pickup_address, order.dropoff_address, parseRouteStops(order.route_stops)).pickups)}>
                     <MapPin className="mr-1 size-4" /> Navigate to pickup
                   </a>
                 </Button>

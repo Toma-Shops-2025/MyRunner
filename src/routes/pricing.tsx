@@ -63,8 +63,9 @@ function Pricing() {
           </div>
         </div>
         <p className="mt-8 max-w-2xl text-sm text-muted-foreground">
-          Standard, multi-pickup, and multi-dropoff are available. A multi-pickup or
-          multi-dropoff adds $3.00. Cargo insurance is included. There is no promo
+          Standard, multi-pickup, and multi-dropoff are available. Multi-pickup asks
+          for every pickup address. Multi-dropoff asks for every drop-off address.
+          Each extra address adds $3.00. Cargo insurance is included. There is no promo
           code and no loyalty discount yet. Runners keep 70% of the delivery fee and
           100% of tips. MyRunner keeps the other 30% of the delivery fee. 24-hour
           support is (502) 812-2456.

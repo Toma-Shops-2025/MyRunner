@@ -25,6 +25,13 @@ import {
   type DriverNotifyStatus,
 } from "@/lib/driver-notifications";
 import { useBgmVolume } from "@/components/bgm-provider";
+import { RouteAddressList } from "@/components/site/route-address-list";
+import { mapsDirectionsUrl, orderedAddresses, parseRouteStops } from "@/lib/route-stops";
+
+function extraStopLabel(stops: unknown) {
+  const count = parseRouteStops(stops).length;
+  return count ? ` + ${count} more` : "";
+}
 
 export const Route = createFileRoute("/driver/dashboard")({
   head: () => ({
@@ -40,6 +47,7 @@ type Order = {
   id: string;
   pickup_address: string;
   dropoff_address: string;
+  route_stops?: unknown;
   item_description: string;
   notes: string | null;
   type: string;
@@ -536,7 +544,7 @@ function DriverDashboard() {
               <li key={o.id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
                 <div className="min-w-0">
                   <p className="truncate font-medium">{o.item_description}</p>
-                  <p className="truncate text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}</p>
+                  <p className="truncate text-xs text-muted-foreground">{o.pickup_address} → {o.dropoff_address}{extraStopLabel(o.route_stops)}</p>
                 </div>
                 <p className="font-serif text-lg text-gold">{fmtUSD(driverShare(o))}</p>
               </li>
@@ -597,8 +605,7 @@ function DriverDashboard() {
               </div>
               <div className="space-y-1 text-sm">
                 <p><span className="text-muted-foreground">Item:</span> {currentOffer.order.item_description}</p>
-                <p><span className="text-muted-foreground">Pickup:</span> {currentOffer.order.pickup_address}</p>
-                <p><span className="text-muted-foreground">Drop:</span> {currentOffer.order.dropoff_address}</p>
+                <RouteAddressList pickup={currentOffer.order.pickup_address} dropoff={currentOffer.order.dropoff_address} stops={currentOffer.order.route_stops} />
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
@@ -635,8 +642,7 @@ function OrderCard({ order, mine, onClaim, canAccept = true }: { order: Order; m
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="font-serif text-lg">{order.item_description}</p>
-          <p className="mt-1 text-sm"><span className="text-muted-foreground">Pickup:</span> {order.pickup_address}</p>
-          <p className="text-sm"><span className="text-muted-foreground">Drop:</span> {order.dropoff_address}</p>
+          <RouteAddressList pickup={order.pickup_address} dropoff={order.dropoff_address} stops={order.route_stops} />
           {order.notes && <p className="mt-1 text-xs italic text-muted-foreground">"{order.notes}"</p>}
           <p className="mt-1 text-xs text-muted-foreground">
             {order.distance_miles ? `${order.distance_miles} mi · ` : ""}{order.type.replace("_", " ")}
@@ -664,12 +670,12 @@ function OrderCard({ order, mine, onClaim, canAccept = true }: { order: Order; m
       {mine && (
         <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
           <Button variant="outline" size="sm" asChild>
-            <a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.pickup_address)}`}>
+            <a target="_blank" rel="noreferrer" href={mapsDirectionsUrl(orderedAddresses(order.pickup_address, order.dropoff_address, parseRouteStops(order.route_stops)).pickups)}>
               <MapPin className="mr-1 size-3" /> Navigate to pickup
             </a>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.dropoff_address)}`}>
+            <a target="_blank" rel="noreferrer" href={mapsDirectionsUrl(orderedAddresses(order.pickup_address, order.dropoff_address, parseRouteStops(order.route_stops)).dropoffs)}>
               <MapPin className="mr-1 size-3" /> Navigate to drop-off
             </a>
           </Button>

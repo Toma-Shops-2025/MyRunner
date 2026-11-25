@@ -13,6 +13,7 @@ import { createCheckoutSession, createTipCheckoutSession, confirmOrderPayment } 
 import { payoutDriverForOrder } from "@/lib/connect.functions";
 import { sendOrderMessage } from "@/lib/order.functions";
 import { toast } from "sonner";
+import { RouteAddressList } from "@/components/site/route-address-list";
 
 export const Route = createFileRoute("/app/orders/$id")({
   head: () => ({ meta: [{ title: "Order details — MyRunner" }, { name: "robots", content: "noindex" }] }),
@@ -25,6 +26,7 @@ type Order = {
   driver_id: string | null;
   pickup_address: string;
   dropoff_address: string;
+  route_stops?: unknown;
   item_description: string;
   notes: string | null;
   type: string;
@@ -235,8 +237,7 @@ function OrderDetail() {
           <div>
             <p className="text-xs uppercase tracking-widest text-gold">{order.type.replace("_", " ")}</p>
             <h1 className="mt-1 font-serif text-3xl">{order.item_description}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">{order.pickup_address}</p>
-            <p className="text-sm text-muted-foreground">→ {order.dropoff_address}</p>
+            <RouteAddressList pickup={order.pickup_address} dropoff={order.dropoff_address} stops={order.route_stops} />
             {order.notes && <p className="mt-2 text-xs text-muted-foreground italic">"{order.notes}"</p>}
           </div>
           <div className="text-right">

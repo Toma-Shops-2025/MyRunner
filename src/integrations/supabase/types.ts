@@ -241,6 +241,7 @@ export type Database = {
           platform_fee_cents: number
           price_cents: number
           proof_photo_url: string | null
+          route_stops: Json
           scheduled_for: string | null
           status: Database["public"]["Enums"]["order_status"]
           stripe_session_id: string | null
@@ -274,6 +275,7 @@ export type Database = {
           platform_fee_cents?: number
           price_cents?: number
           proof_photo_url?: string | null
+          route_stops?: Json
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           stripe_session_id?: string | null
@@ -307,6 +309,7 @@ export type Database = {
           platform_fee_cents?: number
           price_cents?: number
           proof_photo_url?: string | null
+          route_stops?: Json
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           stripe_session_id?: string | null
