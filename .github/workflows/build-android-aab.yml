@@ -3,6 +3,9 @@
 name: Build Android AAB
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       bump_version_code:
@@ -25,7 +28,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Completes in seconds on git push so the Actions list stays green on merges.
+  push-placeholder:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "MyRunner AAB is built manually only."
+          echo "Actions -> Build Android AAB -> Run workflow (branch main)."
+
   build:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
