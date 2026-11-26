@@ -73,7 +73,7 @@ jobs:
             SDKMANAGER="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -name sdkmanager -type f | head -1)"
           fi
           test -x "$SDKMANAGER"
-          yes | "$SDKMANAGER" --licenses >/dev/null
+          yes | "$SDKMANAGER" --licenses | tail -n 20 || true
           "$SDKMANAGER" \
             "platform-tools" \
             "platforms;android-36" \

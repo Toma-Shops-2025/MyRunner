@@ -59,13 +59,16 @@ export const activateDriverRole = createServerFn({ method: "POST" })
         : {}),
     }).eq("id", userId);
 
+    // Set every status-like column explicitly (live DB had invalid enum default "n/a" on insert).
     const applicationPayload = {
       vehicle_make: data.vehicleMake,
       vehicle_model: data.vehicleModel,
       vehicle_year: data.vehicleYear,
+      vehicle_type: null,
       license_number: data.licenseNumber,
       license_state: data.licenseState.toUpperCase().slice(0, 2),
       insurance_provider: data.insuranceProvider,
+      background_check_status: reviewerAccount ? "clear" : "pending",
       status: "approved" as const,
     };
 
