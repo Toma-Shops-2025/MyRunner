@@ -71,8 +71,8 @@ export const activateDriverRole = createServerFn({ method: "POST" })
       license_state: data.licenseState.toUpperCase().slice(0, 2),
       insurance_provider: data.insuranceProvider,
       // driver_applications.background_check_status is text (pending/clear/failed), not profiles enum
-      background_check_status: "pending",
-      status: "approved" as const,
+      background_check_status: reviewerAccount ? "clear" : "pending",
+      status: (reviewerAccount ? "approved" : "pending") as "approved" | "pending",
     };
 
     const { data: existingApp, error: appReadErr } = await supabaseAdmin
