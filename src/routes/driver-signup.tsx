@@ -14,6 +14,7 @@ import { clearDriverReferralCode, readDriverReferralCode } from "@/lib/signup-in
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { SSN_LAST4_CHECKR_STATEMENT } from "@/lib/public-facts";
+import { isPlayReviewerEmail } from "@/lib/reviewer-accounts";
 
 const DRIVER_APPROVED_KEY = "myrunner-driver-just-approved";
 
@@ -109,7 +110,7 @@ function DriverSignup() {
               return toast.error("Please sign in to continue your application.");
             }
 
-            const isReviewer = email.toLowerCase() === "driver-review@myrunner.shop";
+            const isReviewer = isPlayReviewerEmail(email);
 
             try {
               await activateRole({

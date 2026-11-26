@@ -10,7 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/lib/auth-google";
 import { resolvePostAuthDestination } from "@/lib/auth.functions";
 import { resolveClientPostAuthDestination } from "@/lib/auth-routing";
-import { clearSignupIntent } from "@/lib/signup-intent";
+import {
+  clearSignupIntent,
+  intentFromMetadata,
+  readSignupIntent,
+} from "@/lib/signup-intent";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
@@ -39,14 +43,23 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    clearSignupIntent();
-  }, []);
-
-  useEffect(() => {
     if (authLoading || !user) return;
-    if (isAdmin) nav({ to: "/admin/dashboard" });
-    else if (isDriver) nav({ to: "/driver/dashboard" });
-    else nav({ to: "/app/dashboard" });
+    if (isAdmin) {
+      nav({ to: "/admin/dashboard" });
+      return;
+    }
+    if (isDriver) {
+      nav({ to: "/driver/dashboard" });
+      return;
+    }
+    const intent =
+      readSignupIntent() ??
+      intentFromMetadata(user.user_metadata as Record<string, unknown>);
+    if (intent === "driver") {
+      nav({ to: "/driver-signup" });
+      return;
+    }
+    nav({ to: "/app/dashboard" });
   }, [authLoading, user, isAdmin, isDriver, nav]);
 
   async function google() {
@@ -72,25 +85,35 @@ function Login() {
               email: String(fd.get("email")),
               password: String(fd.get("password")),
             });
-            setBusy(false);
-            if (error) return toast.error(error.message);
+            if (error) {
+              setBusy(false);
+              return toast.error(error.message);
+            }
+            const sessionIntent =
+              readSignupIntent() ??
+              intentFromMetadata(data.user?.user_metadata as Record<string, unknown>);
             try {
               const dest = await Promise.race([
-                resolveDest(),
+                resolveDest({ data: { sessionSignupIntent: sessionIntent } }),
                 new Promise<never>((_, reject) =>
                   setTimeout(() => reject(new Error("timeout")), 8000),
                 ),
               ]);
+              clearSignupIntent();
               toast.success("Welcome back.");
               nav({ to: dest.to });
             } catch {
               const to = data.user
                 ? await resolveClientPostAuthDestination(data.user.id, {
                     metadata: data.user.user_metadata as Record<string, unknown>,
+                    sessionSignupIntent: sessionIntent,
                   })
                 : "/app/dashboard";
+              clearSignupIntent();
               toast.success("Welcome back.");
               nav({ to });
+            } finally {
+              setBusy(false);
             }
           }}
           className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8"

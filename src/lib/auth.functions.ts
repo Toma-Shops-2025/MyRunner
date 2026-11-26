@@ -70,19 +70,24 @@ export async function resolveEffectiveDriverAccess(
  */
 export const resolvePostAuthDestination = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((data: unknown) => {
+    const d = data as { sessionSignupIntent?: string | null };
+    return {
+      sessionSignupIntent:
+        d?.sessionSignupIntent === "driver" || d?.sessionSignupIntent === "customer"
+          ? d.sessionSignupIntent
+          : null,
+    };
+  })
+  .handler(async ({ context, data }) => {
     const access = await resolveEffectiveDriverAccess(context.userId, {
       cleanupStaleDriverRole: true,
     });
 
-    if (access.isAdmin) {
-      return { to: "/admin/dashboard" as AuthDestination };
-    }
-    if (access.isDriver) {
-      return { to: "/driver/dashboard" as AuthDestination };
-    }
-
-    return { to: "/app/dashboard" as AuthDestination };
+    const sessionIntent = data.sessionSignupIntent ?? access.signupIntent;
+    return {
+      to: destinationAfterFreshOAuth(access, sessionIntent),
+    };
   });
 
 /** OAuth/signup callback only — never send returning logins to driver signup. */
