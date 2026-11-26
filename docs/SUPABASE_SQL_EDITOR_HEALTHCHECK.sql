@@ -315,7 +315,7 @@ END;
 $$;
 
 INSERT INTO public.user_roles (user_id, role)
-SELECT p.id, 'admin'::public.app_role
+SELECT p.id, 'admin'
 FROM public.profiles p
 WHERE lower(p.email) IN (
   'founder@myrunner.shop',
@@ -324,7 +324,8 @@ WHERE lower(p.email) IN (
 )
 AND NOT EXISTS (
   SELECT 1 FROM public.user_roles ur
-  WHERE ur.user_id = p.id AND ur.role = 'admin'::public.app_role
+  WHERE ur.user_id::text = p.id::text
+    AND ur.role::text = 'admin'
 );
 
 COMMIT;
