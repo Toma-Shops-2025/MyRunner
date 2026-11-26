@@ -12,6 +12,7 @@ dist
 dist-ssr
 public/deploy.json
 .output
+.vercel/output
 .vinxi
 .tanstack/**
 .nitro

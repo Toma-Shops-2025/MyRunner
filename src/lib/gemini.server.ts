@@ -1,6 +1,6 @@
 /**
  * Google Gemini for MyRunner support + triage.
- * Set GEMINI_API_KEY in Netlify (Google AI Studio).
+ * Set GEMINI_API_KEY in the host env (e.g. Vercel, Google AI Studio).
  */
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta";

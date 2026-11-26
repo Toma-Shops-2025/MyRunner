@@ -5,5 +5,5 @@ export default defineConfig({
     client: { entry: "src/app/client.tsx" },
     server: { entry: "server" },
   },
-  nitro: { preset: "netlify" },
+  nitro: { preset: process.env.NITRO_PRESET ?? "vercel" },
 });
