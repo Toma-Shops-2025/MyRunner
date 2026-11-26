@@ -1,8 +1,20 @@
 -- Run once in Supabase SQL Editor if driver submit still says driver_status "n/a"
+-- After fixing schema, trigger a fresh Netlify production deploy from main and open
+-- https://myrunner.shop/deploy.json — commit should match GitHub main (e.g. d23f964+).
 
 BEGIN;
 
--- 1) Show which columns use driver_status or default n/a
+-- 0) Whole-schema audit: any driver_status column or default mentioning n/a
+SELECT table_name, column_name, udt_name, column_default
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND (
+    udt_name = 'driver_status'
+    OR column_default::text ILIKE '%n/a%'
+  )
+ORDER BY table_name, column_name;
+
+-- 1) driver_applications columns of interest
 SELECT column_name, udt_name, column_default
 FROM information_schema.columns
 WHERE table_schema = 'public'
