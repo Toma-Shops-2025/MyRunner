@@ -59,16 +59,19 @@ export const activateDriverRole = createServerFn({ method: "POST" })
         : {}),
     }).eq("id", userId);
 
-    // Set every status-like column explicitly (live DB had invalid enum default "n/a" on insert).
+    // Send non-null vehicle_type: PostgREST omits null keys and DB default "n/a" breaks driver_status enum.
+    const vehicleTypeLabel =
+      [data.vehicleMake, data.vehicleModel].filter(Boolean).join(" ").trim() || "car";
     const applicationPayload = {
       vehicle_make: data.vehicleMake,
       vehicle_model: data.vehicleModel,
       vehicle_year: data.vehicleYear,
-      vehicle_type: null,
+      vehicle_type: vehicleTypeLabel,
       license_number: data.licenseNumber,
       license_state: data.licenseState.toUpperCase().slice(0, 2),
       insurance_provider: data.insuranceProvider,
-      background_check_status: reviewerAccount ? "clear" : "pending",
+      // driver_applications.background_check_status is text (pending/clear/failed), not profiles enum
+      background_check_status: "pending",
       status: "approved" as const,
     };
 
