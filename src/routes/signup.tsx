@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { AuthPageSection } from "@/components/site/auth-page-section";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,7 +70,7 @@ function Signup() {
 
   return (
     <PageShell>
-      <section className="container-app grid min-h-[80vh] place-items-center py-16">
+      <AuthPageSection>
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -113,7 +114,7 @@ function Signup() {
             toast.success(isDriver ? "Account created — finish your driver application." : "Welcome to MyRunner.");
             nav({ to: isDriver ? "/driver-signup" : "/app/dashboard" });
           }}
-          className="w-full max-w-md rounded-2xl border border-border bg-card p-8"
+          className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8"
         >
           <h1 className="font-serif text-4xl">Create account</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -196,7 +197,7 @@ function Signup() {
             </Link>
           </p>
         </form>
-      </section>
+      </AuthPageSection>
     </PageShell>
   );
 }

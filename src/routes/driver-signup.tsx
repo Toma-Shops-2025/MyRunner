@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { AuthPageSection } from "@/components/site/auth-page-section";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,9 +63,9 @@ function DriverSignup() {
   if (loading || !user || isDriver) {
     return (
       <PageShell>
-        <section className="container-app grid min-h-[60vh] place-items-center py-16">
+        <AuthPageSection>
           <p className="text-sm text-muted-foreground">Loading…</p>
-        </section>
+        </AuthPageSection>
       </PageShell>
     );
   }
@@ -77,7 +78,7 @@ function DriverSignup() {
 
   return (
     <PageShell>
-      <section className="container-app py-16">
+      <AuthPageSection className="max-w-3xl">
         <p className="text-xs uppercase tracking-widest text-gold">Driver application</p>
         <h1 className="mt-3 font-serif text-5xl">Apply to drive</h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
@@ -166,7 +167,7 @@ function DriverSignup() {
             );
             goToDriverDashboard();
           }}
-          className="mt-10 grid max-w-3xl gap-6 rounded-2xl border border-border bg-card p-8"
+          className="mt-10 grid gap-6 rounded-2xl border border-border bg-card p-4 sm:p-8"
         >
           <Section title="Your account">
             <Field id="name" label="Full legal name" defaultValue={profileName} />
@@ -225,7 +226,7 @@ function DriverSignup() {
             {busy ? "Submitting…" : "Submit & start driving"}
           </Button>
         </form>
-      </section>
+      </AuthPageSection>
     </PageShell>
   );
 }
