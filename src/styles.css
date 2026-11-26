@@ -111,19 +111,16 @@
 
   html {
     scroll-behavior: smooth;
-    height: auto;
-    min-height: 100%;
   }
 
   body {
-    min-height: 100dvh;
-    min-height: 100vh;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   h1, h2, h3, h4 {

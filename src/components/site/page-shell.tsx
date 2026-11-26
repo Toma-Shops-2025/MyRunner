@@ -23,7 +23,7 @@ export function PageShell({
   return (
     <div className={cn("flex min-h-[100dvh] flex-col bg-background", className)}>
       <SiteHeader />
-      <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+      <main className="flex-1">
         {shouldShowBack ? (
           <div className="container-app pt-6">
             <BackButton fallbackTo={backFallback} />
