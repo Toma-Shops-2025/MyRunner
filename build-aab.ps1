@@ -16,11 +16,16 @@
 
 $ErrorActionPreference = "Stop"
 
-$KEYSTORE = "C:\Keys\myrunner.jks"
-$KEY_ALIAS = "myrunner1"
+$KEYSTORE = if ($env:ANDROID_KEYSTORE_PATH) { $env:ANDROID_KEYSTORE_PATH } else { "C:\Keys\myrunner.jks" }
+$KEY_ALIAS = if ($env:ANDROID_KEY_ALIAS) { $env:ANDROID_KEY_ALIAS } else { "myrunner1" }
+$Password = $env:ANDROID_KEYSTORE_PASSWORD
+if (-not $Password) { $Password = $env:ANDROID_KEY_PASSWORD }
 
 if (-not (Test-Path $KEYSTORE)) {
-  Write-Error "Keystore not found at $KEYSTORE. Generate it first with keytool (see README)."
+  Write-Error "Keystore not found at $KEYSTORE. Set ANDROID_KEYSTORE_PATH or generate the keystore (see docs/ANDROID_AAB_CI.md)."
+}
+if (-not $Password) {
+  Write-Error "Set ANDROID_KEYSTORE_PASSWORD (and ANDROID_KEY_PASSWORD if different) before building. See docs/ANDROID_AAB_CI.md."
 }
 
 Write-Host "==> Pulling latest code" -ForegroundColor Cyan
@@ -51,7 +56,6 @@ if ($content -match "versionCode (\d+)") {
 }
 
 Write-Host "==> Building signed release AAB" -ForegroundColor Cyan
-$Password = "Custom.247"
 
 Push-Location android
 try {
