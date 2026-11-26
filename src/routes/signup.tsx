@@ -14,6 +14,7 @@ import {
   setDriverReferralCode,
   type SignupIntent,
 } from "@/lib/signup-intent";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -39,13 +40,14 @@ export const Route = createFileRoute("/signup")({
 function Signup() {
   const { intent: initialIntent, ref: refCode } = Route.useSearch();
   const nav = useNavigate();
+  const { user, loading: authLoading, isDriver: hasDriverRole, isAdmin } = useAuth();
   const [intent, setIntent] = useState<SignupIntent>(refCode ? "driver" : initialIntent);
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const isDriver = intent === "driver";
+  const signupAsDriver = intent === "driver";
 
   useEffect(() => {
     if (refCode) {
@@ -53,6 +55,34 @@ function Signup() {
       setIntent("driver");
     }
   }, [refCode]);
+
+  useEffect(() => {
+    setSignupIntent(intent);
+  }, [intent]);
+
+  useEffect(() => {
+    if (authLoading || !user) return;
+    if (isAdmin) {
+      nav({ to: "/admin/dashboard" });
+      return;
+    }
+    if (hasDriverRole) {
+      nav({ to: "/driver/dashboard" });
+      return;
+    }
+    const wantsDriver = intent === "driver" || refCode;
+    nav({ to: wantsDriver ? "/driver-signup" : "/app/dashboard" });
+  }, [authLoading, user, hasDriverRole, isAdmin, intent, refCode, nav]);
+
+  if (authLoading || user) {
+    return (
+      <PageShell>
+        <AuthPageSection>
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </AuthPageSection>
+      </PageShell>
+    );
+  }
 
   async function google() {
     if (!agree) return toast.error("Please accept the policies to continue.");
@@ -76,49 +106,67 @@ function Signup() {
             e.preventDefault();
             if (!agree) return toast.error("Please accept the policies to continue.");
             setBusy(true);
+            setSignupIntent(intent);
             if (refCode) setDriverReferralCode(refCode);
-            const fd = new FormData(e.currentTarget);
-            const email = String(fd.get("email"));
-            const fullName = String(fd.get("name"));
-            const { data: authData, error } = await supabase.auth.signUp({
-              email,
-              password: String(fd.get("password")),
-              options: {
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
-                data: { full_name: fullName, signup_intent: intent },
-              },
-            });
+            try {
+              const fd = new FormData(e.currentTarget);
+              const email = String(fd.get("email"));
+              const fullName = String(fd.get("name"));
+              const { data: authData, error } = await supabase.auth.signUp({
+                email,
+                password: String(fd.get("password")),
+                options: {
+                  emailRedirectTo: `${window.location.origin}/auth/callback`,
+                  data: { full_name: fullName, signup_intent: intent },
+                },
+              });
 
-            if (!error && authData.user) {
-              await supabase
-                .from("profiles")
-                .upsert({
-                  id: authData.user.id,
-                  full_name: fullName,
-                  email,
-                })
-                .catch((err) => console.warn("Profile sync error", err));
-            }
-            setBusy(false);
-            if (error) return toast.error(error.message);
+              if (error) {
+                const alreadyExists = /already registered|already been registered/i.test(
+                  error.message,
+                );
+                if (alreadyExists) {
+                  toast.info("You already have an account — sign in to continue.");
+                  return nav({ to: "/login" });
+                }
+                return toast.error(error.message);
+              }
 
-            if (!authData.session) {
+              if (authData.user) {
+                await Promise.race([
+                  supabase
+                    .from("profiles")
+                    .upsert({
+                      id: authData.user.id,
+                      full_name: fullName,
+                      email,
+                    }),
+                  new Promise((resolve) => setTimeout(resolve, 6000)),
+                ]).catch((err) => console.warn("Profile sync error", err));
+              }
+
+              if (!authData.session) {
+                toast.success(
+                  signupAsDriver
+                    ? "Check your email to confirm, then sign in to finish your driver application."
+                    : "Check your email to confirm your account, then sign in.",
+                );
+                return nav({ to: "/login" });
+              }
+
               toast.success(
-                isDriver
-                  ? "Check your email to confirm, then sign in to finish your driver application."
-                  : "Check your email to confirm your account, then sign in.",
+                signupAsDriver ? "Account created — finish your driver application." : "Welcome to MyRunner.",
               );
-              return nav({ to: "/login" });
+              nav({ to: signupAsDriver ? "/driver-signup" : "/app/dashboard" });
+            } finally {
+              setBusy(false);
             }
-
-            toast.success(isDriver ? "Account created — finish your driver application." : "Welcome to MyRunner.");
-            nav({ to: isDriver ? "/driver-signup" : "/app/dashboard" });
           }}
           className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8"
         >
           <h1 className="font-serif text-4xl">Create account</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {isDriver
+            {signupAsDriver
               ? "Sign up as a Runner, then complete your driver application."
               : "Sign up to send deliveries and track your Runners live."}
           </p>
@@ -133,7 +181,7 @@ function Signup() {
               type="button"
               onClick={() => setIntent("customer")}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                !isDriver ? "bg-gold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                !signupAsDriver ? "bg-gold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Send deliveries
@@ -142,7 +190,7 @@ function Signup() {
               type="button"
               onClick={() => setIntent("driver")}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                isDriver ? "bg-gold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                signupAsDriver ? "bg-gold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Drive & earn
@@ -187,7 +235,7 @@ function Signup() {
             </div>
             <LegalConsent id="signup-consent" checked={agree} onCheckedChange={setAgree} />
             <Button type="submit" disabled={busy} className="w-full bg-gold text-primary-foreground hover:bg-gold/90">
-              {isDriver ? "Create account & apply to drive" : "Create customer account"}
+              {signupAsDriver ? "Create account & apply to drive" : "Create customer account"}
             </Button>
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">

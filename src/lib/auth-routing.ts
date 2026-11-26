@@ -71,14 +71,21 @@ export async function fetchUserRoles(
   return [...roles];
 }
 
-/** Client fallback when server routing is unavailable. Never opens driver signup on login. */
+/** Client fallback when server routing is unavailable. */
 export async function resolveClientPostAuthDestination(
   userId: string,
-  metadata?: Record<string, unknown>,
+  options?: {
+    metadata?: Record<string, unknown>;
+    sessionSignupIntent?: SignupIntent | null;
+  },
 ): Promise<AuthDestination> {
+  const metadata = options?.metadata;
+  const signupIntent =
+    options?.sessionSignupIntent ?? intentFromMetadata(metadata) ?? null;
   const roles = await fetchUserRoles(userId, metadata);
   if (roles.includes("admin")) return "/admin/dashboard";
   if (roles.includes("driver")) return "/driver/dashboard";
+  if (signupIntent === "driver") return "/driver-signup";
   return "/app/dashboard";
 }
 

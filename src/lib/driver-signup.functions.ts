@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isPlayReviewerEmail } from "@/lib/reviewer-accounts";
 
 const driverApplicationInput = z.object({
   fullName: z.string().min(1),
@@ -33,6 +34,9 @@ export const activateDriverRole = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const userId = context.userId;
 
+    const { data: authRow } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const reviewerAccount = isPlayReviewerEmail(authRow.user?.email);
+
     await supabaseAdmin.from("profiles").update({
       full_name: data.fullName,
       phone: data.phone,
@@ -47,7 +51,7 @@ export const activateDriverRole = createServerFn({ method: "POST" })
       background_check_status: "clear",
       background_check_updated_at: new Date().toISOString(),
       is_active: true,
-      ...(data.isReviewer
+      ...(reviewerAccount
         ? {
             stripe_connect_account_id: "acct_demo_driver_review",
             payouts_enabled: true,

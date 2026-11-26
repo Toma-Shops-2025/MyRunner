@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import {
   DollarSign,
   Clock,
@@ -42,6 +43,36 @@ export const Route = createFileRoute("/drivers")({
   component: Drivers,
 });
 
+function RunnerSignupCta() {
+  const { user, isDriver, loading } = useAuth();
+  const label = loading
+    ? "Loading…"
+    : !user
+      ? "Sign up as a Runner →"
+      : isDriver
+        ? "Open Runner dashboard →"
+        : "Finish driver application →";
+  const to = !user
+    ? { to: "/signup" as const, search: { intent: "driver" as const } }
+    : isDriver
+      ? { to: "/driver/dashboard" as const }
+      : { to: "/driver-signup" as const };
+
+  if (loading) {
+    return (
+      <Button size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90" disabled>
+        Loading…
+      </Button>
+    );
+  }
+
+  return (
+    <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">
+      <Link {...to}>{label}</Link>
+    </Button>
+  );
+}
+
 function Drivers() {
   return (
     <PageShell>
@@ -65,11 +96,7 @@ function Drivers() {
             Same car, same hours — extra local deliveries when you&apos;re already out. Go online when you want. Stay ready before the city gets busy.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">
-              <Link to="/signup" search={{ intent: "driver" }}>
-                Sign up as a Runner →
-              </Link>
-            </Button>
+            <RunnerSignupCta />
             <Button asChild size="lg" variant="outline" className="border-border-strong">
               <a href="/driver-flyer.html" target="_blank" rel="noreferrer">
                 <Printer className="mr-2 size-4" /> Print flyer
