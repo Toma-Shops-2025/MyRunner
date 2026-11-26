@@ -86,6 +86,28 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS checkr_candidate_id text,
   ADD COLUMN IF NOT EXISTS referral_code text;
 
+-- Normalize legacy / dashboard values before adding CHECK constraints
+UPDATE public.profiles
+SET background_check_status = CASE lower(trim(background_check_status))
+  WHEN 'clear' THEN 'clear'
+  WHEN 'failed' THEN 'failed'
+  WHEN 'pending' THEN 'pending'
+  WHEN 'approved' THEN 'clear'
+  WHEN 'rejected' THEN 'failed'
+  WHEN 'suspended' THEN 'failed'
+  WHEN 'n/a' THEN 'pending'
+  WHEN 'na' THEN 'pending'
+  WHEN '' THEN 'pending'
+  ELSE 'pending'
+END
+WHERE background_check_status IS NULL
+   OR lower(trim(background_check_status)) NOT IN ('pending', 'clear', 'failed');
+
+UPDATE public.profiles
+SET ssn_last4 = NULL
+WHERE ssn_last4 IS NOT NULL
+  AND ssn_last4 !~ '^[0-9]{4}$';
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'profiles_ssn_last4_format') THEN
