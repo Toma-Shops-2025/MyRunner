@@ -44,7 +44,8 @@ jobs:
     permissions:
       contents: write
     env:
-      KEYSTORE_PATH: ${{ runner.temp }}/myrunner-release.jks
+      # runner.* is not allowed in job-level env (causes workflow startup_failure).
+      KEYSTORE_PATH: /tmp/myrunner-release.jks
     steps:
       - name: Checkout
         uses: actions/checkout@v4
