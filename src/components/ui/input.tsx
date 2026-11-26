@@ -14,8 +14,10 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         ref={ref}
         onFocus={(e) => {
           onFocus?.(e);
+          const el = e.currentTarget;
+          if (el.type === "file" || el.readOnly) return;
           requestAnimationFrame(() => {
-            e.currentTarget.scrollIntoView({ block: "center", behavior: "smooth" });
+            el.scrollIntoView({ block: "center", behavior: "smooth" });
           });
         }}
         {...props}
