@@ -12,22 +12,29 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) {
-        setLoading(true);
-        setTimeout(
-          () =>
-            fetchUserRoles(s.user.id, s.user.user_metadata as Record<string, unknown>)
-              .then(setRoles)
-              .finally(() => setLoading(false)),
-          0,
-        );
-      } else {
+      if (!s?.user) {
         setRoles([]);
         setLoading(false);
+        return;
       }
+      // Resuming from camera/file picker fires TOKEN_REFRESHED — must not unmount long forms.
+      const shouldRefreshRoles =
+        event === "INITIAL_SESSION" ||
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "USER_UPDATED";
+      if (!shouldRefreshRoles) return;
+      setLoading(true);
+      setTimeout(
+        () =>
+          fetchUserRoles(s.user.id, s.user.user_metadata as Record<string, unknown>)
+            .then(setRoles)
+            .finally(() => setLoading(false)),
+        0,
+      );
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AuthPageSection } from "@/components/site/auth-page-section";
 import { PageShell } from "@/components/site/page-shell";
@@ -17,6 +17,7 @@ import { SSN_LAST4_CHECKR_STATEMENT } from "@/lib/public-facts";
 import { isPlayReviewerEmail } from "@/lib/reviewer-accounts";
 
 const DRIVER_APPROVED_KEY = "myrunner-driver-just-approved";
+const DRIVER_DRAFT_KEY = "myrunner-driver-application-draft";
 
 function goToDriverDashboard() {
   sessionStorage.setItem(DRIVER_APPROVED_KEY, String(Date.now()));
@@ -40,6 +41,8 @@ function DriverSignup() {
   const { user, loading, isDriver } = useAuth();
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -61,11 +64,52 @@ function DriverSignup() {
       });
   }, [loading, user, isDriver, nav]);
 
-  if (loading || !user || isDriver) {
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form || !user) return;
+    const raw = sessionStorage.getItem(DRIVER_DRAFT_KEY);
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as Record<string, string>;
+      for (const [name, value] of Object.entries(draft)) {
+        const field = form.elements.namedItem(name);
+        if (field instanceof HTMLInputElement && field.type !== "file" && !field.readOnly) {
+          field.value = value;
+        }
+      }
+    } catch {
+      sessionStorage.removeItem(DRIVER_DRAFT_KEY);
+    }
+  }, [user]);
+
+  function scheduleDraftSave() {
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    draftTimerRef.current = setTimeout(() => {
+      const form = formRef.current;
+      if (!form) return;
+      const data: Record<string, string> = {};
+      new FormData(form).forEach((value, key) => {
+        if (typeof value === "string") data[key] = value;
+      });
+      sessionStorage.setItem(DRIVER_DRAFT_KEY, JSON.stringify(data));
+    }, 400);
+  }
+
+  if (!user) {
     return (
       <PageShell>
         <AuthPageSection>
           <p className="text-sm text-muted-foreground">Loading…</p>
+        </AuthPageSection>
+      </PageShell>
+    );
+  }
+
+  if (isDriver) {
+    return (
+      <PageShell>
+        <AuthPageSection>
+          <p className="text-sm text-muted-foreground">Opening Runner dashboard…</p>
         </AuthPageSection>
       </PageShell>
     );
@@ -87,6 +131,8 @@ function DriverSignup() {
         </p>
 
         <form
+          ref={formRef}
+          onInput={scheduleDraftSave}
           onSubmit={async (e) => {
             e.preventDefault();
             if (!agree) return toast.error("Please accept the policies and background check consent.");
@@ -161,6 +207,7 @@ function DriverSignup() {
               }
             }
 
+            sessionStorage.removeItem(DRIVER_DRAFT_KEY);
             toast.success(
               isReviewer
                 ? "Reviewer demo driver ready — opening dashboard…"
@@ -210,8 +257,8 @@ function DriverSignup() {
           <Section title="Driver's license">
             <Field id="license_number" label="License number" />
             <Field id="license_state" label="License state" placeholder="GA" />
-            <Field id="license" label="Upload license (front)" type="file" />
-            <Field id="license_back" label="Upload license (back)" type="file" />
+            <Field id="license" label="Upload license (front)" type="file" accept="image/*" />
+            <Field id="license_back" label="Upload license (back)" type="file" accept="image/*" />
           </Section>
 
           <Section title="Your vehicle & insurance">
@@ -219,7 +266,7 @@ function DriverSignup() {
             <Field id="model" label="Vehicle model" placeholder="Corolla" />
             <Field id="year" label="Vehicle year" placeholder="2021" />
             <Field id="insurance_provider" label="Insurance provider" placeholder="GEICO" />
-            <Field id="insurance" label="Upload proof of insurance" type="file" />
+            <Field id="insurance" label="Upload proof of insurance" type="file" accept="image/*,application/pdf" />
           </Section>
 
           <LegalConsent id="driver-consent" checked={agree} onCheckedChange={setAgree} variant="driver" />
@@ -247,6 +294,7 @@ function Field({
   placeholder,
   defaultValue,
   readOnly,
+  accept,
 }: {
   id: string;
   label: string;
@@ -254,6 +302,7 @@ function Field({
   placeholder?: string;
   defaultValue?: string;
   readOnly?: boolean;
+  accept?: string;
 }) {
   return (
     <div className="grid gap-2">
@@ -262,11 +311,12 @@ function Field({
         id={id}
         name={id}
         type={type}
+        accept={accept}
         placeholder={placeholder}
         defaultValue={defaultValue}
         readOnly={readOnly}
         required={type !== "file" && !readOnly}
-        className={readOnly ? "bg-muted/50" : undefined}
+        className={readOnly ? "bg-muted/50" : type === "file" ? "cursor-pointer" : undefined}
       />
     </div>
   );
