@@ -3,6 +3,9 @@
 name: Build Android AAB
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       bump_version_code:
@@ -25,13 +28,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Completes in seconds on git push so the Actions list stays green on merges.
+  push-placeholder:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "MyRunner AAB is built manually only."
+          echo "Actions -> Build Android AAB -> Run workflow (branch main)."
+
   build:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
       contents: write
     env:
-      KEYSTORE_PATH: ${{ runner.temp }}/myrunner-release.jks
+      # runner.* is not allowed in job-level env (causes workflow startup_failure).
+      KEYSTORE_PATH: /tmp/myrunner-release.jks
     steps:
       - name: Checkout
         uses: actions/checkout@v4
