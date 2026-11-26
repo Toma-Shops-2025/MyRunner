@@ -161,6 +161,19 @@ WITH CHECK (user_id::text = auth.uid()::text AND role::text = 'driver');
 -- ---------------------------------------------------------------------------
 -- 5) driver_applications — unique user, grants, enum fix (includes n/a migration)
 -- ---------------------------------------------------------------------------
+ALTER TABLE public.driver_applications
+  ADD COLUMN IF NOT EXISTS vehicle_type text,
+  ADD COLUMN IF NOT EXISTS vehicle_make text,
+  ADD COLUMN IF NOT EXISTS vehicle_model text,
+  ADD COLUMN IF NOT EXISTS vehicle_year integer,
+  ADD COLUMN IF NOT EXISTS license_number text,
+  ADD COLUMN IF NOT EXISTS license_state text,
+  ADD COLUMN IF NOT EXISTS insurance_provider text,
+  ADD COLUMN IF NOT EXISTS background_check_status text DEFAULT 'pending',
+  ADD COLUMN IF NOT EXISTS notes text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+
 DELETE FROM public.driver_applications a
 USING public.driver_applications b
 WHERE a.ctid < b.ctid
@@ -226,13 +239,23 @@ BEGIN
   END IF;
 END $$;
 
-UPDATE public.driver_applications
-SET background_check_status = 'pending'
-WHERE background_check_status IS NULL
-   OR background_check_status NOT IN ('pending', 'clear', 'failed');
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'driver_applications'
+      AND column_name = 'background_check_status'
+  ) THEN
+    UPDATE public.driver_applications
+    SET background_check_status = 'pending'
+    WHERE background_check_status IS NULL
+       OR background_check_status NOT IN ('pending', 'clear', 'failed');
 
-ALTER TABLE public.driver_applications
-  ALTER COLUMN background_check_status SET DEFAULT 'pending';
+    ALTER TABLE public.driver_applications
+      ALTER COLUMN background_check_status SET DEFAULT 'pending';
+  END IF;
+END $$;
 
 GRANT SELECT, INSERT, UPDATE ON public.driver_applications TO authenticated;
 GRANT ALL ON public.driver_applications TO service_role;
