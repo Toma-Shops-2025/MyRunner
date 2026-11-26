@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { AuthPageSection } from "@/components/site/auth-page-section";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,7 +62,7 @@ function Login() {
 
   return (
     <PageShell>
-      <section className="container-app grid min-h-[80vh] place-items-center py-16">
+      <AuthPageSection>
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -92,7 +93,7 @@ function Login() {
               nav({ to });
             }
           }}
-          className="w-full max-w-md rounded-2xl border border-border bg-card p-8"
+          className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8"
         >
           <h1 className="font-serif text-4xl">Welcome back</h1>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to continue.</p>
@@ -148,7 +149,7 @@ function Login() {
             </Link>
           </p>
         </form>
-      </section>
+      </AuthPageSection>
     </PageShell>
   );
 }

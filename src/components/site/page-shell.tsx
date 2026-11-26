@@ -21,9 +21,9 @@ export function PageShell({
   const shouldShowBack = showBack ?? pathname !== "/";
 
   return (
-    <div className={cn("flex min-h-screen flex-col bg-background", className)}>
+    <div className={cn("flex min-h-[100dvh] flex-col bg-background", className)}>
       <SiteHeader />
-      <main className="flex-1">
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
         {shouldShowBack ? (
           <div className="container-app pt-6">
             <BackButton fallbackTo={backFallback} />

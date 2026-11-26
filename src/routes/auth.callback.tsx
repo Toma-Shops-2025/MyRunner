@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { AuthPageSection } from "@/components/site/auth-page-section";
 import { PageShell } from "@/components/site/page-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { clearSignupIntent, readSignupIntent } from "@/lib/signup-intent";
@@ -103,13 +104,13 @@ function AuthCallback() {
 
   return (
     <PageShell showBack={false}>
-      <section className="container-app grid min-h-[60vh] place-items-center py-16">
+      <AuthPageSection>
         <div className="rounded-2xl border border-border bg-card p-8 text-center">
           <p className="text-xs uppercase tracking-widest text-gold">Auth</p>
           <h1 className="mt-2 font-serif text-3xl">{message}</h1>
           <p className="mt-2 text-sm text-muted-foreground">One moment…</p>
         </div>
-      </section>
+      </AuthPageSection>
     </PageShell>
   );
 }
