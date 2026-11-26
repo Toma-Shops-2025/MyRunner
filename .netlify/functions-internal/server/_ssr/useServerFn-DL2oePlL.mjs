@@ -1,6 +1,6 @@
 import { r as reactExports } from "../_libs/react.mjs";
 import { u as useRouter } from "../_libs/tanstack__react-router.mjs";
-import { l as isRedirect } from "../_libs/tanstack__router-core.mjs";
+import { m as isRedirect } from "../_libs/tanstack__router-core.mjs";
 function useServerFn(serverFn) {
   const router = useRouter();
   return reactExports.useCallback(async (...args) => {

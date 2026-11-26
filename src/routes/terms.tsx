@@ -40,7 +40,12 @@ export const Route = createFileRoute("/terms")({
       <h2>12. Changes</h2>
       <p>We may update these Terms. Material changes will be notified in‑app or by email.</p>
       <h2>13. Governing law</h2>
-      <p>These Terms are governed by the laws of the State of Delaware, USA, excluding conflict‑of‑laws rules.</p>
+      <p>
+        MyRunner is built and operated from Kentucky, with Louisville as the first launch market. These Terms
+        are governed by the laws of the Commonwealth of Kentucky, USA, without regard to conflict‑of‑law rules.
+        If you are a consumer, you may have additional non‑waivable rights under the laws of the U.S. state or
+        territory where you live; nothing in these Terms limits those rights where applicable law requires them.
+      </p>
     </LegalLayout>
   ),
 });

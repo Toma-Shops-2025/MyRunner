@@ -1,6 +1,6 @@
 globalThis.__nitro_main__ = import.meta.url;
 import { d as defineLazyEventHandler, H as HTTPError, a as H3Core } from "./_libs/h3.mjs";
-import { N as NodeResponse } from "./_libs/srvx.mjs";
+import { b as NodeResponse } from "./_libs/srvx.mjs";
 import "./_libs/rou3.mjs";
 import "node:stream";
 function lazyService(loader) {
@@ -40,9 +40,9 @@ const findRouteRules = /* @__PURE__ */ (() => {
     return r;
   };
 })();
-const _lazy_zHoNDd = defineLazyEventHandler(() => import("./_chunks/ssr-renderer.mjs"));
+const _lazy_ukTRh2 = defineLazyEventHandler(() => import("./_chunks/ssr-renderer.mjs"));
 const findRoute = /* @__PURE__ */ (() => {
-  const data = { route: "/**", handler: _lazy_zHoNDd };
+  const data = { route: "/**", handler: _lazy_ukTRh2 };
   return ((_m, p) => {
     return { data, params: { "_": p.slice(1) } };
   });

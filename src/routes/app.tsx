@@ -30,7 +30,7 @@ function AppLayout() {
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       <SiteHeader />
       <div className="container-app grid flex-1 gap-8 py-10 lg:grid-cols-[240px_1fr]">
         <aside className="space-y-1 lg:sticky lg:top-24 lg:self-start">

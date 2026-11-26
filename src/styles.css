@@ -167,6 +167,18 @@
   animation: shimmer 6s linear infinite;
 }
 
+/* Keep delivery preview map contained on mobile (prevents canvas covering the form). */
+.order-map-host .mapboxgl-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.order-map-host .mapboxgl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* Hide Android WebView's giant play overlay on muted autoplay videos */
 .hero-bg-video {
   object-fit: cover;

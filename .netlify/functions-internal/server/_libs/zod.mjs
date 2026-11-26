@@ -3559,8 +3559,9 @@ var ZodFirstPartyTypeKind;
 })(ZodFirstPartyTypeKind || (ZodFirstPartyTypeKind = {}));
 const stringType = ZodString.create;
 const numberType = ZodNumber.create;
+const booleanType = ZodBoolean.create;
 ZodNever.create;
-ZodArray.create;
+const arrayType = ZodArray.create;
 const objectType = ZodObject.create;
 ZodUnion.create;
 ZodIntersection.create;
@@ -3570,6 +3571,8 @@ ZodPromise.create;
 ZodOptional.create;
 ZodNullable.create;
 export {
+  arrayType as a,
+  booleanType as b,
   enumType as e,
   numberType as n,
   objectType as o,

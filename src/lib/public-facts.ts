@@ -13,6 +13,10 @@ export const CARGO_INSURANCE_STATEMENT =
 export const DRIVER_SCREENING_STATEMENT =
   "After MyRunner launches in a city or state, drivers there can start driving after the application, a driver's license, and their own auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found.";
 
+/** Use on driver signup, privacy, and consent — do not paraphrase. */
+export const SSN_LAST4_CHECKR_STATEMENT =
+  "We ask for only the last four digits of your Social Security number on the driver application. MyRunner stores those four digits and shares them with Checkr only if and when MyRunner runs a background check through Checkr. We never collect or store your full Social Security number.";
+
 export const REFUND_POLICY_STATEMENT =
   "After MyRunner launches in a city or state, and once cargo insurance is established, the refund policy will be in effect. Refunds are arranged by contacting 24/7 support.";
 

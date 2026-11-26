@@ -83,7 +83,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "google-site-verification",
         content: "saWreFAe0LYPxmtXc_y8xBDuerHfQ0PXEBCDt87ohgk",
       },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      {
+        name: "viewport",
+        content:
+          "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content",
+      },
       { name: "theme-color", content: "#0a0a0a" },
       { name: "author", content: "MyRunner" },
       { property: "og:site_name", content: "MyRunner" },

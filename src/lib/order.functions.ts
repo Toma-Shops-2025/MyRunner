@@ -28,8 +28,11 @@ export const createOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => createOrderInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { ensureCustomerAccountForOrder } = await import("@/lib/ensure-customer-account");
+    const ensured = await ensureCustomerAccountForOrder(context.userId);
+    if (!ensured.ok) return { error: ensured.error };
+    const userId = ensured.userId;
 
     const extraStops =
       data.type === "standard"

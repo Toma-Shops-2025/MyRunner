@@ -26,9 +26,50 @@ function lazyInherit$1(target, source, sourceKey) {
     if (modified) Object.defineProperty(target, key, desc);
   }
 }
-const _needsNormRE$1 = /(?:(?:^|\/)(?:\.|\.\.|%2e|%2e\.|\.%2e|%2e%2e)(?:\/|$))|[\\^\x80-\uffff]/i;
+const _needsNormRE$1 = /(?:(?:^|\/)(?:\.|\.\.|%2e|%2e\.|\.%2e|%2e%2e)(?:\/|$))|[\\^#"<>{}`\x00-\x20\x7f-\uffff]/i;
+const _searchNeedsNormRE = /[#"'<>\x00-\x20\x7f-\uffff]/;
 const FastURL$1 = /* @__PURE__ */ (() => {
   const NativeURL = globalThis.URL;
+  const NativeSearchParams = globalThis.URLSearchParams;
+  const FastURLSearchParams = class URLSearchParams {
+    #owner;
+    #params;
+    constructor(owner) {
+      this.#owner = owner;
+    }
+    static [Symbol.hasInstance](val) {
+      return val instanceof NativeSearchParams;
+    }
+    _adopt(params) {
+      this.#params = params;
+    }
+    get _params() {
+      if (!this.#params) {
+        const search = this.#owner.search;
+        this.#params ??= new NativeSearchParams(search);
+      }
+      return this.#params;
+    }
+    #mutable() {
+      this.#owner._url;
+      return this.#params;
+    }
+    append(name, value) {
+      this.#mutable().append(name, value);
+    }
+    set(name, value) {
+      this.#mutable().set(name, value);
+    }
+    delete(name, value) {
+      this.#mutable().delete(name, value);
+    }
+    sort() {
+      this.#mutable().sort();
+    }
+  };
+  lazyInherit$1(FastURLSearchParams.prototype, NativeSearchParams.prototype, "_params");
+  Object.setPrototypeOf(FastURLSearchParams.prototype, NativeSearchParams.prototype);
+  Object.setPrototypeOf(FastURLSearchParams, NativeSearchParams);
   const FastURL2 = class URL {
     #url;
     #href;
@@ -39,9 +80,11 @@ const FastURL$1 = /* @__PURE__ */ (() => {
     #searchParams;
     #pos;
     constructor(url) {
-      if (typeof url === "string") if (url[0] === "/") this.#href = url;
-      else this.#url = new NativeURL(url);
-      else if (_needsNormRE$1.test(url.pathname)) this.#url = new NativeURL(`${url.protocol || "http:"}//${url.host || "localhost"}${url.pathname}${url.search || ""}`);
+      if (typeof url === "string") {
+        const isOriginForm = url[0] === "/";
+        if (isOriginForm && !_searchNeedsNormRE.test(url)) this.#href = `http://localhost${url}`;
+        else this.#url = new NativeURL(isOriginForm ? `http://localhost${url}` : url);
+      } else if (_needsNormRE$1.test(url.pathname) || url.search && _searchNeedsNormRE.test(url.search)) this.#url = new NativeURL(`${url.protocol || "http:"}//${url.host || "localhost"}${url.pathname}${url.search || ""}`);
       else {
         this.#protocol = url.protocol;
         this.#host = url.host;
@@ -60,8 +103,8 @@ const FastURL$1 = /* @__PURE__ */ (() => {
       this.#host = void 0;
       this.#pathname = void 0;
       this.#search = void 0;
-      this.#searchParams = void 0;
       this.#pos = void 0;
+      this.#searchParams?._adopt(this.#url.searchParams);
       return this.#url;
     }
     get href() {
@@ -103,9 +146,9 @@ const FastURL$1 = /* @__PURE__ */ (() => {
       return this.#search;
     }
     get searchParams() {
+      if (this.#searchParams) return this.#searchParams;
       if (this.#url) return this.#url.searchParams;
-      if (!this.#searchParams) this.#searchParams = new URLSearchParams(this.search);
-      return this.#searchParams;
+      return this.#searchParams = new FastURLSearchParams(this);
     }
     get protocol() {
       if (this.#url) return this.#url.protocol;
@@ -131,7 +174,6 @@ const FastURL$1 = /* @__PURE__ */ (() => {
 })();
 const NodeResponse$1 = /* @__PURE__ */ (() => {
   const NativeResponse = globalThis.Response;
-  const STATUS_CODES = globalThis.process?.getBuiltinModule?.("node:http")?.STATUS_CODES || {};
   class NodeResponse2 {
     #body;
     #init;
@@ -144,17 +186,31 @@ const NodeResponse$1 = /* @__PURE__ */ (() => {
     static [Symbol.hasInstance](val) {
       return val instanceof NativeResponse;
     }
+    static json(data, init) {
+      const body = JSON.stringify(data);
+      if (body === void 0) throw new TypeError("Value is not JSON serializable");
+      let headers = init?.headers;
+      if (!headers) headers = { "content-type": "application/json" };
+      else {
+        const merged = new Headers(headers);
+        if (!merged.has("content-type")) merged.set("content-type", "application/json");
+        headers = merged;
+      }
+      return new NodeResponse2(body, init ? {
+        ...init,
+        headers
+      } : { headers });
+    }
     get status() {
       return this.#response?.status || this.#init?.status || 200;
     }
     get statusText() {
-      return this.#response?.statusText || this.#init?.statusText || STATUS_CODES[this.status] || "";
+      return this.#response?.statusText || this.#init?.statusText || "";
     }
     get headers() {
       if (this.#response) return this.#response.headers;
       if (this.#headers) return this.#headers;
-      const initHeaders = this.#init?.headers;
-      return this.#headers = initHeaders instanceof Headers ? initHeaders : new Headers(initHeaders);
+      return this.#headers = new Headers(this.#init?.headers);
     }
     get ok() {
       if (this.#response) return this.#response.ok;
@@ -187,7 +243,7 @@ const NodeResponse$1 = /* @__PURE__ */ (() => {
       let contentType;
       let contentLength;
       if (this.#response) body = this.#response.body;
-      else if (this.#body) if (this.#body instanceof ReadableStream) body = this.#body;
+      else if (this.#body != null) if (this.#body instanceof ReadableStream) body = this.#body;
       else if (typeof this.#body === "string") {
         body = this.#body;
         contentType = "text/plain; charset=UTF-8";
@@ -199,7 +255,7 @@ const NodeResponse$1 = /* @__PURE__ */ (() => {
         body = this.#body;
         contentLength = this.#body.byteLength;
       } else if (this.#body instanceof DataView) {
-        body = Buffer.from(this.#body.buffer);
+        body = Buffer.from(this.#body.buffer, this.#body.byteOffset, this.#body.byteLength);
         contentLength = this.#body.byteLength;
       } else if (this.#body instanceof Blob) {
         body = this.#body.stream();
@@ -209,17 +265,18 @@ const NodeResponse$1 = /* @__PURE__ */ (() => {
       else body = this._response.body;
       const headers = [];
       const initHeaders = this.#init?.headers;
-      const headerEntries = this.#response?.headers || this.#headers || (initHeaders ? Array.isArray(initHeaders) ? initHeaders : initHeaders?.entries ? initHeaders.entries() : Object.entries(initHeaders).map(([k, v]) => [k.toLowerCase(), v]) : void 0);
+      const headerEntries = this.#response?.headers || this.#headers || (initHeaders ? Array.isArray(initHeaders) ? initHeaders : initHeaders?.entries ? initHeaders.entries() : Object.entries(initHeaders) : void 0);
       let hasContentTypeHeader;
       let hasContentLength;
       if (headerEntries) for (const [key, value] of headerEntries) {
-        if (Array.isArray(value)) for (const v of value) headers.push([key, v]);
-        else headers.push([key, value]);
-        if (key === "content-type") hasContentTypeHeader = true;
-        else if (key === "content-length") hasContentLength = true;
+        const lowerKey = typeof key === "string" ? key.toLowerCase() : String(key);
+        if (Array.isArray(value)) for (const v of value) headers.push(lowerKey, v);
+        else headers.push(lowerKey, value);
+        if (lowerKey === "content-type") hasContentTypeHeader = true;
+        else if (lowerKey === "content-length") hasContentLength = true;
       }
-      if (contentType && !hasContentTypeHeader) headers.push(["content-type", contentType]);
-      if (contentLength && !hasContentLength) headers.push(["content-length", String(contentLength)]);
+      if (contentType && !hasContentTypeHeader) headers.push("content-type", contentType);
+      if (contentLength != null && !hasContentLength) headers.push("content-length", String(contentLength));
       this.#init = void 0;
       this.#headers = void 0;
       this.#response = void 0;
@@ -312,10 +369,11 @@ const FastURL = /* @__PURE__ */ (() => {
         const url = this.href;
         const protoIndex = url.indexOf("://");
         const pathnameIndex = protoIndex === -1 ? -1 : url.indexOf("/", protoIndex + 4);
+        const qIndex = pathnameIndex === -1 ? -1 : url.indexOf("?", pathnameIndex);
         this.#pos = [
           protoIndex,
           pathnameIndex,
-          pathnameIndex === -1 ? -1 : url.indexOf("?", pathnameIndex)
+          qIndex
         ];
       }
       return this.#pos;
@@ -349,7 +407,8 @@ const FastURL = /* @__PURE__ */ (() => {
       if (this.#protocol === void 0) {
         const [protocolIndex] = this.#getPos();
         if (protocolIndex === -1) return this._url.protocol;
-        this.#protocol = this.href.slice(0, protocolIndex + 1);
+        const url = this.href;
+        this.#protocol = url.slice(0, protocolIndex + 1);
       }
       return this.#protocol;
     }

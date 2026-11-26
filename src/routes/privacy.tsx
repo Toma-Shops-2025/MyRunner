@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout } from "@/components/site/page-shell";
-import { DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
+import { DRIVER_SCREENING_STATEMENT, SSN_LAST4_CHECKR_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -19,7 +19,11 @@ export const Route = createFileRoute("/privacy")({
       <ul>
         <li><strong>Account info</strong>: name, email, phone, password (hashed).</li>
         <li><strong>Delivery info</strong>: pickup/drop‑off addresses, item descriptions, recipient details you provide.</li>
-        <li><strong>Driver info</strong>: license, the Runner's own auto insurance details, vehicle data, and the last 4 digits of an SSN entered on the application. {DRIVER_SCREENING_STATEMENT}</li>
+        <li>
+          <strong>Driver info</strong>: license, the Runner's own auto insurance details, vehicle data, and the last
+          four digits of a Social Security number entered on the application. {SSN_LAST4_CHECKR_STATEMENT}{" "}
+          {DRIVER_SCREENING_STATEMENT}
+        </li>
         <li><strong>Payment info</strong>: processed by Stripe. We never see or store full card numbers.</li>
         <li><strong>Location</strong>: GPS while a Runner is online. The app refreshes that location about every 20 seconds.</li>
         <li><strong>Device & usage</strong>: device type, IP, app version, interactions for analytics and security.</li>

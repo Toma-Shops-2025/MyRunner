@@ -16,8 +16,8 @@ import track03 from "@/assets/bgm/03.mp3?url";
 
 const BGM_TRACKS = [track01, track02, track03] as const;
 
-/** 0.5% — fixed background music level */
-const BGM_VOLUME = 0.005;
+/** Fixed background music level (~0.6%). */
+const BGM_VOLUME = 0.006;
 
 /** Music only on marketing hero + customer/driver dashboards. */
 const BGM_ALLOWED_PATHS = new Set(["/", "/app/dashboard", "/driver/dashboard"]);

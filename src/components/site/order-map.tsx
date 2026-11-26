@@ -58,5 +58,10 @@ export function OrderMap({
     };
   }, [token, pickup, dropoff]);
 
-  return <div ref={ref} className={`h-80 w-full overflow-hidden rounded-2xl border border-border ${className}`} />;
+  return (
+    <div
+      ref={ref}
+      className={`order-map-host relative isolate h-64 max-h-[40vh] w-full max-w-full overflow-hidden rounded-2xl border border-border ${className}`}
+    />
+  );
 }

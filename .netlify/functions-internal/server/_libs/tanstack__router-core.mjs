@@ -1,10 +1,10 @@
 import { p as parseHref } from "./tanstack__history.mjs";
 import { s as splitSetCookieString } from "./cookie-es.mjs";
-import { n as ni, t as te, c as cn, m as mn } from "./seroval.mjs";
+import { a as ai, r as re, S as Sn, d as dn } from "./seroval.mjs";
 import { p } from "./seroval-plugins.mjs";
 import { ReadableStream as ReadableStream$1 } from "node:stream/web";
 import { Readable } from "node:stream";
-var isServer = true;
+const isServer = true;
 function last(arr) {
   return arr[arr.length - 1];
 }
@@ -15,8 +15,13 @@ function functionalUpdate(updater, previous) {
   if (isFunction(updater)) return updater(previous);
   return updater;
 }
-var createNull = () => /* @__PURE__ */ Object.create(null);
-var nullReplaceEqualDeep = (prev, next) => replaceEqualDeep(prev, next, createNull);
+const hasOwn = Object.prototype.hasOwnProperty;
+function hasKeys(obj) {
+  for (const key in obj) if (hasOwn.call(obj, key)) return true;
+  return false;
+}
+const createNull = () => /* @__PURE__ */ Object.create(null);
+const nullReplaceEqualDeep = (prev, next) => replaceEqualDeep(prev, next, createNull);
 function replaceEqualDeep(prev, _next, _makeObj = () => ({}), _depth = 0) {
   return _next;
 }
@@ -105,7 +110,7 @@ function decodeSegment(segment) {
   }
   return sanitizePathSegment(decoded);
 }
-var DEFAULT_PROTOCOL_ALLOWLIST = [
+const DEFAULT_PROTOCOL_ALLOWLIST = [
   "http:",
   "https:",
   "mailto:",
@@ -120,14 +125,14 @@ function isDangerousProtocol(url, allowlist) {
     return false;
   }
 }
-var HTML_ESCAPE_LOOKUP = {
+const HTML_ESCAPE_LOOKUP = {
   "&": "\\u0026",
   ">": "\\u003e",
   "<": "\\u003c",
   "\u2028": "\\u2028",
   "\u2029": "\\u2029"
 };
-var HTML_ESCAPE_REGEX = /[&><\u2028\u2029]/g;
+const HTML_ESCAPE_REGEX = /[&><\u2028\u2029]/g;
 function escapeHtml(str) {
   return str.replace(HTML_ESCAPE_REGEX, (match) => HTML_ESCAPE_LOOKUP[match]);
 }
@@ -140,13 +145,13 @@ function decodePath(path) {
     path,
     handledProtocolRelativeURL: false
   };
-  const re = /%25|%5C/gi;
+  const re2 = /%25|%5C/gi;
   let cursor = 0;
   let result = "";
   let match;
-  while (null !== (match = re.exec(path))) {
+  while (null !== (match = re2.exec(path))) {
     result += decodeSegment(path.slice(cursor, match.index)) + match[0];
-    cursor = re.lastIndex;
+    cursor = re2.lastIndex;
   }
   result = result + decodeSegment(cursor ? path.slice(cursor) : path);
   let handledProtocolRelativeURL = false;
@@ -237,8 +242,8 @@ function createLRUCache(max) {
     }
   };
 }
-var SEGMENT_TYPE_INDEX = 4;
-var SEGMENT_TYPE_PATHLESS = 5;
+const SEGMENT_TYPE_INDEX = 4;
+const SEGMENT_TYPE_PATHLESS = 5;
 function getOpenAndCloseBraces(part) {
   const openBrace = part.indexOf("{");
   if (openBrace === -1) return null;
@@ -333,7 +338,7 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
     const path = route.fullPath ?? route.from;
     const length = path.length;
     const caseSensitive = route.options?.caseSensitive ?? defaultCaseSensitive;
-    const skipOnParamError = !!(route.options?.params?.parse && route.options?.skipRouteOnParseError?.params);
+    const parseParams = route.options?.params?.parse ?? route.options?.parseParams;
     while (cursor < length) {
       const segment = parseSegment(path, cursor, data);
       let nextNode;
@@ -376,7 +381,7 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
           const actuallyCaseSensitive = caseSensitive && !!(prefix_raw || suffix_raw);
           const prefix = !prefix_raw ? void 0 : actuallyCaseSensitive ? prefix_raw : prefix_raw.toLowerCase();
           const suffix = !suffix_raw ? void 0 : actuallyCaseSensitive ? suffix_raw : suffix_raw.toLowerCase();
-          const existingNode = !skipOnParamError && node.dynamic?.find((s) => !s.skipOnParamError && s.caseSensitive === actuallyCaseSensitive && s.prefix === prefix && s.suffix === suffix);
+          const existingNode = !parseParams && node.dynamic?.find((s) => !s.parse && s.caseSensitive === actuallyCaseSensitive && s.prefix === prefix && s.suffix === suffix);
           if (existingNode) nextNode = existingNode;
           else {
             const next = createDynamicNode(1, route.fullPath ?? route.from, actuallyCaseSensitive, prefix, suffix);
@@ -394,7 +399,7 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
           const actuallyCaseSensitive = caseSensitive && !!(prefix_raw || suffix_raw);
           const prefix = !prefix_raw ? void 0 : actuallyCaseSensitive ? prefix_raw : prefix_raw.toLowerCase();
           const suffix = !suffix_raw ? void 0 : actuallyCaseSensitive ? suffix_raw : suffix_raw.toLowerCase();
-          const existingNode = !skipOnParamError && node.optional?.find((s) => !s.skipOnParamError && s.caseSensitive === actuallyCaseSensitive && s.prefix === prefix && s.suffix === suffix);
+          const existingNode = !parseParams && node.optional?.find((s) => !s.parse && s.caseSensitive === actuallyCaseSensitive && s.prefix === prefix && s.suffix === suffix);
           if (existingNode) nextNode = existingNode;
           else {
             const next = createDynamicNode(3, route.fullPath ?? route.from, actuallyCaseSensitive, prefix, suffix);
@@ -422,7 +427,7 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
       }
       node = nextNode;
     }
-    if (skipOnParamError && route.children && !route.isRoot && route.id && route.id.charCodeAt(route.id.lastIndexOf("/") + 1) === 95) {
+    if (parseParams && route.children && !route.isRoot && route.id && route.id.charCodeAt(route.id.lastIndexOf("/") + 1) === 95) {
       const pathlessNode = createStaticNode(route.fullPath ?? route.from);
       pathlessNode.kind = SEGMENT_TYPE_PATHLESS;
       pathlessNode.parent = node;
@@ -442,9 +447,8 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
       node.index = indexNode;
       node = indexNode;
     }
-    node.parse = route.options?.params?.parse ?? null;
-    node.skipOnParamError = skipOnParamError;
-    node.parsingPriority = route.options?.skipRouteOnParseError?.priority ?? 0;
+    node.parse = parseParams ?? null;
+    node.priority = route.options?.params?.priority ?? 0;
     if (isLeaf && !node.route) {
       node.route = route;
       node.fullPath = route.fullPath ?? route.from;
@@ -453,9 +457,9 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
   if (route.children) for (const child of route.children) parseSegments(defaultCaseSensitive, data, child, cursor, node, depth, onRoute);
 }
 function sortDynamic(a, b) {
-  if (a.skipOnParamError && !b.skipOnParamError) return -1;
-  if (!a.skipOnParamError && b.skipOnParamError) return 1;
-  if (a.skipOnParamError && b.skipOnParamError && (a.parsingPriority || b.parsingPriority)) return b.parsingPriority - a.parsingPriority;
+  if (a.parse && !b.parse) return -1;
+  if (!a.parse && b.parse) return 1;
+  if (a.parse && b.parse && (a.priority || b.priority)) return b.priority - a.priority;
   if (a.prefix && b.prefix && a.prefix !== b.prefix) {
     if (a.prefix.startsWith(b.prefix)) return -1;
     if (b.prefix.startsWith(a.prefix)) return 1;
@@ -504,8 +508,7 @@ function createStaticNode(fullPath) {
     fullPath,
     parent: null,
     parse: null,
-    skipOnParamError: false,
-    parsingPriority: 0
+    priority: 0
   };
 }
 function createDynamicNode(kind, fullPath, caseSensitive, prefix, suffix) {
@@ -523,8 +526,7 @@ function createDynamicNode(kind, fullPath, caseSensitive, prefix, suffix) {
     fullPath,
     parent: null,
     parse: null,
-    skipOnParamError: false,
-    parsingPriority: 0,
+    priority: 0,
     caseSensitive,
     prefix,
     suffix
@@ -615,8 +617,7 @@ function findMatch(path, segmentTree, fuzzy = false) {
   const [rawParams] = extractParams(path, parts, leaf);
   return {
     route: leaf.node.route,
-    rawParams,
-    parsedParams: leaf.parsedParams
+    rawParams
   };
 }
 function extractParams(path, parts, leaf) {
@@ -721,13 +722,12 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
   while (stack.length) {
     const frame = stack.pop();
     const { node, index, skipped, depth, statics, dynamics, optionals } = frame;
-    let { extract, rawParams, parsedParams } = frame;
+    let { extract, rawParams } = frame;
     if (node.kind === 2 && node.route && !isFrameMoreSpecific(bestMatch, frame)) continue;
-    if (node.skipOnParamError) {
-      if (!validateMatchParams(path, parts, frame)) continue;
+    if (node.parse) {
+      if (!validateParseParams(path, parts, frame)) continue;
       rawParams = frame.rawParams;
       extract = frame.extract;
-      parsedParams = frame.parsedParams;
     }
     if (fuzzy && node.route && node.kind !== SEGMENT_TYPE_INDEX && isFrameMoreSpecific(bestFuzzy, frame)) bestFuzzy = frame;
     const isBeyondPath = index === partsLength;
@@ -747,12 +747,11 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
         dynamics,
         optionals,
         extract,
-        rawParams,
-        parsedParams
+        rawParams
       };
       let indexValid = true;
-      if (node.index.skipOnParamError) {
-        if (!validateMatchParams(path, parts, indexFrame)) indexValid = false;
+      if (node.index.parse) {
+        if (!validateParseParams(path, parts, indexFrame)) indexValid = false;
       }
       if (indexValid) {
         if (!dynamics && !optionals && !skipped && isPerfectStaticMatch(statics, partsLength)) return indexFrame;
@@ -780,8 +779,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
         dynamics,
         optionals,
         extract,
-        rawParams,
-        parsedParams
+        rawParams
       });
     }
     if (node.optional) {
@@ -798,8 +796,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
           dynamics,
           optionals,
           extract,
-          rawParams,
-          parsedParams
+          rawParams
         });
       }
       if (!isBeyondPath) for (let i = node.optional.length - 1; i >= 0; i--) {
@@ -819,8 +816,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
           dynamics,
           optionals: optionals + segmentScore(partsLength, index),
           extract,
-          rawParams,
-          parsedParams
+          rawParams
         });
       }
     }
@@ -841,8 +837,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
         dynamics: dynamics + segmentScore(partsLength, index),
         optionals,
         extract,
-        rawParams,
-        parsedParams
+        rawParams
       });
     }
     if (!isBeyondPath && node.staticInsensitive) {
@@ -856,8 +851,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
         dynamics,
         optionals,
         extract,
-        rawParams,
-        parsedParams
+        rawParams
       });
     }
     if (!isBeyondPath && node.static) {
@@ -871,8 +865,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
         dynamics,
         optionals,
         extract,
-        rawParams,
-        parsedParams
+        rawParams
       });
     }
     if (node.pathless) {
@@ -888,8 +881,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
           dynamics,
           optionals,
           extract,
-          rawParams,
-          parsedParams
+          rawParams
         });
       }
     }
@@ -911,17 +903,22 @@ function segmentScore(partsLength, index) {
 function isPerfectStaticMatch(statics, partsLength) {
   return statics === 2 ** (partsLength - 1) - 1;
 }
-function validateMatchParams(path, parts, frame) {
+function validateParseParams(path, parts, frame) {
+  let rawParams;
+  let state;
   try {
-    const [rawParams, state] = extractParams(path, parts, frame);
-    frame.rawParams = rawParams;
-    frame.extract = state;
-    const parsed = frame.node.parse(rawParams);
-    frame.parsedParams = Object.assign(/* @__PURE__ */ Object.create(null), frame.parsedParams, parsed);
-    return true;
+    [rawParams, state] = extractParams(path, parts, frame);
   } catch {
     return null;
   }
+  frame.rawParams = rawParams;
+  frame.extract = state;
+  if (!frame.node.parse) return true;
+  try {
+    if (frame.node.parse(rawParams) === false) return null;
+  } catch {
+  }
+  return true;
 }
 function isFrameMoreSpecific(prev, next) {
   if (!prev) return true;
@@ -983,28 +980,7 @@ function resolvePath({ base, to, trailingSlash = "never", cache }) {
       if (trailingSlash === "never") baseSegments.pop();
     } else if (trailingSlash === "always") baseSegments.push("");
   }
-  let segment;
-  let joined = "";
-  for (let i = 0; i < baseSegments.length; i++) {
-    if (i > 0) joined += "/";
-    const part = baseSegments[i];
-    if (!part) continue;
-    segment = parseSegment(part, 0, segment);
-    const kind = segment[0];
-    if (kind === 0) {
-      joined += part;
-      continue;
-    }
-    const end = segment[5];
-    const prefix = part.substring(0, segment[1]);
-    const suffix = part.substring(segment[4], end);
-    const value = part.substring(segment[2], segment[3]);
-    if (kind === 1) joined += prefix || suffix ? `${prefix}{$${value}}${suffix}` : `$${value}`;
-    else if (kind === 2) joined += prefix || suffix ? `${prefix}{$}${suffix}` : "$";
-    else joined += `${prefix}{-$${value}}${suffix}`;
-  }
-  joined = cleanPath(joined);
-  const result = joined || "/";
+  const result = cleanPath(baseSegments.join("/")) || "/";
   if (key && cache) cache.set(key, result);
   return result;
 }
@@ -1147,43 +1123,6 @@ function notFound(options = {}) {
 function isNotFound(obj) {
   return obj?.isNotFound === true;
 }
-function getSafeSessionStorage() {
-  try {
-    return typeof window !== "undefined" && typeof window.sessionStorage === "object" ? window.sessionStorage : void 0;
-  } catch {
-    return;
-  }
-}
-var storageKey = "tsr-scroll-restoration-v1_3";
-function createScrollRestorationCache() {
-  const safeSessionStorage = getSafeSessionStorage();
-  if (!safeSessionStorage) return null;
-  let state = {};
-  try {
-    const parsed = JSON.parse(safeSessionStorage.getItem("tsr-scroll-restoration-v1_3") || "{}");
-    if (isPlainObject(parsed)) state = parsed;
-  } catch {
-  }
-  const persist = () => {
-    try {
-      safeSessionStorage.setItem(storageKey, JSON.stringify(state));
-    } catch {
-    }
-  };
-  return {
-    get state() {
-      return state;
-    },
-    set: (updater) => {
-      state = functionalUpdate(updater, state) || state;
-    },
-    persist
-  };
-}
-createScrollRestorationCache();
-var defaultGetScrollRestorationKey = (location) => {
-  return location.state.__TSR_key || location.href;
-};
 function encode(obj, stringify = String) {
   const result = new URLSearchParams();
   for (const key in obj) {
@@ -1209,8 +1148,8 @@ function decode(str) {
   }
   return result;
 }
-var defaultParseSearch = parseSearchWith(JSON.parse);
-var defaultStringifySearch = stringifySearchWith(JSON.stringify, JSON.parse);
+const defaultParseSearch = parseSearchWith(JSON.parse);
+const defaultStringifySearch = stringifySearchWith(JSON.stringify, JSON.parse);
 function parseSearchWith(parser) {
   return (searchStr) => {
     if (searchStr[0] === "?") searchStr = searchStr.substring(1);
@@ -1244,7 +1183,7 @@ function stringifySearchWith(stringify, parser) {
     return searchStr ? `?${searchStr}` : "";
   };
 }
-var rootRouteId = "__root__";
+const rootRouteId = "__root__";
 function redirect(opts) {
   opts.statusCode = opts.statusCode || opts.code || 307;
   if (!opts._builtLocation && !opts.reloadDocument && typeof opts.href === "string") try {
@@ -1271,204 +1210,16 @@ function isResolvedRedirect(obj) {
 function parseRedirect(obj) {
   if (obj !== null && typeof obj === "object" && obj.isSerializedRedirect) return redirect(obj);
 }
-function composeRewrites(rewrites) {
-  return {
-    input: ({ url }) => {
-      for (const rewrite of rewrites) url = executeRewriteInput(rewrite, url);
-      return url;
-    },
-    output: ({ url }) => {
-      for (let i = rewrites.length - 1; i >= 0; i--) url = executeRewriteOutput(rewrites[i], url);
-      return url;
-    }
-  };
-}
-function rewriteBasepath(opts) {
-  const trimmedBasepath = trimPath(opts.basepath);
-  const normalizedBasepath = `/${trimmedBasepath}`;
-  const normalizedBasepathWithSlash = `${normalizedBasepath}/`;
-  const checkBasepath = opts.caseSensitive ? normalizedBasepath : normalizedBasepath.toLowerCase();
-  const checkBasepathWithSlash = opts.caseSensitive ? normalizedBasepathWithSlash : normalizedBasepathWithSlash.toLowerCase();
-  return {
-    input: ({ url }) => {
-      const pathname = opts.caseSensitive ? url.pathname : url.pathname.toLowerCase();
-      if (pathname === checkBasepath) url.pathname = "/";
-      else if (pathname.startsWith(checkBasepathWithSlash)) url.pathname = url.pathname.slice(normalizedBasepath.length);
-      return url;
-    },
-    output: ({ url }) => {
-      url.pathname = joinPaths([
-        "/",
-        trimmedBasepath,
-        url.pathname
-      ]);
-      return url;
-    }
-  };
-}
-function executeRewriteInput(rewrite, url) {
-  const res = rewrite?.input?.({ url });
-  if (res) {
-    if (typeof res === "string") return new URL(res);
-    else if (res instanceof URL) return res;
-  }
-  return url;
-}
-function executeRewriteOutput(rewrite, url) {
-  const res = rewrite?.output?.({ url });
-  if (res) {
-    if (typeof res === "string") return new URL(res);
-    else if (res instanceof URL) return res;
-  }
-  return url;
-}
-function createNonReactiveMutableStore(initialValue) {
-  let value = initialValue;
-  return {
-    get() {
-      return value;
-    },
-    set(nextOrUpdater) {
-      value = functionalUpdate(nextOrUpdater, value);
-    }
-  };
-}
-function createNonReactiveReadonlyStore(read) {
-  return { get() {
-    return read();
-  } };
-}
-function createRouterStores(initialState, config) {
-  const { createMutableStore, createReadonlyStore, batch, init } = config;
-  const matchStores = /* @__PURE__ */ new Map();
-  const pendingMatchStores = /* @__PURE__ */ new Map();
-  const cachedMatchStores = /* @__PURE__ */ new Map();
-  const status = createMutableStore(initialState.status);
-  const loadedAt = createMutableStore(initialState.loadedAt);
-  const isLoading = createMutableStore(initialState.isLoading);
-  const isTransitioning = createMutableStore(initialState.isTransitioning);
-  const location = createMutableStore(initialState.location);
-  const resolvedLocation = createMutableStore(initialState.resolvedLocation);
-  const statusCode = createMutableStore(initialState.statusCode);
-  const redirect2 = createMutableStore(initialState.redirect);
-  const matchesId = createMutableStore([]);
-  const pendingIds = createMutableStore([]);
-  const cachedIds = createMutableStore([]);
-  const matches = createReadonlyStore(() => readPoolMatches(matchStores, matchesId.get()));
-  const pendingMatches = createReadonlyStore(() => readPoolMatches(pendingMatchStores, pendingIds.get()));
-  const cachedMatches = createReadonlyStore(() => readPoolMatches(cachedMatchStores, cachedIds.get()));
-  const firstId = createReadonlyStore(() => matchesId.get()[0]);
-  const hasPending = createReadonlyStore(() => matchesId.get().some((matchId) => {
-    return matchStores.get(matchId)?.get().status === "pending";
-  }));
-  const matchRouteDeps = createReadonlyStore(() => ({
-    locationHref: location.get().href,
-    resolvedLocationHref: resolvedLocation.get()?.href,
-    status: status.get()
-  }));
-  const __store = createReadonlyStore(() => ({
-    status: status.get(),
-    loadedAt: loadedAt.get(),
-    isLoading: isLoading.get(),
-    isTransitioning: isTransitioning.get(),
-    matches: matches.get(),
-    location: location.get(),
-    resolvedLocation: resolvedLocation.get(),
-    statusCode: statusCode.get(),
-    redirect: redirect2.get()
-  }));
-  const matchStoreByRouteIdCache = createLRUCache(64);
-  function getRouteMatchStore(routeId) {
-    let cached = matchStoreByRouteIdCache.get(routeId);
-    if (!cached) {
-      cached = createReadonlyStore(() => {
-        const ids = matchesId.get();
-        for (const id of ids) {
-          const matchStore = matchStores.get(id);
-          if (matchStore && matchStore.routeId === routeId) return matchStore.get();
-        }
-      });
-      matchStoreByRouteIdCache.set(routeId, cached);
-    }
-    return cached;
-  }
-  const store = {
-    status,
-    loadedAt,
-    isLoading,
-    isTransitioning,
-    location,
-    resolvedLocation,
-    statusCode,
-    redirect: redirect2,
-    matchesId,
-    pendingIds,
-    cachedIds,
-    matches,
-    pendingMatches,
-    cachedMatches,
-    firstId,
-    hasPending,
-    matchRouteDeps,
-    matchStores,
-    pendingMatchStores,
-    cachedMatchStores,
-    __store,
-    getRouteMatchStore,
-    setMatches,
-    setPending,
-    setCached
-  };
-  setMatches(initialState.matches);
-  init?.(store);
-  function setMatches(nextMatches) {
-    reconcileMatchPool(nextMatches, matchStores, matchesId, createMutableStore, batch);
-  }
-  function setPending(nextMatches) {
-    reconcileMatchPool(nextMatches, pendingMatchStores, pendingIds, createMutableStore, batch);
-  }
-  function setCached(nextMatches) {
-    reconcileMatchPool(nextMatches, cachedMatchStores, cachedIds, createMutableStore, batch);
-  }
-  return store;
-}
-function readPoolMatches(pool, ids) {
-  const matches = [];
-  for (const id of ids) {
-    const matchStore = pool.get(id);
-    if (matchStore) matches.push(matchStore.get());
-  }
-  return matches;
-}
-function reconcileMatchPool(nextMatches, pool, idStore, createMutableStore, batch) {
-  const nextIds = nextMatches.map((d) => d.id);
-  const nextIdSet = new Set(nextIds);
-  batch(() => {
-    for (const id of pool.keys()) if (!nextIdSet.has(id)) pool.delete(id);
-    for (const nextMatch of nextMatches) {
-      const existing = pool.get(nextMatch.id);
-      if (!existing) {
-        const matchStore = createMutableStore(nextMatch);
-        matchStore.routeId = nextMatch.routeId;
-        pool.set(nextMatch.id, matchStore);
-        continue;
-      }
-      existing.routeId = nextMatch.routeId;
-      if (existing.get() !== nextMatch) existing.set(nextMatch);
-    }
-    if (!arraysEqual(idStore.get(), nextIds)) idStore.set(nextIds);
-  });
-}
-var triggerOnReady = (inner) => {
+const triggerOnReady = (inner) => {
   if (!inner.rendered) {
     inner.rendered = true;
     return inner.onReady?.();
   }
 };
-var resolvePreload = (inner, matchId) => {
+const resolvePreload = (inner, matchId) => {
   return !!(inner.preload && !inner.router.stores.matchStores.has(matchId));
 };
-var buildMatchContext = (inner, index, includeCurrentMatch = true) => {
+const buildMatchContext = (inner, index, includeCurrentMatch = true) => {
   const context = { ...inner.router.options.context ?? {} };
   const end = includeCurrentMatch ? index : index - 1;
   for (let i = 0; i <= end; i++) {
@@ -1480,7 +1231,7 @@ var buildMatchContext = (inner, index, includeCurrentMatch = true) => {
   }
   return context;
 };
-var getNotFoundBoundaryIndex = (inner, err) => {
+const getNotFoundBoundaryIndex = (inner, err) => {
   if (!inner.matches.length) return;
   const requestedRouteId = err.routeId;
   const matchedRootIndex = inner.matches.findIndex((m) => m.routeId === inner.router.routeTree.id);
@@ -1493,7 +1244,7 @@ var getNotFoundBoundaryIndex = (inner, err) => {
   }
   return requestedRouteId ? startIndex : rootIndex;
 };
-var handleRedirectAndNotFound = (inner, match, err) => {
+const handleRedirectAndNotFound = (inner, match, err) => {
   if (!isRedirect(err) && !isNotFound(err)) return;
   if (isRedirect(err) && err.redirectHandled && !err.options.reloadDocument) throw err;
   if (match) {
@@ -1520,13 +1271,13 @@ var handleRedirectAndNotFound = (inner, match, err) => {
   }
   throw err;
 };
-var shouldSkipLoader = (inner, matchId) => {
+const shouldSkipLoader = (inner, matchId) => {
   const match = inner.router.getMatch(matchId);
   if (!match) return true;
   if (match.ssr === false) return true;
   return false;
 };
-var syncMatchContext = (inner, matchId, index) => {
+const syncMatchContext = (inner, matchId, index) => {
   const nextContext = buildMatchContext(inner, index);
   inner.updateMatch(matchId, (prev) => {
     return {
@@ -1535,11 +1286,10 @@ var syncMatchContext = (inner, matchId, index) => {
     };
   });
 };
-var handleSerialError = (inner, index, err, routerCode) => {
+const handleSerialError = (inner, index, err) => {
   const { id: matchId, routeId } = inner.matches[index];
   const route = inner.router.looseRoutesById[routeId];
   if (err instanceof Promise) throw err;
-  err.routerCode = routerCode;
   inner.firstBadMatchIndex ??= index;
   handleRedirectAndNotFound(inner, inner.router.getMatch(matchId), err);
   try {
@@ -1563,7 +1313,7 @@ var handleSerialError = (inner, index, err, routerCode) => {
   });
   if (!inner.preload && !isRedirect(err) && !isNotFound(err)) inner.serialError ??= err;
 };
-var isBeforeLoadSsr = (inner, matchId, index, route) => {
+const isBeforeLoadSsr = (inner, matchId, index, route) => {
   const existingMatch = inner.router.getMatch(matchId);
   const parentMatchId = inner.matches[index - 1]?.id;
   const parentMatch = parentMatchId ? inner.router.getMatch(parentMatchId) : void 0;
@@ -1611,7 +1361,7 @@ var isBeforeLoadSsr = (inner, matchId, index, route) => {
   });
   existingMatch.ssr = parentOverride(tempSsr ?? defaultSsr);
 };
-var setupPendingTimeout = (inner, matchId, route, match) => {
+const setupPendingTimeout = (inner, matchId, route, match) => {
   if (match._nonReactive.pendingTimeout !== void 0) return;
   const pendingMs = route.options.pendingMs ?? inner.router.options.defaultPendingMs;
   if (!!(inner.onReady && false)) {
@@ -1621,7 +1371,7 @@ var setupPendingTimeout = (inner, matchId, route, match) => {
     match._nonReactive.pendingTimeout = pendingTimeout;
   }
 };
-var preBeforeLoadSetup = (inner, matchId, route) => {
+const preBeforeLoadSetup = (inner, matchId, route) => {
   const existingMatch = inner.router.getMatch(matchId);
   if (!existingMatch._nonReactive.beforeLoadPromise && !existingMatch._nonReactive.loaderPromise) return;
   setupPendingTimeout(inner, matchId, route, existingMatch);
@@ -1631,7 +1381,7 @@ var preBeforeLoadSetup = (inner, matchId, route) => {
   };
   return existingMatch._nonReactive.beforeLoadPromise ? existingMatch._nonReactive.beforeLoadPromise.then(then) : then();
 };
-var executeBeforeLoad = (inner, matchId, index, route) => {
+const executeBeforeLoad = (inner, matchId, index, route) => {
   const match = inner.router.getMatch(matchId);
   let prevLoadPromise = match._nonReactive.loadPromise;
   match._nonReactive.loadPromise = createControlledPromise(() => {
@@ -1639,8 +1389,8 @@ var executeBeforeLoad = (inner, matchId, index, route) => {
     prevLoadPromise = void 0;
   });
   const { paramsError, searchError } = match;
-  if (paramsError) handleSerialError(inner, index, paramsError, "PARSE_PARAMS");
-  if (searchError) handleSerialError(inner, index, searchError, "VALIDATE_SEARCH");
+  if (paramsError) handleSerialError(inner, index, paramsError);
+  if (searchError) handleSerialError(inner, index, searchError);
   setupPendingTimeout(inner, matchId, route, match);
   const abortController = new AbortController();
   let isPending = false;
@@ -1703,7 +1453,7 @@ var executeBeforeLoad = (inner, matchId, index, route) => {
     }
     if (isRedirect(beforeLoadContext2) || isNotFound(beforeLoadContext2)) {
       pending();
-      handleSerialError(inner, index, beforeLoadContext2, "BEFORE_LOAD");
+      handleSerialError(inner, index, beforeLoadContext2);
     }
     inner.router.batch(() => {
       pending();
@@ -1720,16 +1470,16 @@ var executeBeforeLoad = (inner, matchId, index, route) => {
     if (isPromise(beforeLoadContext)) {
       pending();
       return beforeLoadContext.catch((err) => {
-        handleSerialError(inner, index, err, "BEFORE_LOAD");
+        handleSerialError(inner, index, err);
       }).then(updateContext);
     }
   } catch (err) {
     pending();
-    handleSerialError(inner, index, err, "BEFORE_LOAD");
+    handleSerialError(inner, index, err);
   }
   updateContext(beforeLoadContext);
 };
-var handleBeforeLoad = (inner, index) => {
+const handleBeforeLoad = (inner, index) => {
   const { id: matchId, routeId } = inner.matches[index];
   const route = inner.router.looseRoutesById[routeId];
   const serverSsr = () => {
@@ -1747,7 +1497,7 @@ var handleBeforeLoad = (inner, index) => {
   };
   return serverSsr();
 };
-var executeHead = (inner, matchId, route) => {
+const executeHead = (inner, matchId, route) => {
   const match = inner.router.getMatch(matchId);
   if (!match) return;
   if (!route.options.head && !route.options.scripts && !route.options.headers) return;
@@ -1773,7 +1523,7 @@ var executeHead = (inner, matchId, route) => {
     };
   });
 };
-var getLoaderContext = (inner, matchPromises, matchId, index, route) => {
+const getLoaderContext = (inner, matchPromises, matchId, index, route) => {
   const parentMatchPromise = matchPromises[index - 1];
   const { params, loaderDeps, abortController, cause } = inner.router.getMatch(matchId);
   const context = buildMatchContext(inner, index);
@@ -1795,7 +1545,7 @@ var getLoaderContext = (inner, matchPromises, matchId, index, route) => {
     ...inner.router.options.additionalContext
   };
 };
-var runLoader = async (inner, matchPromises, matchId, index, route) => {
+const runLoader = async (inner, matchPromises, matchId, index, route) => {
   try {
     const match = inner.router.getMatch(matchId);
     try {
@@ -1869,7 +1619,7 @@ var runLoader = async (inner, matchPromises, matchId, index, route) => {
     handleRedirectAndNotFound(inner, match, err);
   }
 };
-var loadRouteMatch = async (inner, matchPromises, index) => {
+const loadRouteMatch = async (inner, matchPromises, index) => {
   async function handleLoader(preload, prevMatch, previousRouteMatchId, match2, route2) {
     const age = Date.now() - prevMatch.updatedAt;
     const staleAge = preload ? route2.options.preloadStaleTime ?? inner.router.options.defaultPreloadStaleTime ?? 3e4 : route2.options.staleTime ?? inner.router.options.defaultStaleTime ?? 0;
@@ -2088,12 +1838,199 @@ function routeNeedsPreload(route) {
   for (const componentType of componentTypes) if (route.options[componentType]?.preload) return true;
   return false;
 }
-var componentTypes = [
+const componentTypes = [
   "component",
   "errorComponent",
   "pendingComponent",
   "notFoundComponent"
 ];
+function composeRewrites(rewrites) {
+  return {
+    input: ({ url }) => {
+      for (const rewrite of rewrites) url = executeRewriteInput(rewrite, url);
+      return url;
+    },
+    output: ({ url }) => {
+      for (let i = rewrites.length - 1; i >= 0; i--) url = executeRewriteOutput(rewrites[i], url);
+      return url;
+    }
+  };
+}
+function rewriteBasepath(opts) {
+  const trimmedBasepath = trimPath(opts.basepath);
+  const normalizedBasepath = `/${trimmedBasepath}`;
+  const checkBasepath = opts.caseSensitive ? normalizedBasepath : normalizedBasepath.toLowerCase();
+  const checkBasepathWithSlash = `${checkBasepath}/`;
+  return {
+    input: ({ url }) => {
+      const pathname = opts.caseSensitive ? url.pathname : url.pathname.toLowerCase();
+      if (pathname === checkBasepath) url.pathname = "/";
+      else if (pathname.startsWith(checkBasepathWithSlash)) url.pathname = url.pathname.slice(normalizedBasepath.length);
+      return url;
+    },
+    output: ({ url }) => {
+      url.pathname = joinPaths([
+        "/",
+        trimmedBasepath,
+        url.pathname
+      ]);
+      return url;
+    }
+  };
+}
+function executeRewriteInput(rewrite, url) {
+  const res = rewrite?.input?.({ url });
+  if (res) {
+    if (typeof res === "string") return new URL(res);
+    else if (res instanceof URL) return res;
+  }
+  return url;
+}
+function executeRewriteOutput(rewrite, url) {
+  const res = rewrite?.output?.({ url });
+  if (res) {
+    if (typeof res === "string") return new URL(res);
+    else if (res instanceof URL) return res;
+  }
+  return url;
+}
+function createNonReactiveMutableStore(initialValue) {
+  let value = initialValue;
+  return {
+    get() {
+      return value;
+    },
+    set(nextOrUpdater) {
+      value = functionalUpdate(nextOrUpdater, value);
+    }
+  };
+}
+function createNonReactiveReadonlyStore(read) {
+  return { get() {
+    return read();
+  } };
+}
+function createRouterStores(initialState, config) {
+  const { createMutableStore, createReadonlyStore, batch, init } = config;
+  const matchStores = /* @__PURE__ */ new Map();
+  const pendingMatchStores = /* @__PURE__ */ new Map();
+  const cachedMatchStores = /* @__PURE__ */ new Map();
+  const status = createMutableStore(initialState.status);
+  const loadedAt = createMutableStore(initialState.loadedAt);
+  const isLoading = createMutableStore(initialState.isLoading);
+  const isTransitioning = createMutableStore(initialState.isTransitioning);
+  const location = createMutableStore(initialState.location);
+  const resolvedLocation = createMutableStore(initialState.resolvedLocation);
+  const statusCode = createMutableStore(initialState.statusCode);
+  const redirect2 = createMutableStore(initialState.redirect);
+  const matchesId = createMutableStore([]);
+  const pendingIds = createMutableStore([]);
+  const cachedIds = createMutableStore([]);
+  const matches = createReadonlyStore(() => readPoolMatches(matchStores, matchesId.get()));
+  const pendingMatches = createReadonlyStore(() => readPoolMatches(pendingMatchStores, pendingIds.get()));
+  const cachedMatches = createReadonlyStore(() => readPoolMatches(cachedMatchStores, cachedIds.get()));
+  const firstId = createReadonlyStore(() => matchesId.get()[0]);
+  const hasPending = createReadonlyStore(() => matchesId.get().some((matchId) => {
+    return matchStores.get(matchId)?.get().status === "pending";
+  }));
+  const matchRouteDeps = createReadonlyStore(() => ({
+    locationHref: location.get().href,
+    resolvedLocationHref: resolvedLocation.get()?.href,
+    status: status.get()
+  }));
+  const __store = createReadonlyStore(() => ({
+    status: status.get(),
+    loadedAt: loadedAt.get(),
+    isLoading: isLoading.get(),
+    isTransitioning: isTransitioning.get(),
+    matches: matches.get(),
+    location: location.get(),
+    resolvedLocation: resolvedLocation.get(),
+    statusCode: statusCode.get(),
+    redirect: redirect2.get()
+  }));
+  const matchStoreByRouteIdCache = createLRUCache(64);
+  function getRouteMatchStore(routeId) {
+    let cached = matchStoreByRouteIdCache.get(routeId);
+    if (!cached) {
+      cached = createReadonlyStore(() => {
+        const ids = matchesId.get();
+        for (const id of ids) {
+          const matchStore = matchStores.get(id);
+          if (matchStore && matchStore.routeId === routeId) return matchStore.get();
+        }
+      });
+      matchStoreByRouteIdCache.set(routeId, cached);
+    }
+    return cached;
+  }
+  const store = {
+    status,
+    loadedAt,
+    isLoading,
+    isTransitioning,
+    location,
+    resolvedLocation,
+    statusCode,
+    redirect: redirect2,
+    matchesId,
+    pendingIds,
+    cachedIds,
+    matches,
+    pendingMatches,
+    cachedMatches,
+    firstId,
+    hasPending,
+    matchRouteDeps,
+    matchStores,
+    pendingMatchStores,
+    cachedMatchStores,
+    __store,
+    getRouteMatchStore,
+    setMatches,
+    setPending,
+    setCached
+  };
+  setMatches(initialState.matches);
+  init?.(store);
+  function setMatches(nextMatches) {
+    reconcileMatchPool(nextMatches, matchStores, matchesId, createMutableStore, batch);
+  }
+  function setPending(nextMatches) {
+    reconcileMatchPool(nextMatches, pendingMatchStores, pendingIds, createMutableStore, batch);
+  }
+  function setCached(nextMatches) {
+    reconcileMatchPool(nextMatches, cachedMatchStores, cachedIds, createMutableStore, batch);
+  }
+  return store;
+}
+function readPoolMatches(pool, ids) {
+  const matches = [];
+  for (const id of ids) {
+    const matchStore = pool.get(id);
+    if (matchStore) matches.push(matchStore.get());
+  }
+  return matches;
+}
+function reconcileMatchPool(nextMatches, pool, idStore, createMutableStore, batch) {
+  const nextIds = nextMatches.map((d) => d.id);
+  const nextIdSet = new Set(nextIds);
+  batch(() => {
+    for (const id of pool.keys()) if (!nextIdSet.has(id)) pool.delete(id);
+    for (const nextMatch of nextMatches) {
+      const existing = pool.get(nextMatch.id);
+      if (!existing) {
+        const matchStore = createMutableStore(nextMatch);
+        matchStore.routeId = nextMatch.routeId;
+        pool.set(nextMatch.id, matchStore);
+        continue;
+      }
+      existing.routeId = nextMatch.routeId;
+      if (existing.get() !== nextMatch) existing.set(nextMatch);
+    }
+    if (!arraysEqual(idStore.get(), nextIds)) idStore.set(nextIds);
+  });
+}
 function getLocationChangeInfo(location, resolvedLocation) {
   const fromLocation = resolvedLocation;
   const toLocation = location;
@@ -2105,6 +2042,7 @@ function getLocationChangeInfo(location, resolvedLocation) {
     hashChanged: fromLocation?.hash !== toLocation.hash
   };
 }
+const locationHistoryActions = /* @__PURE__ */ new WeakMap();
 var RouterCore = class {
   /**
   * @deprecated Use the `createRouter` function instead
@@ -2117,6 +2055,7 @@ var RouterCore = class {
     this.subscribers = /* @__PURE__ */ new Set();
     this.isScrollRestoring = false;
     this.isScrollRestorationSetup = false;
+    this.routeBranchCache = /* @__PURE__ */ new WeakMap();
     this.startTransition = (fn) => fn();
     this.update = (newOptions) => {
       const prevOptions = this.options;
@@ -2172,7 +2111,7 @@ var RouterCore = class {
         needsLocationUpdate = true;
       }
       if (needsLocationUpdate && this.stores) this.stores.location.set(this.latestLocation);
-      if (typeof window !== "undefined" && "CSS" in window && typeof window.CSS?.supports === "function") this.isViewTransitionTypesSupported = window.CSS.supports("selector(:active-view-transition-type(a)");
+      if (typeof window !== "undefined" && "CSS" in window && typeof window.CSS?.supports === "function") this.isViewTransitionTypesSupported = window.CSS.supports("selector(:active-view-transition-type(a))");
     };
     this.updateLatestLocation = () => {
       this.latestLocation = this.parseLocation(this.history.location, this.latestLocation);
@@ -2248,7 +2187,7 @@ var RouterCore = class {
     this.resolvePathWithBase = (from, path) => {
       return resolvePath({
         base: from,
-        to: cleanPath(path),
+        to: path.includes("//") ? cleanPath(path) : path,
         trailingSlash: this.options.trailingSlash,
         cache: this.resolvePathCache
       });
@@ -2291,15 +2230,22 @@ var RouterCore = class {
         const lightweightResult = this.matchRoutesLightweight(currentLocation);
         if (dest.from && false) ;
         const defaultedFromPath = dest.unsafeRelative === "path" ? currentLocation.pathname : dest.from ?? lightweightResult.fullPath;
-        const fromPath = this.resolvePathWithBase(defaultedFromPath, ".");
+        const destTo = dest.to ? `${dest.to}` : void 0;
         const fromSearch = lightweightResult.search;
         const fromParams = Object.assign(/* @__PURE__ */ Object.create(null), lightweightResult.params);
-        const nextTo = dest.to ? this.resolvePathWithBase(fromPath, `${dest.to}`) : this.resolvePathWithBase(fromPath, ".");
+        const sourcePath = destTo?.charCodeAt(0) === 47 ? "/" : this.resolvePathWithBase(defaultedFromPath, ".");
+        const nextTo = destTo ? this.resolvePathWithBase(sourcePath, destTo) : sourcePath;
         const nextParams = dest.params === false || dest.params === null ? /* @__PURE__ */ Object.create(null) : (dest.params ?? true) === true ? fromParams : Object.assign(fromParams, functionalUpdate(dest.params, fromParams));
-        const destMatchResult = this.getMatchedRoutes(nextTo);
-        let destRoutes = destMatchResult.matchedRoutes;
-        if ((!destMatchResult.foundRoute || destMatchResult.foundRoute.path !== "/" && destMatchResult.routeParams["**"]) && this.options.notFoundRoute) destRoutes = [...destRoutes, this.options.notFoundRoute];
-        if (Object.keys(nextParams).length > 0) for (const route of destRoutes) {
+        const destRoute = this.routesByPath[trimPathRight(nextTo)];
+        let destRoutes;
+        if (destRoute) destRoutes = this.getRouteBranch(destRoute);
+        else if (nextTo.includes("$")) destRoutes = [];
+        else {
+          const destMatchResult = this.getMatchedRoutes(nextTo);
+          destRoutes = destMatchResult.matchedRoutes;
+          if (this.options.notFoundRoute && (!destMatchResult.foundRoute || destMatchResult.foundRoute.path !== "/" && destMatchResult.routeParams["**"])) destRoutes = [...destRoutes, this.options.notFoundRoute];
+        }
+        if (destRoutes.length && hasKeys(nextParams)) for (const route of destRoutes) {
           const fn = route.options.params?.stringify ?? route.options.stringifyParams;
           if (fn) try {
             Object.assign(nextParams, fn(nextParams));
@@ -2396,6 +2342,7 @@ var RouterCore = class {
       return buildWithMatches(opts);
     };
     this.commitLocation = async ({ viewTransition, ignoreBlocker, ...next }) => {
+      let historyAction;
       const isSameState = () => {
         const ignoredProps = [
           "key",
@@ -2444,10 +2391,11 @@ var RouterCore = class {
         }
         nextHistory.state.__hashScrollIntoViewOptions = hashScrollIntoView ?? this.options.defaultHashScrollIntoView ?? true;
         this.shouldViewTransition = viewTransition;
-        this.history[next.replace ? "replace" : "push"](nextHistory.publicHref, nextHistory.state, { ignoreBlocker });
+        historyAction = next.replace ? "REPLACE" : "PUSH";
+        this.history[historyAction === "REPLACE" ? "replace" : "push"](nextHistory.publicHref, nextHistory.state, { ignoreBlocker });
       }
       this.resetNextScroll = next.resetScroll ?? true;
-      if (!this.history.subscribers.size) this.load();
+      if (!this.history.subscribers.size) this.load(historyAction ? { action: { type: historyAction } } : void 0);
       return this.commitLocationPromise;
     };
     this.buildAndCommitLocation = ({ replace, resetScroll, hashScrollIntoView, viewTransition, ignoreBlocker, href, ...rest } = {}) => {
@@ -2552,6 +2500,7 @@ var RouterCore = class {
       });
     };
     this.load = async (opts) => {
+      const historyAction = opts?.action?.type;
       let redirect2;
       let notFound2;
       let loadPromise;
@@ -2560,6 +2509,8 @@ var RouterCore = class {
         this.startTransition(async () => {
           try {
             this.beforeLoad();
+            if (historyAction) locationHistoryActions.set(this.latestLocation, historyAction);
+            else locationHistoryActions.delete(this.latestLocation);
             const next = this.latestLocation;
             const locationChangeInfo = getLocationChangeInfo(next, this.stores.resolvedLocation.get());
             if (!this.stores.redirect.get()) this.emit({
@@ -2841,6 +2792,14 @@ var RouterCore = class {
       this.routesById[notFoundRoute.id] = notFoundRoute;
     }
   }
+  getRouteBranch(route) {
+    let branch = this.routeBranchCache.get(route);
+    if (!branch) {
+      branch = buildRouteBranch(route);
+      this.routeBranchCache.set(route, branch);
+    }
+    return branch;
+  }
   get looseRoutesById() {
     return this.routesById;
   }
@@ -2849,7 +2808,7 @@ var RouterCore = class {
   }
   matchRoutesInternal(next, opts) {
     const matchedRoutesResult = this.getMatchedRoutes(next.pathname);
-    const { foundRoute, routeParams, parsedParams } = matchedRoutesResult;
+    const { foundRoute, routeParams } = matchedRoutesResult;
     let { matchedRoutes } = matchedRoutesResult;
     let isGlobalNotFound = false;
     if (foundRoute ? foundRoute.path !== "/" && routeParams["**"] : trimPathRight(next.pathname)) if (this.options.notFoundRoute) matchedRoutes = [...matchedRoutes, this.options.notFoundRoute];
@@ -2901,7 +2860,7 @@ var RouterCore = class {
       const strictParams = existingMatch?._strictParams ?? usedParams;
       let paramsError = void 0;
       if (!existingMatch) try {
-        extractStrictParams(route, usedParams, parsedParams, strictParams);
+        extractStrictParams(route, strictParams);
       } catch (err) {
         if (isNotFound(err) || isRedirect(err)) paramsError = err;
         else paramsError = new PathParamError(err.message, { cause: err });
@@ -3007,7 +2966,7 @@ var RouterCore = class {
   * operations like AbortController, ControlledPromise, loaderDeps, and full match objects.
   */
   matchRoutesLightweight(location) {
-    const { matchedRoutes, routeParams, parsedParams } = this.getMatchedRoutes(location.pathname);
+    const { matchedRoutes, routeParams } = this.getMatchedRoutes(location.pathname);
     const lastRoute = last(matchedRoutes);
     const accumulatedSearch = { ...location.search };
     for (const route of matchedRoutes) try {
@@ -3022,7 +2981,7 @@ var RouterCore = class {
     else {
       const strictParams = Object.assign(/* @__PURE__ */ Object.create(null), routeParams);
       for (const route of matchedRoutes) try {
-        extractStrictParams(route, routeParams, parsedParams ?? {}, strictParams);
+        extractStrictParams(route, strictParams);
       } catch {
       }
       params = strictParams;
@@ -3067,18 +3026,15 @@ function getMatchedRoutes({ pathname, routesById, processedTree }) {
   const routeParams = /* @__PURE__ */ Object.create(null);
   const trimmedPath = trimPathRight(pathname);
   let foundRoute = void 0;
-  let parsedParams = void 0;
   const match = findRouteMatch(trimmedPath, processedTree, true);
   if (match) {
     foundRoute = match.route;
     Object.assign(routeParams, match.rawParams);
-    parsedParams = Object.assign(/* @__PURE__ */ Object.create(null), match.parsedParams);
   }
   return {
     matchedRoutes: match?.branch || [routesById["__root__"]],
     routeParams,
-    foundRoute,
-    parsedParams
+    foundRoute
   };
 }
 function applySearchMiddleware({ search, dest, destRoutes, _includeValidateSearch }) {
@@ -3150,19 +3106,45 @@ function findGlobalNotFoundRouteId(notFoundMode, routes) {
   }
   return rootRouteId;
 }
-function extractStrictParams(route, referenceParams, parsedParams, accumulatedParams) {
+function extractStrictParams(route, accumulatedParams) {
   const parseParams = route.options.params?.parse ?? route.options.parseParams;
-  if (parseParams) if (route.options.skipRouteOnParseError) {
-    for (const key in referenceParams) if (key in parsedParams) accumulatedParams[key] = parsedParams[key];
-  } else {
+  if (parseParams) {
     const result = parseParams(accumulatedParams);
+    if (result === false) throw new Error("Route params.parse returned false for a matched route");
     Object.assign(accumulatedParams, result);
   }
 }
+function getSafeSessionStorage() {
+  try {
+    return sessionStorage;
+  } catch {
+    return;
+  }
+}
+const storageKey = "tsr-scroll-restoration-v1_3";
+getSafeSessionStorage();
+const defaultGetScrollRestorationKey = (location) => {
+  return location.state.__TSR_key || location.href;
+};
 function getAssetCrossOrigin(assetCrossOrigin, kind) {
   if (!assetCrossOrigin) return;
   if (typeof assetCrossOrigin === "string") return assetCrossOrigin;
   return assetCrossOrigin[kind];
+}
+function getManifestScriptFormat(manifest) {
+  return manifest?.scriptFormat ?? "module";
+}
+function getScriptPreloadAttrs(manifest, link, assetCrossOrigin) {
+  const preloadLink = resolveManifestAssetLink(link);
+  const crossOrigin = getAssetCrossOrigin(assetCrossOrigin, "script") ?? preloadLink.crossOrigin;
+  return {
+    ...getManifestScriptFormat(manifest) === "iife" ? {
+      rel: "preload",
+      as: "script"
+    } : { rel: "modulepreload" },
+    href: preloadLink.href,
+    ...crossOrigin ? { crossOrigin } : {}
+  };
 }
 function resolveManifestAssetLink(link) {
   if (typeof link === "string") return {
@@ -3171,32 +3153,38 @@ function resolveManifestAssetLink(link) {
   };
   return link;
 }
-function getStylesheetHref(asset) {
-  if (asset.tag !== "link") return void 0;
-  const rel = asset.attrs?.rel;
-  const href = asset.attrs?.href;
-  if (typeof href !== "string") return void 0;
-  if (!(typeof rel === "string" ? rel.split(/\s+/) : []).includes("stylesheet")) return void 0;
-  return href;
+function appendUniqueUserTags(target, tags) {
+  if (tags.length === 0) return;
+  if (tags.length === 1) {
+    target.push(tags[0]);
+    return;
+  }
+  const seen = /* @__PURE__ */ new Set();
+  for (const tag of tags) {
+    const key = JSON.stringify(tag);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    target.push(tag);
+  }
 }
-function isInlinableStylesheet(manifest, asset) {
-  const href = getStylesheetHref(asset);
-  return !!href && manifest?.inlineCss?.styles[href] !== void 0;
+function getStylesheetHref(asset) {
+  return resolveManifestCssLink(asset).href;
+}
+function resolveManifestCssLink(link) {
+  if (typeof link === "string") return {
+    href: link,
+    crossOrigin: void 0
+  };
+  return link;
 }
 function createInlineCssStyleAsset(css) {
   return {
-    tag: "style",
     attrs: { suppressHydrationWarning: true },
-    inlineCss: true,
     children: css
   };
 }
 function createInlineCssPlaceholderAsset() {
-  return {
-    tag: "style",
-    attrs: { suppressHydrationWarning: true },
-    inlineCss: true
-  };
+  return { attrs: { suppressHydrationWarning: true } };
 }
 var BaseRoute = class {
   get to() {
@@ -3270,14 +3258,14 @@ var BaseRootRoute = class extends BaseRoute {
     super(options);
   }
 };
-var GLOBAL_TSR = "$_TSR";
-var TSR_SCRIPT_BARRIER_ID = "$tsr-stream-barrier";
+const GLOBAL_TSR = "$_TSR";
+const TSR_SCRIPT_BARRIER_ID = "$tsr-stream-barrier";
 function createSerializationAdapter(opts) {
   return opts;
 }
 // @__NO_SIDE_EFFECTS__
 function makeSsrSerovalPlugin(serializationAdapter, options) {
-  return /* @__PURE__ */ ni({
+  return /* @__PURE__ */ ai({
     tag: "$TSR/t/" + serializationAdapter.key,
     test: serializationAdapter.test,
     parse: { stream(value, ctx, _data) {
@@ -3292,7 +3280,7 @@ function makeSsrSerovalPlugin(serializationAdapter, options) {
 }
 // @__NO_SIDE_EFFECTS__
 function makeSerovalPlugin(serializationAdapter) {
-  return /* @__PURE__ */ ni({
+  return /* @__PURE__ */ ai({
     tag: "$TSR/t/" + serializationAdapter.key,
     test: serializationAdapter.test,
     parse: {
@@ -3318,8 +3306,8 @@ var RawStream = class {
     this.hint = options?.hint ?? "binary";
   }
 };
-var BufferCtor = globalThis.Buffer;
-var hasNodeBuffer = !!BufferCtor && typeof BufferCtor.from === "function";
+const BufferCtor = globalThis.Buffer;
+const hasNodeBuffer = !!BufferCtor && typeof BufferCtor.from === "function";
 function uint8ArrayToBase64(bytes) {
   if (bytes.length === 0) return "";
   if (hasNodeBuffer) return BufferCtor.from(bytes).toString("base64");
@@ -3342,9 +3330,9 @@ function base64ToUint8Array(base64) {
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
 }
-var RAW_STREAM_FACTORY_BINARY = /* @__PURE__ */ Object.create(null);
-var RAW_STREAM_FACTORY_TEXT = /* @__PURE__ */ Object.create(null);
-var RAW_STREAM_FACTORY_CONSTRUCTOR_BINARY = (stream) => new ReadableStream({ start(controller) {
+const RAW_STREAM_FACTORY_BINARY = /* @__PURE__ */ Object.create(null);
+const RAW_STREAM_FACTORY_TEXT = /* @__PURE__ */ Object.create(null);
+const RAW_STREAM_FACTORY_CONSTRUCTOR_BINARY = (stream) => new ReadableStream({ start(controller) {
   stream.on({
     next(base64) {
       try {
@@ -3363,8 +3351,8 @@ var RAW_STREAM_FACTORY_CONSTRUCTOR_BINARY = (stream) => new ReadableStream({ sta
     }
   });
 } });
-var textEncoderForFactory = new TextEncoder();
-var RAW_STREAM_FACTORY_CONSTRUCTOR_TEXT = (stream) => {
+const textEncoderForFactory = new TextEncoder();
+const RAW_STREAM_FACTORY_CONSTRUCTOR_TEXT = (stream) => {
   return new ReadableStream({ start(controller) {
     stream.on({
       next(value) {
@@ -3386,10 +3374,10 @@ var RAW_STREAM_FACTORY_CONSTRUCTOR_TEXT = (stream) => {
     });
   } });
 };
-var FACTORY_BINARY = `(s=>new ReadableStream({start(c){s.on({next(b){try{const d=atob(b),a=new Uint8Array(d.length);for(let i=0;i<d.length;i++)a[i]=d.charCodeAt(i);c.enqueue(a)}catch(_){}},throw(e){c.error(e)},return(){try{c.close()}catch(_){}}})}}))`;
-var FACTORY_TEXT = `(s=>{const e=new TextEncoder();return new ReadableStream({start(c){s.on({next(v){try{if(typeof v==='string'){c.enqueue(e.encode(v))}else{const d=atob(v.$b64),a=new Uint8Array(d.length);for(let i=0;i<d.length;i++)a[i]=d.charCodeAt(i);c.enqueue(a)}}catch(_){}},throw(x){c.error(x)},return(){try{c.close()}catch(_){}}})}})})`;
+const FACTORY_BINARY = `(s=>new ReadableStream({start(c){s.on({next(b){try{const d=atob(b),a=new Uint8Array(d.length);for(let i=0;i<d.length;i++)a[i]=d.charCodeAt(i);c.enqueue(a)}catch(_){}},throw(e){c.error(e)},return(){try{c.close()}catch(_){}}})}}))`;
+const FACTORY_TEXT = `(s=>{const e=new TextEncoder();return new ReadableStream({start(c){s.on({next(v){try{if(typeof v==='string'){c.enqueue(e.encode(v))}else{const d=atob(v.$b64),a=new Uint8Array(d.length);for(let i=0;i<d.length;i++)a[i]=d.charCodeAt(i);c.enqueue(a)}}catch(_){}},throw(x){c.error(x)},return(){try{c.close()}catch(_){}}})}})})`;
 function toBinaryStream(readable) {
-  const stream = te();
+  const stream = re();
   const reader = readable.getReader();
   (async () => {
     try {
@@ -3410,7 +3398,7 @@ function toBinaryStream(readable) {
   return stream;
 }
 function toTextStream(readable) {
-  const stream = te();
+  const stream = re();
   const reader = readable.getReader();
   const decoder = new TextDecoder("utf-8", { fatal: true });
   (async () => {
@@ -3441,9 +3429,9 @@ function toTextStream(readable) {
   })();
   return stream;
 }
-var RawStreamSSRPlugin = /* @__PURE__ */ ni({
+const RawStreamSSRPlugin = /* @__PURE__ */ ai({
   tag: "tss/RawStream",
-  extends: [/* @__PURE__ */ ni({
+  extends: [/* @__PURE__ */ ai({
     tag: "tss/RawStreamFactory",
     test(value) {
       return value === RAW_STREAM_FACTORY_BINARY;
@@ -3465,7 +3453,7 @@ var RawStreamSSRPlugin = /* @__PURE__ */ ni({
     deserialize(_node, _ctx, _data) {
       return RAW_STREAM_FACTORY_BINARY;
     }
-  }), /* @__PURE__ */ ni({
+  }), /* @__PURE__ */ ai({
     tag: "tss/RawStreamFactoryText",
     test(value) {
       return value === RAW_STREAM_FACTORY_TEXT;
@@ -3497,7 +3485,7 @@ var RawStreamSSRPlugin = /* @__PURE__ */ ni({
       return {
         hint: ctx.parse(value.hint),
         factory: ctx.parse(factory),
-        stream: ctx.parse(te())
+        stream: ctx.parse(re())
       };
     },
     async async(value, ctx, _data) {
@@ -3530,7 +3518,7 @@ var RawStreamSSRPlugin = /* @__PURE__ */ ni({
 // @__NO_SIDE_EFFECTS__
 function createRawStreamRPCPlugin(onRawStream) {
   let nextStreamId = 1;
-  return /* @__PURE__ */ ni({
+  return /* @__PURE__ */ ai({
     tag: "tss/RawStream",
     test(value) {
       return value instanceof RawStream;
@@ -3555,7 +3543,7 @@ function createRawStreamRPCPlugin(onRawStream) {
     }
   });
 }
-var ShallowErrorPlugin = /* @__PURE__ */ ni({
+const ShallowErrorPlugin = /* @__PURE__ */ ai({
   tag: "$TSR/Error",
   test(value) {
     return value instanceof Error;
@@ -3578,7 +3566,7 @@ var ShallowErrorPlugin = /* @__PURE__ */ ni({
     return new Error(ctx.deserialize(node.message));
   }
 });
-var defaultSerovalPlugins = [
+const defaultSerovalPlugins = [
   ShallowErrorPlugin,
   RawStreamSSRPlugin,
   p
@@ -3602,10 +3590,10 @@ function dehydrateSsrMatchId(id) {
   return id.replaceAll("/", "\0");
 }
 var tsrScript_default = "self.$_TSR={h(){this.hydrated=!0,this.c()},e(){this.streamEnded=!0,this.c()},c(){this.hydrated&&this.streamEnded&&(delete self.$_TSR,delete self.$R.tsr)},p(e){this.initialized?e():this.buffer.push(e)},buffer:[]}";
-var SCOPE_ID = "tsr";
-var TSR_PREFIX = GLOBAL_TSR + ".router=";
-var P_PREFIX = GLOBAL_TSR + ".p(()=>";
-var P_SUFFIX = ")";
+const SCOPE_ID = "tsr";
+const TSR_PREFIX = GLOBAL_TSR + ".router=";
+const P_PREFIX = GLOBAL_TSR + ".p(()=>";
+const P_SUFFIX = ")";
 function dehydrateMatch(match) {
   const dehydratedMatch = {
     i: dehydrateSsrMatchId(match.id),
@@ -3621,40 +3609,44 @@ function dehydrateMatch(match) {
   if (match.globalNotFound) dehydratedMatch.g = true;
   return dehydratedMatch;
 }
-var INITIAL_SCRIPTS = [mn(SCOPE_ID), tsrScript_default];
+const INITIAL_SCRIPTS = [dn(SCOPE_ID), tsrScript_default];
 var ScriptBuffer = class {
-  constructor(router) {
+  constructor(injectScript) {
     this._scriptBarrierLifted = false;
     this._cleanedUp = false;
-    this._pendingMicrotask = false;
-    this.router = router;
+    this._microtaskVersion = 0;
+    this._pendingMicrotaskVersion = 0;
+    this.injectScript = injectScript;
     this._queue = INITIAL_SCRIPTS.slice();
   }
   enqueue(script) {
     if (this._cleanedUp) return;
     this._queue.push(script);
-    if (this._scriptBarrierLifted && !this._pendingMicrotask) {
-      this._pendingMicrotask = true;
-      queueMicrotask(() => {
-        this._pendingMicrotask = false;
-        this.injectBufferedScripts();
-      });
-    }
+    if (this._scriptBarrierLifted) this.scheduleInjectBufferedScripts();
   }
   liftBarrier() {
     if (this._scriptBarrierLifted || this._cleanedUp) return;
     this._scriptBarrierLifted = true;
-    if (this._queue.length > 0 && !this._pendingMicrotask) {
-      this._pendingMicrotask = true;
-      queueMicrotask(() => {
-        this._pendingMicrotask = false;
-        this.injectBufferedScripts();
-      });
-    }
+    if (this._queue.length > 0) this.scheduleInjectBufferedScripts();
+  }
+  scheduleInjectBufferedScripts() {
+    if (this._pendingMicrotaskVersion !== 0) return;
+    const pendingVersion = ++this._microtaskVersion;
+    this._pendingMicrotaskVersion = pendingVersion;
+    queueMicrotask(() => {
+      if (this._pendingMicrotaskVersion !== pendingVersion) return;
+      this._pendingMicrotaskVersion = 0;
+      this.injectBufferedScripts();
+    });
+  }
+  clearPendingMicrotask() {
+    if (this._pendingMicrotaskVersion === 0) return;
+    this._pendingMicrotaskVersion = 0;
+    this._microtaskVersion++;
   }
   /**
   * Flushes any pending scripts synchronously.
-  * Call this before emitting onSerializationFinished to ensure all scripts are injected.
+  * Call this before signaling serialization finished to ensure all scripts are injected.
   *
   * IMPORTANT: Only injects if the barrier has been lifted. Before the barrier is lifted,
   * scripts should remain in the queue so takeBufferedScripts() can retrieve them
@@ -3662,32 +3654,37 @@ var ScriptBuffer = class {
   flush() {
     if (!this._scriptBarrierLifted) return;
     if (this._cleanedUp) return;
-    this._pendingMicrotask = false;
-    const scriptsToInject = this.takeAll();
-    if (scriptsToInject && this.router?.serverSsr) this.router.serverSsr.injectScript(scriptsToInject);
+    this.clearPendingMicrotask();
+    this.injectBufferedScripts();
   }
   takeAll() {
-    const bufferedScripts = this._queue;
-    this._queue = [];
+    return this.takeScripts(this._queue.length);
+  }
+  takeScripts(count) {
+    if (count <= 0) return void 0;
+    const bufferedScripts = this._queue.splice(0, count);
     if (bufferedScripts.length === 0) return;
     if (bufferedScripts.length === 1) return bufferedScripts[0] + ";document.currentScript.remove()";
     return bufferedScripts.join(";") + ";document.currentScript.remove()";
+  }
+  hasPending() {
+    return this._queue.length > 0;
   }
   injectBufferedScripts() {
     if (this._cleanedUp) return;
     if (this._queue.length === 0) return;
     const scriptsToInject = this.takeAll();
-    if (scriptsToInject && this.router?.serverSsr) this.router.serverSsr.injectScript(scriptsToInject);
+    if (scriptsToInject) this.injectScript?.(scriptsToInject);
   }
   cleanup() {
     this._cleanedUp = true;
+    this.clearPendingMicrotask();
     this._queue = [];
-    this.router = void 0;
+    this.injectScript = void 0;
   }
 };
-var MANIFEST_CACHE_SIZE = 100;
-var manifestCaches = /* @__PURE__ */ new WeakMap();
-var inlineCssCaches = /* @__PURE__ */ new WeakMap();
+const MANIFEST_CACHE_SIZE = 100;
+const manifestCaches = /* @__PURE__ */ new WeakMap();
 function getManifestCache(manifest) {
   const cache = manifestCaches.get(manifest);
   if (cache) return cache;
@@ -3695,101 +3692,178 @@ function getManifestCache(manifest) {
   manifestCaches.set(manifest, newCache);
   return newCache;
 }
-function getInlineCssCache(manifest) {
-  const cache = inlineCssCaches.get(manifest);
-  if (cache) return cache;
-  const newCache = createLRUCache(MANIFEST_CACHE_SIZE);
-  inlineCssCaches.set(manifest, newCache);
-  return newCache;
-}
-function getInlineCssHrefsForMatches(manifest, matches) {
-  const styles = manifest?.inlineCss?.styles;
-  if (!styles) return [];
-  const seen = /* @__PURE__ */ new Set();
-  const hrefs = [];
-  for (const match of matches) {
-    const assets = manifest?.routes[match.routeId]?.assets ?? [];
-    for (const asset of assets) {
-      const href = getStylesheetHref(asset);
-      if (!href || seen.has(href) || styles[href] === void 0) continue;
-      seen.add(href);
-      hrefs.push(href);
-    }
-  }
-  return hrefs;
-}
-function getInlineCssForHrefs(manifest, hrefs) {
+function getInlineCssForPreparedRoutes(manifest, preparedRoutes) {
+  if (preparedRoutes.inlineCss !== void 0) return preparedRoutes.inlineCss;
   const styles = manifest.inlineCss?.styles;
-  if (!styles || hrefs.length === 0) return void 0;
-  const cacheKey = hrefs.join("\0");
-  {
-    const cached = getInlineCssCache(manifest).get(cacheKey);
-    if (cached !== void 0) return cached;
-  }
-  const css = hrefs.map((href) => styles[href]).join("");
-  getInlineCssCache(manifest).set(cacheKey, css);
+  const hrefs = preparedRoutes.inlineCssHrefs;
+  if (!styles || !hrefs?.length) return void 0;
+  let css = "";
+  for (const href of hrefs) css += styles[href];
+  preparedRoutes.inlineCss = css;
   return css;
 }
-function getInlineCssAssetForMatches(manifest, matches) {
-  if (!manifest?.inlineCss) return void 0;
-  const css = getInlineCssForHrefs(manifest, getInlineCssHrefsForMatches(manifest, matches));
+function getInlineCssAssetForPreparedRoutes(manifest, preparedRoutes) {
+  const css = getInlineCssForPreparedRoutes(manifest, preparedRoutes);
   return css === void 0 ? void 0 : createInlineCssStyleAsset(css);
 }
-function stripInlinedStylesheetAssets(manifest, routes, matches) {
-  if (!manifest.inlineCss) return routes;
-  const nextRoutes = {};
-  for (const [routeId, route] of Object.entries(routes)) {
-    const assets = route.assets?.filter((asset) => !isInlinableStylesheet(manifest, asset));
-    const nextRoute = { ...route };
-    if (assets) if (assets.length > 0) nextRoute.assets = assets;
-    else delete nextRoute.assets;
-    nextRoutes[routeId] = nextRoute;
+function getMatchedRoutesCacheKey(matches) {
+  let cacheKey = "";
+  for (let i = 0; i < matches.length; i++) cacheKey += (i === 0 ? "" : "\0") + matches[i].routeId;
+  return cacheKey;
+}
+function getPreparedMatchedManifestRoutes(manifest, matches, cacheKey) {
+  {
+    const cached = getManifestCache(manifest).get(cacheKey);
+    if (cached) return cached;
   }
-  if (getInlineCssAssetForMatches(manifest, matches)) {
-    const rootRoute = nextRoutes["__root__"] ?? {};
-    nextRoutes[rootRouteId] = {
-      ...rootRoute,
-      assets: [createInlineCssPlaceholderAsset(), ...rootRoute.assets ?? []]
+  const preparedRoutes = prepareMatchedManifestRoutes(manifest, matches);
+  getManifestCache(manifest).set(cacheKey, preparedRoutes);
+  return preparedRoutes;
+}
+function prepareMatchedManifestRoutes(manifest, matches) {
+  const inlineStyles = manifest.inlineCss?.styles;
+  const routes = {};
+  if (!inlineStyles) {
+    for (const match of matches) {
+      const route = manifest.routes[match.routeId];
+      if (route) routes[match.routeId] = route;
+    }
+    return {
+      routes,
+      hasStrippedRoutes: false
     };
   }
-  return nextRoutes;
+  const inlineCssHrefs = [];
+  const seenInlineCssHrefs = /* @__PURE__ */ new Set();
+  let hasStrippedRoutes = false;
+  for (const match of matches) {
+    const routeId = match.routeId;
+    const route = manifest.routes[routeId];
+    if (!route) continue;
+    const nextRoute = stripInlinedStylesheetAssetsFromRoute(inlineStyles, route, inlineCssHrefs, seenInlineCssHrefs);
+    if (nextRoute !== route) hasStrippedRoutes = true;
+    routes[routeId] = nextRoute;
+  }
+  return {
+    routes,
+    hasStrippedRoutes,
+    ...inlineCssHrefs.length ? { inlineCssHrefs } : {}
+  };
 }
-function attachRouterServerSsrUtils({ router, manifest, getRequestAssets, includeUnmatchedRouteAssets = true }) {
+function stripInlinedStylesheetAssetsFromRoute(inlineStyles, route, inlineCssHrefs, seenInlineCssHrefs) {
+  const css = route.css;
+  if (!css) return route;
+  if (css.length === 0) {
+    const nextRoute2 = { ...route };
+    delete nextRoute2.css;
+    return nextRoute2;
+  }
+  let cssLinks;
+  for (let i = 0; i < css.length; i++) {
+    const link = css[i];
+    const href = getStylesheetHref(link);
+    if (inlineStyles[href] === void 0) {
+      if (cssLinks) cssLinks.push(link);
+      continue;
+    }
+    if (!seenInlineCssHrefs.has(href)) {
+      seenInlineCssHrefs.add(href);
+      inlineCssHrefs.push(href);
+    }
+    if (!cssLinks) cssLinks = css.slice(0, i);
+  }
+  if (!cssLinks) return route;
+  if (cssLinks.length > 0) return {
+    ...route,
+    css: cssLinks
+  };
+  const nextRoute = { ...route };
+  delete nextRoute.css;
+  return nextRoute;
+}
+function hasRouteAssets(route) {
+  return !!route.scripts?.length || !!route.css?.length;
+}
+function hasRequestAssets(assets) {
+  return !!assets && (!!assets.preloads?.length || hasRouteAssets(assets));
+}
+function mergeRequestAssetsIntoRootRoute(rootRoute, requestAssets) {
+  const preloads = requestAssets?.preloads?.length ? [...requestAssets.preloads, ...rootRoute?.preloads ?? []] : rootRoute?.preloads;
+  const scripts = requestAssets?.scripts?.length ? [...requestAssets.scripts, ...rootRoute?.scripts ?? []] : rootRoute?.scripts;
+  const cssLinks = requestAssets?.css?.length ? [...requestAssets.css, ...rootRoute?.css ?? []] : rootRoute?.css;
+  return {
+    ...rootRoute ?? {},
+    ...preloads?.length ? { preloads } : {},
+    ...scripts?.length ? { scripts } : {},
+    ...cssLinks?.length ? { css: cssLinks } : {}
+  };
+}
+function attachRouterServerSsrUtils({ router, manifest, getRequestAssets }) {
   router.ssr = { get manifest() {
+    if (!manifest) return manifest;
     const requestAssets = getRequestAssets?.();
-    const inlineCssAsset = getInlineCssAssetForMatches(manifest, router.stores.matches.get());
-    if (!requestAssets?.length && !inlineCssAsset) return manifest;
+    const matches = router.stores.matches.get();
+    const hasAssets = hasRequestAssets(requestAssets);
+    if (!hasAssets && !manifest.inlineCss) return manifest;
+    let inlineCssAsset;
+    let routes = manifest.routes;
+    if (manifest.inlineCss) {
+      const preparedManifest = getPreparedMatchedManifestRoutes(manifest, matches, getMatchedRoutesCacheKey(matches));
+      inlineCssAsset = getInlineCssAssetForPreparedRoutes(manifest, preparedManifest);
+      if (preparedManifest.hasStrippedRoutes) routes = {
+        ...manifest.routes,
+        ...preparedManifest.routes
+      };
+    }
+    if (!hasAssets) return {
+      ...manifest.scriptFormat ? { scriptFormat: manifest.scriptFormat } : {},
+      ...inlineCssAsset ? { inlineStyle: inlineCssAsset } : {},
+      routes
+    };
+    const rootRoute = routes[rootRouteId];
     return {
-      ...manifest,
+      ...manifest.scriptFormat ? { scriptFormat: manifest.scriptFormat } : {},
+      ...inlineCssAsset ? { inlineStyle: inlineCssAsset } : {},
       routes: {
-        ...manifest?.routes,
-        [rootRouteId]: {
-          ...manifest?.routes?.[rootRouteId],
-          assets: [
-            ...requestAssets ?? [],
-            ...inlineCssAsset ? [inlineCssAsset] : [],
-            ...manifest?.routes?.["__root__"]?.assets ?? []
-          ]
-        }
+        ...routes,
+        [rootRouteId]: mergeRequestAssetsIntoRootRoute(rootRoute, requestAssets)
       }
     };
   } };
   let _dehydrated = false;
   let _serializationFinished = false;
+  let streamFastPathReserved = false;
   const renderFinishedListeners = [];
+  const injectedHtmlListeners = [];
   const serializationFinishedListeners = [];
-  const scriptBuffer = new ScriptBuffer(router);
+  const cleanupListeners = [];
+  let cleanupStarted = false;
   let injectedHtmlBuffer = "";
-  router.serverSsr = {
+  const callListeners = (listeners, errorPrefix) => {
+    const snapshot = listeners.slice();
+    for (const l of snapshot) try {
+      l();
+    } catch (err) {
+      console.error(`${errorPrefix}:`, err);
+    }
+  };
+  const removeListener = (listeners, listener) => {
+    const index = listeners.indexOf(listener);
+    if (index >= 0) listeners.splice(index, 1);
+  };
+  const scriptBuffer = new ScriptBuffer((script) => {
+    serverSsr.injectScript(script);
+  });
+  const serverSsr = {
     injectHtml: (html) => {
-      if (!html) return;
+      if (!html || cleanupStarted) return;
       injectedHtmlBuffer += html;
-      router.emit({ type: "onInjectedHtml" });
+      callListeners(injectedHtmlListeners, "SSR injected HTML listener error");
     },
     injectScript: (script) => {
-      if (!script) return;
+      if (!script || cleanupStarted) return;
       const html = `<script${router.options.ssr?.nonce ? ` nonce='${router.options.ssr.nonce}'` : ""}>${script}<\/script>`;
-      router.serverSsr.injectHtml(html);
+      serverSsr.injectHtml(html);
     },
     dehydrate: async (opts) => {
       if (_dehydrated) {
@@ -3800,27 +3874,19 @@ function attachRouterServerSsrUtils({ router, manifest, getRequestAssets, includ
       const matches = matchesToDehydrate.map(dehydrateMatch);
       let manifestToDehydrate = void 0;
       if (manifest) {
-        const currentRouteIdsList = matchesToDehydrate.map((m) => m.routeId);
-        const manifestCacheKey = `${currentRouteIdsList.join("\0")}\0includeUnmatchedRouteAssets=${includeUnmatchedRouteAssets}`;
-        let filteredRoutes;
-        filteredRoutes = getManifestCache(manifest).get(manifestCacheKey);
-        if (!filteredRoutes) {
-          const currentRouteIds = new Set(currentRouteIdsList);
-          const nextFilteredRoutes = {};
-          for (const routeId in manifest.routes) {
-            const routeManifest = manifest.routes[routeId];
-            if (currentRouteIds.has(routeId)) nextFilteredRoutes[routeId] = routeManifest;
-            else if (includeUnmatchedRouteAssets && routeManifest.assets && routeManifest.assets.length > 0) nextFilteredRoutes[routeId] = { assets: routeManifest.assets };
-          }
-          filteredRoutes = stripInlinedStylesheetAssets(manifest, nextFilteredRoutes, matchesToDehydrate);
-          getManifestCache(manifest).set(manifestCacheKey, filteredRoutes);
-        }
-        manifestToDehydrate = { routes: { ...filteredRoutes } };
-        if (opts?.requestAssets?.length) {
+        const cacheKey = getMatchedRoutesCacheKey(matchesToDehydrate);
+        const preparedManifest = getPreparedMatchedManifestRoutes(manifest, matchesToDehydrate, cacheKey);
+        manifestToDehydrate = {
+          ...manifest.scriptFormat ? { scriptFormat: manifest.scriptFormat } : {},
+          ...preparedManifest.inlineCssHrefs ? { inlineStyle: createInlineCssPlaceholderAsset() } : {},
+          routes: preparedManifest.routes
+        };
+        const requestAssets = opts?.requestAssets;
+        if (hasRequestAssets(requestAssets)) {
           const existingRoot = manifestToDehydrate.routes[rootRouteId];
-          manifestToDehydrate.routes[rootRouteId] = {
-            ...existingRoot,
-            assets: [...opts.requestAssets, ...existingRoot?.assets ?? []]
+          manifestToDehydrate.routes = {
+            ...manifestToDehydrate.routes,
+            [rootRouteId]: mergeRequestAssetsIntoRootRoute(existingRoot, requestAssets)
           };
         }
       }
@@ -3836,19 +3902,26 @@ function attachRouterServerSsrUtils({ router, manifest, getRequestAssets, includ
       const trackPlugins = { didRun: false };
       const serializationAdapters = router.options.serializationAdapters;
       const plugins = serializationAdapters ? serializationAdapters.map((t) => /* @__PURE__ */ makeSsrSerovalPlugin(t, trackPlugins)).concat(defaultSerovalPlugins) : defaultSerovalPlugins;
+      let serializationCompleteSignaled = false;
       const signalSerializationComplete = () => {
+        if (serializationCompleteSignaled || cleanupStarted) return;
+        serializationCompleteSignaled = true;
         _serializationFinished = true;
-        try {
-          serializationFinishedListeners.forEach((l) => l());
-          router.emit({ type: "onSerializationFinished" });
+        const listeners = serializationFinishedListeners.slice();
+        serializationFinishedListeners.length = 0;
+        for (const l of listeners) try {
+          l();
         } catch (err) {
           console.error("Serialization listener error:", err);
-        } finally {
-          serializationFinishedListeners.length = 0;
-          renderFinishedListeners.length = 0;
         }
       };
-      cn(dehydratedRouter, {
+      const finishScriptSerialization = () => {
+        if (serializationCompleteSignaled || cleanupStarted) return;
+        scriptBuffer.enqueue(GLOBAL_TSR + ".e()");
+        scriptBuffer.flush();
+        signalSerializationComplete();
+      };
+      Sn(dehydratedRouter, {
         refs: /* @__PURE__ */ new Map(),
         plugins,
         onSerialize: (data, initial) => {
@@ -3859,13 +3932,11 @@ function attachRouterServerSsrUtils({ router, manifest, getRequestAssets, includ
         onError: (err) => {
           console.error("Serialization error:", err);
           if (err && err.stack) console.error(err.stack);
-          signalSerializationComplete();
+          finishScriptSerialization();
         },
         scopeId: SCOPE_ID,
         onDone: () => {
-          scriptBuffer.enqueue(GLOBAL_TSR + ".e()");
-          scriptBuffer.flush();
-          signalSerializationComplete();
+          finishScriptSerialization();
         }
       });
     },
@@ -3875,20 +3946,57 @@ function attachRouterServerSsrUtils({ router, manifest, getRequestAssets, includ
     isSerializationFinished() {
       return _serializationFinished;
     },
-    onRenderFinished: (listener) => renderFinishedListeners.push(listener),
-    onSerializationFinished: (listener) => serializationFinishedListeners.push(listener),
+    reserveStreamFastPath() {
+      if (!cleanupStarted && _serializationFinished && !streamFastPathReserved && renderFinishedListeners.length === 0 && !injectedHtmlBuffer && !scriptBuffer.hasPending()) {
+        streamFastPathReserved = true;
+        return true;
+      }
+      return false;
+    },
+    onInjectedHtml: (listener) => {
+      if (cleanupStarted) return () => {
+      };
+      injectedHtmlListeners.push(listener);
+      return () => removeListener(injectedHtmlListeners, listener);
+    },
+    onRenderFinished: (listener) => {
+      if (cleanupStarted || streamFastPathReserved) return;
+      renderFinishedListeners.push(listener);
+    },
+    onSerializationFinished: (listener) => {
+      if (cleanupStarted) return () => {
+      };
+      if (_serializationFinished && !cleanupStarted) {
+        try {
+          listener();
+        } catch (err) {
+          console.error("Serialization listener error:", err);
+        }
+        return () => {
+        };
+      }
+      serializationFinishedListeners.push(listener);
+      return () => removeListener(serializationFinishedListeners, listener);
+    },
+    onCleanup: (listener) => {
+      if (cleanupStarted) return;
+      cleanupListeners.push(listener);
+    },
     setRenderFinished: () => {
-      try {
-        renderFinishedListeners.forEach((l) => l());
+      if (cleanupStarted) return;
+      scriptBuffer.liftBarrier();
+      const listeners = renderFinishedListeners.slice();
+      renderFinishedListeners.length = 0;
+      for (const l of listeners) try {
+        l();
       } catch (err) {
         console.error("Error in render finished listener:", err);
-      } finally {
-        renderFinishedListeners.length = 0;
       }
-      scriptBuffer.liftBarrier();
+      if (_serializationFinished) scriptBuffer.flush();
     },
     takeBufferedScripts() {
       const scripts = scriptBuffer.takeAll();
+      if (!scripts) return void 0;
       return {
         tag: "script",
         attrs: {
@@ -3909,14 +4017,29 @@ function attachRouterServerSsrUtils({ router, manifest, getRequestAssets, includ
       return buffered;
     },
     cleanup() {
-      if (!router.serverSsr) return;
+      if (cleanupStarted) return;
+      cleanupStarted = true;
+      const listeners = cleanupListeners.slice();
+      cleanupListeners.length = 0;
+      for (const l of listeners) try {
+        l();
+      } catch (err) {
+        console.error("Error in SSR cleanup listener:", err);
+      }
       renderFinishedListeners.length = 0;
+      injectedHtmlListeners.length = 0;
       serializationFinishedListeners.length = 0;
       injectedHtmlBuffer = "";
       scriptBuffer.cleanup();
       router.serverSsr = void 0;
     }
   };
+  router.serverSsr = serverSsr;
+  for (const listener of router.serverSsrLifecycle?.onServerSsrAttach ?? []) try {
+    listener(serverSsr);
+  } catch (err) {
+    console.error("SSR attach listener error:", err);
+  }
 }
 function getOrigin(request) {
   try {
@@ -3936,163 +4059,349 @@ function getNormalizedURL(url, base) {
     handledProtocolRelativeURL
   };
 }
+function isSsrResponse(value) {
+  return typeof value === "object" && value !== null && "response" in value && "serverSsrCleanup" in value;
+}
+function normalizeSsrResponse(result) {
+  return isSsrResponse(result) ? result : {
+    response: result,
+    serverSsrCleanup: "none"
+  };
+}
+function createSsrStreamResponse(router, response) {
+  if (!response.body) throw new Error("Invariant failed: SSR stream response requires a body");
+  let disposed = false;
+  return {
+    response,
+    serverSsrCleanup: "stream",
+    async dispose(reason) {
+      if (disposed) return;
+      disposed = true;
+      try {
+        await response.body.cancel(reason);
+      } catch {
+      }
+      router.serverSsr?.cleanup();
+    }
+  };
+}
+async function replaceSsrResponse(result, response, reason) {
+  const ssrResponse = normalizeSsrResponse(result);
+  if (ssrResponse.serverSsrCleanup === "stream") await ssrResponse.dispose(reason);
+  return {
+    response,
+    serverSsrCleanup: "none"
+  };
+}
+async function stripSsrResponseBody(result, reason) {
+  const ssrResponse = normalizeSsrResponse(result);
+  if (ssrResponse.serverSsrCleanup === "stream") await ssrResponse.dispose(reason);
+  return {
+    response: new Response(null, ssrResponse.response),
+    serverSsrCleanup: "none"
+  };
+}
 function defineHandlerCallback(handler) {
   return handler;
 }
-function transformReadableStreamWithRouter(router, routerStream) {
-  return transformStreamWithRouter(router, routerStream);
+function transformReadableStreamWithRouter(router, routerStream, opts) {
+  return transformStreamWithRouter(router, routerStream, opts);
 }
-function transformPipeableStreamWithRouter(router, routerStream) {
-  return Readable.fromWeb(transformStreamWithRouter(router, Readable.toWeb(routerStream)));
+function transformPipeableStreamWithRouter(router, routerStream, opts) {
+  return Readable.fromWeb(transformStreamWithRouter(router, Readable.toWeb(routerStream), opts));
 }
-var BODY_END_TAG = "</body>";
-var HTML_END_TAG = "</html>";
-var MIN_CLOSING_TAG_LENGTH = 4;
-var DEFAULT_SERIALIZATION_TIMEOUT_MS = 6e4;
-var DEFAULT_LIFETIME_TIMEOUT_MS = 6e4;
-var textEncoder = new TextEncoder();
-function findLastClosingTagEnd(str) {
-  const len = str.length;
-  if (len < MIN_CLOSING_TAG_LENGTH) return -1;
-  let i = len - 1;
-  while (i >= MIN_CLOSING_TAG_LENGTH - 1) {
-    if (str.charCodeAt(i) === 62) {
-      let j = i - 1;
-      while (j >= 1) {
-        const code = str.charCodeAt(j);
-        if (code >= 97 && code <= 122 || code >= 65 && code <= 90 || code >= 48 && code <= 57 || code === 95 || code === 58 || code === 46 || code === 45) j--;
-        else break;
-      }
-      const tagNameStart = j + 1;
-      if (tagNameStart < i) {
-        const startCode = str.charCodeAt(tagNameStart);
-        if (startCode >= 97 && startCode <= 122 || startCode >= 65 && startCode <= 90) {
-          if (j >= 1 && str.charCodeAt(j) === 47 && str.charCodeAt(j - 1) === 60) return i + 1;
+const MIN_CLOSING_TAG_LENGTH = 4;
+const DEFAULT_SERIALIZATION_TIMEOUT_MS = 6e4;
+const DEFAULT_LIFETIME_TIMEOUT_MS = DEFAULT_SERIALIZATION_TIMEOUT_MS * 2;
+const MAX_LEFTOVER_CHARS = 2048;
+const MAX_TAIL_CHARS = 64 * 1024;
+const MAX_ROUTER_HTML_CHARS = 16 * 1024 * 1024;
+const MAX_PENDING_WRITE_CHARS = 16 * 1024 * 1024;
+const MergeState = {
+  ReadingBody: 0,
+  HoldingTail: 1,
+  AppDone: 2,
+  Draining: 3,
+  Done: 4
+};
+const textEncoder = new TextEncoder();
+const noop = () => {
+};
+const resolvedPromise = Promise.resolve();
+function findHtmlBoundary(str) {
+  let lastClosingTagEnd = -1;
+  let searchFrom = str.length - MIN_CLOSING_TAG_LENGTH;
+  while (searchFrom >= 0) {
+    const openSlash = str.lastIndexOf("</", searchFrom);
+    if (openSlash === -1) break;
+    if ((str.charCodeAt(openSlash + 2) | 32) === 98 && (str.charCodeAt(openSlash + 3) | 32) === 111 && (str.charCodeAt(openSlash + 4) | 32) === 100 && (str.charCodeAt(openSlash + 5) | 32) === 121 && str.charCodeAt(openSlash + 6) === 62) return -openSlash - 2;
+    if (lastClosingTagEnd === -1) {
+      let i = openSlash + 2;
+      const startCode = str.charCodeAt(i);
+      if (startCode >= 97 && startCode <= 122 || startCode >= 65 && startCode <= 90) {
+        i++;
+        while (i < str.length) {
+          const code = str.charCodeAt(i);
+          if (code >= 97 && code <= 122 || code >= 65 && code <= 90 || code >= 48 && code <= 57 || code === 95 || code === 58 || code === 46 || code === 45) i++;
+          else break;
         }
+        if (str.charCodeAt(i) === 62) lastClosingTagEnd = i + 1;
       }
     }
-    i--;
+    searchFrom = openSlash - 1;
   }
-  return -1;
+  return lastClosingTagEnd;
+}
+function safeReleaseReader(reader) {
+  try {
+    reader.releaseLock();
+    return true;
+  } catch {
+    return false;
+  }
+}
+function safeCancelReader(reader, reason) {
+  let cancelPromise;
+  try {
+    cancelPromise = reader.cancel(reason);
+  } catch {
+  }
+  if (!safeReleaseReader(reader) && cancelPromise) return cancelPromise.then(noop, noop).then(() => {
+    safeReleaseReader(reader);
+  });
+  return cancelPromise ? cancelPromise.then(noop, noop) : resolvedPromise;
+}
+function createReaderState(appStream) {
+  const reader = appStream.getReader();
+  let released = false;
+  return {
+    reader,
+    cancel: (reason) => {
+      if (released) return resolvedPromise;
+      released = true;
+      return safeCancelReader(reader, reason);
+    },
+    release: () => {
+      if (released) return;
+      released = true;
+      safeReleaseReader(reader);
+    }
+  };
+}
+function createAbortNotifier(opts) {
+  let abortNotified = false;
+  return (reason) => {
+    if (abortNotified) return;
+    abortNotified = true;
+    try {
+      opts?.onAbort?.(reason);
+    } catch {
+    }
+  };
 }
 function transformStreamWithRouter(router, appStream, opts) {
-  const serializationAlreadyFinished = router.serverSsr?.isSerializationFinished() ?? false;
-  const initialBufferedHtml = router.serverSsr?.takeBufferedHtml();
-  if (serializationAlreadyFinished && !initialBufferedHtml) {
-    let cleanedUp2 = false;
-    let controller2;
-    let isStreamClosed2 = false;
-    let lifetimeTimeoutHandle2;
-    const cleanup2 = () => {
-      if (cleanedUp2) return;
-      cleanedUp2 = true;
-      if (lifetimeTimeoutHandle2 !== void 0) {
-        clearTimeout(lifetimeTimeoutHandle2);
-        lifetimeTimeoutHandle2 = void 0;
-      }
-      router.serverSsr?.cleanup();
-    };
-    const safeClose2 = () => {
-      if (isStreamClosed2) return;
-      isStreamClosed2 = true;
+  const serverSsr = router.serverSsr;
+  if (!serverSsr) throw new Error("Invariant failed: router.serverSsr is required");
+  if (serverSsr.reserveStreamFastPath()) return makeFastPathStream(appStream, opts, serverSsr);
+  return makeMainStream(serverSsr, appStream, opts);
+}
+function makeFastPathStream(appStream, opts, serverSsr) {
+  let cleanedUp = false;
+  let controller;
+  let state = MergeState.ReadingBody;
+  let lifetimeTimeoutHandle;
+  let stopListeningToInjectedHtml;
+  const readerState = createReaderState(appStream);
+  const notifyAbort = createAbortNotifier(opts);
+  const isDone = () => state === MergeState.Done;
+  let renderFinished = false;
+  const finishSsrRendering = () => {
+    if (!serverSsr || renderFinished) return true;
+    renderFinished = true;
+    try {
+      serverSsr.setRenderFinished();
+      return true;
+    } catch (error) {
+      safeError(error);
+      cleanup(error);
+      return false;
+    }
+  };
+  const cleanup = (reason, cancelReader = true) => {
+    if (cleanedUp) return resolvedPromise;
+    cleanedUp = true;
+    if (lifetimeTimeoutHandle !== void 0) {
+      clearTimeout(lifetimeTimeoutHandle);
+      lifetimeTimeoutHandle = void 0;
+    }
+    try {
+      stopListeningToInjectedHtml?.();
+    } catch {
+    }
+    stopListeningToInjectedHtml = void 0;
+    if (cancelReader) notifyAbort(reason);
+    const readerDone = cancelReader ? readerState.cancel(reason) : (readerState.release(), resolvedPromise);
+    if (serverSsr) try {
+      serverSsr.cleanup();
+    } catch (error) {
+      console.error("Error in SSR cleanup:", error);
+    }
+    return readerDone;
+  };
+  const safeClose = () => {
+    if (isDone()) return;
+    state = MergeState.Done;
+    try {
+      controller?.close();
+    } catch {
+    }
+  };
+  const safeError = (error) => {
+    if (isDone()) return;
+    state = MergeState.Done;
+    try {
+      controller?.error(error);
+    } catch {
+    }
+  };
+  if (serverSsr) stopListeningToInjectedHtml = serverSsr.onInjectedHtml(() => {
+    const err = /* @__PURE__ */ new Error("SSR router HTML injected during fast path");
+    safeError(err);
+    cleanup(err);
+  });
+  const lifetimeMs = opts?.lifetimeMs ?? DEFAULT_LIFETIME_TIMEOUT_MS;
+  lifetimeTimeoutHandle = setTimeout(() => {
+    if (!cleanedUp && !isDone()) {
+      const err = /* @__PURE__ */ new Error("Stream lifetime exceeded");
+      console.warn(`SSR stream transform exceeded maximum lifetime (${lifetimeMs}ms), forcing cleanup`);
+      safeError(err);
+      cleanup(err);
+    }
+  }, lifetimeMs);
+  return new ReadableStream$1({
+    start(c) {
+      controller = c;
+    },
+    async pull(c) {
+      if (cleanedUp || isDone()) return;
       try {
-        controller2?.close();
-      } catch {
-      }
-    };
-    const safeError2 = (error) => {
-      if (isStreamClosed2) return;
-      isStreamClosed2 = true;
-      try {
-        controller2?.error(error);
-      } catch {
-      }
-    };
-    const lifetimeMs2 = DEFAULT_LIFETIME_TIMEOUT_MS;
-    lifetimeTimeoutHandle2 = setTimeout(() => {
-      if (!cleanedUp2 && !isStreamClosed2) {
-        console.warn(`SSR stream transform exceeded maximum lifetime (${lifetimeMs2}ms), forcing cleanup`);
-        safeError2(/* @__PURE__ */ new Error("Stream lifetime exceeded"));
-        cleanup2();
-      }
-    }, lifetimeMs2);
-    const stream2 = new ReadableStream$1({
-      start(c) {
-        controller2 = c;
-      },
-      cancel() {
-        isStreamClosed2 = true;
-        cleanup2();
-      }
-    });
-    (async () => {
-      const reader = appStream.getReader();
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (cleanedUp2 || isStreamClosed2) return;
-          controller2?.enqueue(value);
+        const { done, value } = await readerState.reader.read();
+        if (!done) {
+          if (!cleanedUp && !isDone()) c.enqueue(value);
+          return;
         }
-        if (cleanedUp2 || isStreamClosed2) return;
-        router.serverSsr?.setRenderFinished();
-        safeClose2();
-        cleanup2();
+        if (cleanedUp || isDone()) return;
+        if (!finishSsrRendering()) return;
+        safeClose();
+        return cleanup(void 0, false);
       } catch (error) {
-        if (cleanedUp2) return;
+        if (cleanedUp) return;
         console.error("Error reading appStream:", error);
-        router.serverSsr?.setRenderFinished();
-        safeError2(error);
-        cleanup2();
+        if (state < MergeState.AppDone) try {
+          serverSsr?.setRenderFinished();
+        } catch {
+        }
+        safeError(error);
+        return cleanup(error);
       } finally {
-        reader.releaseLock();
+        if (cleanedUp || isDone()) readerState.release();
       }
-    })().catch((error) => {
-      if (cleanedUp2) return;
-      console.error("Error in stream transform:", error);
-      safeError2(error);
-      cleanup2();
-    });
-    return stream2;
-  }
+    },
+    cancel(reason) {
+      state = MergeState.Done;
+      return cleanup(reason);
+    }
+  });
+}
+function makeMainStream(serverSsr, appStream, opts) {
   let stopListeningToInjectedHtml;
   let stopListeningToSerializationFinished;
   let serializationTimeoutHandle;
   let lifetimeTimeoutHandle;
   let cleanedUp = false;
   let controller;
-  let isStreamClosed = false;
-  const textDecoder = new TextDecoder();
-  let pendingRouterHtml = initialBufferedHtml ?? "";
-  let leftover = "";
-  let pendingClosingTags = "";
-  const MAX_LEFTOVER_CHARS = 2048;
-  let isAppRendering = true;
-  let streamBarrierLifted = false;
-  let serializationFinished = serializationAlreadyFinished;
-  function safeEnqueue(chunk) {
-    if (isStreamClosed) return;
-    if (typeof chunk === "string") controller.enqueue(textEncoder.encode(chunk));
-    else controller.enqueue(chunk);
+  let closeWhenDrained = false;
+  let state = MergeState.ReadingBody;
+  const readerState = createReaderState(appStream);
+  const notifyAbort = createAbortNotifier(opts);
+  const pendingWrites = [];
+  let pendingWriteHead = 0;
+  let pendingWriteChars = 0;
+  function clearPending() {
+    pendingWrites.length = 0;
+    pendingWriteHead = 0;
+    pendingWriteChars = 0;
+  }
+  let drainResolve = null;
+  const waitForDrain = () => new Promise((r) => {
+    drainResolve = r;
+  });
+  const signalDrain = () => {
+    if (drainResolve) {
+      const r = drainResolve;
+      drainResolve = null;
+      r();
+    }
+  };
+  const isDone = () => state === MergeState.Done;
+  function drainPending() {
+    if (!controller || isDone()) return;
+    while (pendingWriteHead < pendingWrites.length) {
+      const ds = controller.desiredSize;
+      if (ds !== null && ds <= 0) return;
+      const next = pendingWrites[pendingWriteHead];
+      pendingWrites[pendingWriteHead] = "";
+      pendingWriteHead++;
+      pendingWriteChars -= next.length;
+      try {
+        controller.enqueue(textEncoder.encode(next));
+      } catch (error) {
+        safeError(error);
+        cleanup(error);
+        return;
+      }
+    }
+    if (pendingWriteHead >= pendingWrites.length) {
+      pendingWrites.length = 0;
+      pendingWriteHead = 0;
+    }
+    if (closeWhenDrained && pendingWriteHead >= pendingWrites.length) {
+      closeWhenDrained = false;
+      safeClose();
+      cleanup(void 0, false);
+    }
+  }
+  function writeChunk(chunk) {
+    if (cleanedUp || isDone()) return;
+    if (!chunk.length) return;
+    if (pendingWriteChars + chunk.length > MAX_PENDING_WRITE_CHARS) {
+      const err = /* @__PURE__ */ new Error("SSR stream pending output exceeded maximum buffer");
+      safeError(err);
+      cleanup(err);
+      return;
+    }
+    pendingWrites.push(chunk);
+    pendingWriteChars += chunk.length;
+    drainPending();
   }
   function safeClose() {
-    if (isStreamClosed) return;
-    isStreamClosed = true;
+    if (isDone()) return;
+    state = MergeState.Done;
     try {
-      controller.close();
+      controller?.close();
     } catch {
     }
   }
   function safeError(error) {
-    if (isStreamClosed) return;
-    isStreamClosed = true;
+    if (isDone()) return;
+    state = MergeState.Done;
     try {
-      controller.error(error);
+      controller?.error(error);
     } catch {
     }
   }
-  function cleanup() {
-    if (cleanedUp) return;
+  function cleanup(reason, cancelReader = true) {
+    if (cleanedUp) return resolvedPromise;
     cleanedUp = true;
     try {
       stopListeningToInjectedHtml?.();
@@ -4109,155 +4418,261 @@ function transformStreamWithRouter(router, appStream, opts) {
       clearTimeout(lifetimeTimeoutHandle);
       lifetimeTimeoutHandle = void 0;
     }
-    pendingRouterHtml = "";
+    clearPendingRouterHtml();
     leftover = "";
-    pendingClosingTags = "";
-    router.serverSsr?.cleanup();
+    pendingTail = "";
+    clearPending();
+    if (cancelReader) notifyAbort(reason);
+    const readerDone = cancelReader ? readerState.cancel(reason) : (readerState.release(), resolvedPromise);
+    signalDrain();
+    try {
+      serverSsr.cleanup();
+    } catch (error) {
+      console.error("Error in SSR cleanup:", error);
+    }
+    return readerDone;
+  }
+  const textDecoder = new TextDecoder();
+  const pendingRouterHtml = [];
+  let pendingRouterHtmlChars = 0;
+  let leftover = "";
+  let pendingTail = "";
+  let streamBarrierLifted = false;
+  let streamBarrierMarkerSeen = false;
+  let serializationFinished = false;
+  function noteBarrierMarker(chunk) {
+    if (streamBarrierMarkerSeen) return;
+    if (chunk.includes("$tsr-stream-barrier")) streamBarrierMarkerSeen = true;
+  }
+  function liftBarrierAfterBoundary() {
+    if (streamBarrierLifted) return;
+    if (!streamBarrierMarkerSeen) return;
+    streamBarrierLifted = true;
+    serverSsr.liftScriptBarrier();
   }
   const stream = new ReadableStream$1({
     start(c) {
       controller = c;
+      drainPending();
     },
-    cancel() {
-      isStreamClosed = true;
-      cleanup();
+    pull() {
+      drainPending();
+      signalDrain();
+    },
+    cancel(reason) {
+      state = MergeState.Done;
+      return cleanup(reason);
     }
   });
-  function flushPendingRouterHtml() {
-    if (!pendingRouterHtml) return;
-    safeEnqueue(pendingRouterHtml);
-    pendingRouterHtml = "";
-  }
-  function appendRouterHtml(html) {
+  function drainRouterHtml() {
+    if (cleanedUp || isDone()) return;
+    let html;
+    try {
+      html = serverSsr.takeBufferedHtml();
+    } catch (error) {
+      safeError(error);
+      cleanup(error);
+      return;
+    }
     if (!html) return;
-    pendingRouterHtml += html;
+    if (state >= MergeState.Draining) {
+      const err = /* @__PURE__ */ new Error("SSR router HTML injected after stream finalization");
+      safeError(err);
+      cleanup(err);
+      return;
+    }
+    if (state === MergeState.HoldingTail) {
+      flushPendingRouterHtml();
+      writeChunk(html);
+    } else {
+      if (pendingRouterHtmlChars + html.length > MAX_ROUTER_HTML_CHARS) {
+        const err = /* @__PURE__ */ new Error("SSR router HTML exceeded maximum buffer");
+        safeError(err);
+        cleanup(err);
+        return;
+      }
+      pendingRouterHtml.push(html);
+      pendingRouterHtmlChars += html.length;
+    }
+  }
+  function flushPendingRouterHtml() {
+    if (!pendingRouterHtml.length) return;
+    for (const html of pendingRouterHtml) writeChunk(html);
+    clearPendingRouterHtml();
+  }
+  function clearPendingRouterHtml() {
+    pendingRouterHtml.length = 0;
+    pendingRouterHtmlChars = 0;
+  }
+  function appendTail(chunk) {
+    pendingTail += chunk;
+    if (pendingTail.length > MAX_TAIL_CHARS) throw new Error("SSR stream tail exceeded maximum buffer");
+  }
+  function waitForBackpressure() {
+    return !!(controller && controller.desiredSize !== null && controller.desiredSize <= 0);
+  }
+  function startSerializationTimeout() {
+    if (cleanedUp || isDone()) return;
+    if (serializationTimeoutHandle !== void 0) return;
+    const timeoutMs2 = opts?.timeoutMs ?? DEFAULT_SERIALIZATION_TIMEOUT_MS;
+    serializationTimeoutHandle = setTimeout(() => {
+      if (!cleanedUp && !isDone()) {
+        const err = /* @__PURE__ */ new Error("Serialization timeout after app render finished");
+        console.error("Serialization timeout after app render finished");
+        safeError(err);
+        cleanup(err);
+      }
+    }, timeoutMs2);
   }
   function tryFinish() {
-    if (isAppRendering || !serializationFinished) return;
-    if (cleanedUp || isStreamClosed) return;
+    if (state !== MergeState.AppDone || !serializationFinished) return;
+    if (cleanedUp || isDone()) return;
     if (serializationTimeoutHandle !== void 0) {
       clearTimeout(serializationTimeoutHandle);
       serializationTimeoutHandle = void 0;
     }
+    drainRouterHtml();
+    if (cleanedUp || isDone()) return;
     const decoderRemainder = textDecoder.decode();
-    if (leftover) safeEnqueue(leftover);
-    if (decoderRemainder) safeEnqueue(decoderRemainder);
+    if (leftover) writeChunk(leftover);
+    if (cleanedUp || isDone()) return;
+    if (decoderRemainder) writeChunk(decoderRemainder);
+    if (cleanedUp || isDone()) return;
     flushPendingRouterHtml();
-    if (pendingClosingTags) safeEnqueue(pendingClosingTags);
-    safeClose();
-    cleanup();
+    if (cleanedUp || isDone()) return;
+    if (pendingTail) writeChunk(pendingTail);
+    if (cleanedUp || isDone()) return;
+    leftover = "";
+    pendingTail = "";
+    state = MergeState.Draining;
+    closeWhenDrained = true;
+    drainPending();
   }
-  const lifetimeMs = DEFAULT_LIFETIME_TIMEOUT_MS;
+  function finishAppRendering() {
+    if (state >= MergeState.AppDone) return;
+    state = MergeState.AppDone;
+    try {
+      serverSsr.setRenderFinished();
+    } catch (error) {
+      safeError(error);
+      cleanup(error);
+      return;
+    }
+    drainRouterHtml();
+    if (cleanedUp || isDone()) return;
+    serializationFinished = serializationFinished || serverSsr.isSerializationFinished();
+    if (serializationFinished) tryFinish();
+    else startSerializationTimeout();
+  }
+  const timeoutMs = opts?.timeoutMs ?? DEFAULT_SERIALIZATION_TIMEOUT_MS;
+  const lifetimeMs = opts?.lifetimeMs ?? timeoutMs * 2;
   lifetimeTimeoutHandle = setTimeout(() => {
-    if (!cleanedUp && !isStreamClosed) {
+    if (!cleanedUp && !isDone()) {
+      const err = /* @__PURE__ */ new Error("Stream lifetime exceeded");
       console.warn(`SSR stream transform exceeded maximum lifetime (${lifetimeMs}ms), forcing cleanup`);
-      safeError(/* @__PURE__ */ new Error("Stream lifetime exceeded"));
-      cleanup();
+      safeError(err);
+      cleanup(err);
     }
   }, lifetimeMs);
-  if (!serializationAlreadyFinished) {
-    stopListeningToInjectedHtml = router.subscribe("onInjectedHtml", () => {
-      if (cleanedUp || isStreamClosed) return;
-      const html = router.serverSsr?.takeBufferedHtml();
-      if (!html) return;
-      if (isAppRendering || leftover || pendingClosingTags) appendRouterHtml(html);
-      else {
-        flushPendingRouterHtml();
-        safeEnqueue(html);
-      }
-    });
-    stopListeningToSerializationFinished = router.subscribe("onSerializationFinished", () => {
-      serializationFinished = true;
-      tryFinish();
-    });
+  stopListeningToInjectedHtml = serverSsr.onInjectedHtml(() => {
+    drainRouterHtml();
+  });
+  stopListeningToSerializationFinished = serverSsr.onSerializationFinished(() => {
+    serializationFinished = true;
+    drainRouterHtml();
+    tryFinish();
+  });
+  drainRouterHtml();
+  if (cleanedUp || isDone()) return stream;
+  serializationFinished = serializationFinished || serverSsr.isSerializationFinished();
+  if (serializationFinished) {
+    drainRouterHtml();
+    if (cleanedUp || isDone()) return stream;
   }
   (async () => {
-    const reader = appStream.getReader();
     try {
       while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        if (cleanedUp || isStreamClosed) return;
-        const text = value instanceof Uint8Array ? textDecoder.decode(value, { stream: true }) : String(value);
-        const chunkString = leftover ? leftover + text : text;
-        if (!streamBarrierLifted) {
-          if (chunkString.includes("$tsr-stream-barrier")) {
-            streamBarrierLifted = true;
-            router.serverSsr?.liftScriptBarrier();
-          }
+        if (waitForBackpressure()) {
+          await waitForDrain();
+          if (cleanedUp || isDone()) return;
         }
-        if (pendingClosingTags) {
-          pendingClosingTags += chunkString;
+        const { done, value } = await readerState.reader.read();
+        if (done) break;
+        if (cleanedUp || isDone()) return;
+        const text = typeof value === "string" ? value : textDecoder.decode(value, { stream: true });
+        const chunkString = leftover ? leftover + text : text;
+        if (state >= MergeState.HoldingTail) {
+          appendTail(chunkString);
           leftover = "";
           continue;
         }
-        const bodyEndIndex = chunkString.indexOf(BODY_END_TAG);
-        const htmlEndIndex = chunkString.indexOf(HTML_END_TAG);
-        if (bodyEndIndex !== -1 && htmlEndIndex !== -1 && bodyEndIndex < htmlEndIndex) {
-          pendingClosingTags = chunkString.slice(bodyEndIndex);
-          safeEnqueue(chunkString.slice(0, bodyEndIndex));
+        const boundary = findHtmlBoundary(chunkString);
+        if (boundary < -1) {
+          const bodyEndIndex = -boundary - 2;
+          state = MergeState.HoldingTail;
+          appendTail(chunkString.slice(bodyEndIndex));
+          const bodyChunk = chunkString.slice(0, bodyEndIndex);
+          writeChunk(bodyChunk);
+          if (cleanedUp || isDone()) return;
+          noteBarrierMarker(bodyChunk);
+          liftBarrierAfterBoundary();
+          if (cleanedUp || isDone()) return;
           flushPendingRouterHtml();
           leftover = "";
           continue;
         }
-        const lastClosingTagEnd = findLastClosingTagEnd(chunkString);
+        const lastClosingTagEnd = boundary;
         if (lastClosingTagEnd > 0) {
-          safeEnqueue(chunkString.slice(0, lastClosingTagEnd));
+          const safeChunk = chunkString.slice(0, lastClosingTagEnd);
+          writeChunk(safeChunk);
+          if (cleanedUp || isDone()) return;
+          noteBarrierMarker(safeChunk);
+          liftBarrierAfterBoundary();
+          if (cleanedUp || isDone()) return;
           flushPendingRouterHtml();
           leftover = chunkString.slice(lastClosingTagEnd);
           if (leftover.length > MAX_LEFTOVER_CHARS) {
-            safeEnqueue(leftover.slice(0, leftover.length - MAX_LEFTOVER_CHARS));
-            leftover = leftover.slice(-MAX_LEFTOVER_CHARS);
+            noteBarrierMarker(leftover);
+            writeChunk(leftover.slice(0, leftover.length - MAX_LEFTOVER_CHARS));
+            leftover = leftover.slice(-2048);
           }
         } else {
           const combined = chunkString;
           if (combined.length > MAX_LEFTOVER_CHARS) {
+            noteBarrierMarker(combined);
             const flushUpto = combined.length - MAX_LEFTOVER_CHARS;
-            safeEnqueue(combined.slice(0, flushUpto));
+            writeChunk(combined.slice(0, flushUpto));
             leftover = combined.slice(flushUpto);
           } else leftover = combined;
         }
       }
-      if (cleanedUp || isStreamClosed) return;
-      isAppRendering = false;
-      router.serverSsr?.setRenderFinished();
-      if (serializationFinished) tryFinish();
-      else {
-        const timeoutMs = opts?.timeoutMs ?? DEFAULT_SERIALIZATION_TIMEOUT_MS;
-        serializationTimeoutHandle = setTimeout(() => {
-          if (!cleanedUp && !isStreamClosed) {
-            console.error("Serialization timeout after app render finished");
-            safeError(/* @__PURE__ */ new Error("Serialization timeout after app render finished"));
-            cleanup();
-          }
-        }, timeoutMs);
-      }
+      if (cleanedUp || isDone()) return;
+      finishAppRendering();
     } catch (error) {
       if (cleanedUp) return;
       console.error("Error reading appStream:", error);
-      isAppRendering = false;
-      router.serverSsr?.setRenderFinished();
+      if (state < MergeState.AppDone) try {
+        serverSsr.setRenderFinished();
+      } catch {
+      }
       safeError(error);
-      cleanup();
+      cleanup(error);
     } finally {
-      reader.releaseLock();
+      readerState.release();
     }
   })().catch((error) => {
     if (cleanedUp) return;
     console.error("Error in stream transform:", error);
     safeError(error);
-    cleanup();
+    cleanup(error);
   });
   return stream;
 }
-var scroll_restoration_inline_default = 'function(t){let s;try{s=JSON.parse(sessionStorage.getItem(t.storageKey)||"{}")}catch(e){console.error(e);return}const c=t.key||window.history.state?.__TSR_key,r=c?s[c]:void 0;if(t.shouldScrollRestoration&&r&&typeof r=="object"&&Object.keys(r).length>0){for(const e in r){const o=r[e];if(!o||typeof o!="object")continue;const l=o.scrollX,i=o.scrollY;if(!(!Number.isFinite(l)||!Number.isFinite(i))){if(e==="window")window.scrollTo({top:i,left:l,behavior:t.behavior});else if(e){let n;try{n=document.querySelector(e)}catch{continue}n&&(n.scrollLeft=l,n.scrollTop=i)}}}return}const a=window.location.hash.split("#",2)[1];if(a){const e=window.history.state?.__hashScrollIntoViewOptions??!0;if(e){const o=document.getElementById(a);o&&o.scrollIntoView(e)}return}window.scrollTo({top:0,left:0,behavior:t.behavior})}';
-var defaultInlineScrollRestorationScript = `(${scroll_restoration_inline_default})(${escapeHtml(JSON.stringify({
-  storageKey,
-  shouldScrollRestoration: true
-}))})`;
-function getScrollRestorationScript(options) {
-  if (options.storageKey === "tsr-scroll-restoration-v1_3" && options.shouldScrollRestoration === true && options.key === void 0 && options.behavior === void 0) return defaultInlineScrollRestorationScript;
-  return `(${scroll_restoration_inline_default})(${escapeHtml(JSON.stringify(options))})`;
+var scroll_restoration_inline_default = 'function(a,f){let l;try{l=JSON.parse(sessionStorage.getItem(a)||"{}")}catch{return}const n=l?.[f||history.state?.__TSR_key];let c=!1;for(const t in n){const e=n[t],o=e?.scrollX,s=e?.scrollY;if(Number.isFinite(o)&&Number.isFinite(s)){if(t==="window")scrollTo(o,s),c=!0;else if(t)try{const r=document.querySelector(t);r&&(r.scrollLeft=o,r.scrollTop=s)}catch{}}}if(c)return;const i=location.hash.slice(1);if(i){const t=history.state?.__hashScrollIntoViewOptions??!0;if(t){const e=document.getElementById(i);e&&e.scrollIntoView(t)}return}scrollTo(0,0)}';
+const defaultInlineScrollRestorationScript = `(${scroll_restoration_inline_default})(${escapeHtml(JSON.stringify(storageKey))})`;
+function getScrollRestorationScript(key) {
+  if (key === void 0) return defaultInlineScrollRestorationScript;
+  return `(${scroll_restoration_inline_default})(${escapeHtml(JSON.stringify(storageKey))},${escapeHtml(JSON.stringify(key))})`;
 }
 function getScrollRestorationScriptForRouter(router) {
   if (typeof router.options.scrollRestoration === "function" && !router.options.scrollRestoration({ location: router.latestLocation })) return null;
@@ -4266,23 +4681,28 @@ function getScrollRestorationScriptForRouter(router) {
   const location = router.latestLocation;
   const userKey = getKey(location);
   if (userKey === defaultGetScrollRestorationKey(location)) return defaultInlineScrollRestorationScript;
-  return getScrollRestorationScript({
-    storageKey,
-    shouldScrollRestoration: true,
-    key: userKey
-  });
+  return getScrollRestorationScript(userKey);
 }
 export {
-  createRawStreamRPCPlugin as A,
+  getNormalizedURL as A,
   BaseRootRoute as B,
-  isResolvedRedirect as C,
-  mergeHeaders as D,
-  executeRewriteInput as E,
-  defaultSerovalPlugins as F,
-  makeSerovalPlugin as G,
-  parseRedirect as H,
-  notFound as I,
+  getOrigin as C,
+  normalizeSsrResponse as D,
+  attachRouterServerSsrUtils as E,
+  createSerializationAdapter as F,
+  createRawStreamRPCPlugin as G,
+  isResolvedRedirect as H,
+  replaceSsrResponse as I,
+  mergeHeaders as J,
+  executeRewriteInput as K,
+  stripSsrResponseBody as L,
+  defaultSerovalPlugins as M,
+  makeSerovalPlugin as N,
+  getStylesheetHref as O,
+  isSsrResponse as P,
+  parseRedirect as Q,
   RouterCore as R,
+  notFound as S,
   isDangerousProtocol as a,
   BaseRoute as b,
   isModuleNotFoundError as c,
@@ -4290,23 +4710,23 @@ export {
   exactPathTest as e,
   functionalUpdate as f,
   isNotFound as g,
-  getScrollRestorationScriptForRouter as h,
+  hasKeys as h,
   invariant as i,
-  rootRouteId as j,
-  isServer as k,
-  isRedirect as l,
-  createNonReactiveReadonlyStore as m,
-  createNonReactiveMutableStore as n,
-  escapeHtml as o,
-  isInlinableStylesheet as p,
+  getScrollRestorationScriptForRouter as j,
+  rootRouteId as k,
+  isServer as l,
+  isRedirect as m,
+  createNonReactiveReadonlyStore as n,
+  createNonReactiveMutableStore as o,
+  escapeHtml as p,
   getAssetCrossOrigin as q,
   removeTrailingSlash as r,
-  resolveManifestAssetLink as s,
-  transformReadableStreamWithRouter as t,
-  transformPipeableStreamWithRouter as u,
-  defineHandlerCallback as v,
-  getNormalizedURL as w,
-  getOrigin as x,
-  attachRouterServerSsrUtils as y,
-  createSerializationAdapter as z
+  getScriptPreloadAttrs as s,
+  appendUniqueUserTags as t,
+  resolveManifestCssLink as u,
+  transformReadableStreamWithRouter as v,
+  createSsrStreamResponse as w,
+  transformPipeableStreamWithRouter as x,
+  defineHandlerCallback as y,
+  resolveManifestAssetLink as z
 };

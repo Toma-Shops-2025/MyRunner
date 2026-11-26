@@ -130,7 +130,7 @@ function NewDelivery() {
           toast.error("Could not start checkout.");
           nav({ to: "/app/orders/$id", params: { id: created.orderId } });
         }}
-        className="grid gap-6 rounded-2xl border border-border bg-card p-8"
+        className="grid gap-6 rounded-2xl border border-border bg-card p-4 sm:p-8"
       >
         <div className="grid gap-2">
           <Label>Delivery type</Label>
