@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Input } from "@/components/ui/input";
 import { getPublicConfig } from "@/lib/config.functions";
 
@@ -25,7 +25,10 @@ export function AddressAutocomplete({
   const [token, setToken] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({});
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getPublicConfig().then((c) => setToken(c.mapboxToken));
@@ -51,9 +54,43 @@ export function AddressAutocomplete({
     }, 250);
   }, [value, token]);
 
+  const positionDropdown = () => {
+    const input = inputRef.current;
+    if (!input) return;
+    const rect = input.getBoundingClientRect();
+  const maxHeight = Math.min(220, Math.max(120, window.innerHeight - rect.bottom - 16));
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      maxHeight,
+      zIndex: 60,
+    });
+  };
+
+  const scrollFieldIntoView = () => {
+    inputRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    positionDropdown();
+    const onResize = () => positionDropdown();
+    window.visualViewport?.addEventListener("resize", onResize);
+    window.visualViewport?.addEventListener("scroll", onResize);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", onResize);
+      window.visualViewport?.removeEventListener("scroll", onResize);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [open, suggestions.length]);
+
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative isolate">
       <Input
+        ref={inputRef}
         id={id}
         name={name}
         value={value}
@@ -61,19 +98,31 @@ export function AddressAutocomplete({
           setValue(e.target.value);
           onValueChange?.(e.target.value);
           setOpen(true);
+          positionDropdown();
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          scrollFieldIntoView();
+          setOpen(true);
+          positionDropdown();
+        }}
         onBlur={() => setTimeout(() => setOpen(false), 200)}
         placeholder={placeholder}
         required={required}
         autoComplete="off"
+        enterKeyHint="next"
+        className="text-base md:text-base"
       />
       {open && suggestions.length > 0 && (
-        <ul className="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-lg">
+        <ul
+          style={dropdownStyle}
+          className="overflow-auto rounded-lg border border-border bg-card p-1 shadow-lg"
+          role="listbox"
+        >
           {suggestions.map((s) => (
             <li key={s.id}>
               <button
                 type="button"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   setValue(s.place_name);
                   setSuggestions([]);

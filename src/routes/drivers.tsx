@@ -12,7 +12,12 @@ import {
   MapPin,
   Printer,
 } from "lucide-react";
-import { CARGO_INSURANCE_STATEMENT, DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
+import {
+  CARGO_INSURANCE_STATEMENT,
+  DRIVER_SCREENING_STATEMENT,
+  SSN_LAST4_CHECKR_STATEMENT,
+  SUPPORT_STATEMENT,
+} from "@/lib/public-facts";
 
 export const Route = createFileRoute("/drivers")({
   head: () => ({
@@ -149,6 +154,7 @@ function Drivers() {
             </li>
           ))}
         </ul>
+        <p className="mt-6 max-w-2xl text-sm text-muted-foreground">{SSN_LAST4_CHECKR_STATEMENT}</p>
         <div className="mt-10">
           <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">
             <Link to="/signup" search={{ intent: "driver" }}>

@@ -12,6 +12,7 @@ import { attachDriverReferrer } from "@/lib/referral.functions";
 import { clearDriverReferralCode, readDriverReferralCode } from "@/lib/signup-intent";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { SSN_LAST4_CHECKR_STATEMENT } from "@/lib/public-facts";
 
 const DRIVER_APPROVED_KEY = "myrunner-driver-just-approved";
 
@@ -94,12 +95,11 @@ function DriverSignup() {
             const fullName = String(fd.get("name") || profileName).trim();
             const phone = String(fd.get("phone") || "").trim();
             const dob = String(fd.get("dob") || "");
-            const ssnFull = String(fd.get("ssn") || "").replace(/\D/g, "");
-            const ssnLast4 = ssnFull.slice(-4);
+            const ssnLast4 = String(fd.get("ssn_last4") || "").replace(/\D/g, "").slice(0, 4);
 
             if (ssnLast4.length !== 4) {
               setBusy(false);
-              return toast.error("Please enter a valid SSN.");
+              return toast.error("Please enter the last four digits of your Social Security number.");
             }
 
             const currentUser = user;
@@ -176,10 +176,21 @@ function DriverSignup() {
 
           <Section title="Identity verification">
             <Field id="dob" label="Date of birth" type="date" />
-            <Field id="ssn" label="Social Security Number" placeholder="123-45-6789" />
-            <p className="col-span-full text-xs text-muted-foreground">
-              Only the last 4 digits are saved. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found.
-            </p>
+            <div className="grid gap-2 sm:col-span-2">
+              <Label htmlFor="ssn_last4">Social Security number — last 4 digits only</Label>
+              <Input
+                id="ssn_last4"
+                name="ssn_last4"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="6789"
+                maxLength={4}
+                pattern="[0-9]{4}"
+                required
+                className="max-w-[8rem] tracking-widest"
+              />
+              <p className="text-xs leading-relaxed text-muted-foreground">{SSN_LAST4_CHECKR_STATEMENT}</p>
+            </div>
           </Section>
 
           <Section title="Home address">
