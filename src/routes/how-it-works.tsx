@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
-import { CARGO_INSURANCE_STATEMENT, DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
+import { MARKET_LAUNCH_LINE } from "@/lib/public-facts";
+import { PreLaunchNotice } from "@/components/site/pre-launch-notice";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
@@ -27,7 +28,7 @@ const steps = [
   ["Track live", "Watch the Runner move in real time on a GPS map."],
   ["Chat in‑app", "Need to update the address or add a note? Message your Runner directly."],
   ["Photo proof", "A photo at drop‑off confirms delivery and goes straight to your order screen."],
-  ["Rate the delivery", "After a completed order you can leave a star rating. There is no published rating yet because there are no completed orders."],
+  ["Rate the delivery", "After a completed order you can leave a star rating."],
 ];
 
 function HowItWorks() {
@@ -39,9 +40,8 @@ function HowItWorks() {
           From your phone to their hands.
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-          Coming to your city very soon!!! Louisville is first. Multi-pickup and
-          multi-dropoff are available. {CARGO_INSURANCE_STATEMENT} {SUPPORT_STATEMENT}{" "}
-          {DRIVER_SCREENING_STATEMENT} Here's the order flow.
+          {MARKET_LAUNCH_LINE} Standard, multi-pickup, and multi-dropoff are
+          available. Here is the order flow.
         </p>
       </section>
       <section className="container-app pb-20">
@@ -54,6 +54,7 @@ function HowItWorks() {
             </li>
           ))}
         </ol>
+        <PreLaunchNotice className="mt-12 max-w-3xl" />
         <div className="mt-14 text-center">
           <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">
             <Link to="/signup">Create your account</Link>

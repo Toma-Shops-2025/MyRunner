@@ -8,14 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { LegalConsent } from "@/components/site/legal-consent";
 import { submitContactMessage } from "@/lib/support.functions";
-import {
-  CARGO_INSURANCE_STATEMENT,
-  DRIVER_SCREENING_STATEMENT,
-  SUPPORT_EMAIL,
-  SUPPORT_PHONE_DISPLAY,
-  SUPPORT_PHONE_TEL,
-  SUPPORT_STATEMENT,
-} from "@/lib/public-facts";
+import { SUPPORT_EMAIL, SUPPORT_PHONE_DISPLAY, SUPPORT_PHONE_TEL } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -41,10 +34,9 @@ function Contact() {
         <p className="text-xs uppercase tracking-widest text-gold">Contact</p>
         <h1 className="mt-3 font-serif text-6xl">Contact support.</h1>
         <p className="mt-4 max-w-xl text-muted-foreground">
-          Coming to your city very soon!!! {SUPPORT_STATEMENT} Call{" "}
+          Call{" "}
           <a className="text-gold underline" href={`tel:${SUPPORT_PHONE_TEL}`}>{SUPPORT_PHONE_DISPLAY}</a>{" "}
-          or email {SUPPORT_EMAIL}, or send the form below. {CARGO_INSURANCE_STATEMENT}{" "}
-          {DRIVER_SCREENING_STATEMENT} The Help button can answer common questions from the FAQ.
+          or email {SUPPORT_EMAIL}, or send the form below. The Help button answers common questions from the FAQ.
         </p>
       </section>
       <section className="container-app pb-24">

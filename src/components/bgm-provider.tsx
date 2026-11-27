@@ -61,7 +61,7 @@ function BgmMuteButton() {
     <button
       type="button"
       onClick={() => setMuted(!muted)}
-      className="fixed bottom-4 right-4 z-[60] flex size-11 items-center justify-center rounded-full border border-gold/40 bg-background/95 text-gold shadow-lg backdrop-blur-md transition-colors hover:bg-gold/10"
+      className="fixed bottom-4 right-[5.25rem] z-[55] flex size-11 items-center justify-center rounded-full border border-gold/40 bg-background/95 text-gold shadow-lg backdrop-blur-md transition-colors hover:bg-gold/10 sm:right-[5.75rem]"
       aria-label={muted ? "Unmute background music" : "Mute background music"}
       title={muted ? "Unmute music" : "Mute music"}
     >

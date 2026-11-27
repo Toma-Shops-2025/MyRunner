@@ -101,6 +101,8 @@ jobs:
         run: bun install
 
       - name: Build web bundle (Capacitor shell)
+        env:
+          NITRO_PRESET: netlify
         run: bun run build
 
       - name: Generate Android icons and splash

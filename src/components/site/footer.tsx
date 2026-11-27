@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./logo";
 import {
-  CARGO_INSURANCE_STATEMENT,
-  DRIVER_SCREENING_STATEMENT,
+  LAUNCH_BADGE,
+  PRE_LAUNCH_DISCLOSURE_SHORT,
   SUPPORT_EMAIL,
   SUPPORT_PHONE_DISPLAY,
   SUPPORT_PHONE_TEL,
-  SUPPORT_STATEMENT,
+  VENTURE_STATEMENT,
 } from "@/lib/public-facts";
 
 const cols = [
@@ -57,23 +57,24 @@ export function SiteFooter() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm font-semibold uppercase tracking-wide text-gold">
-              Coming to your city very soon!!!
+              {LAUNCH_BADGE}
             </p>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
               Anything. Anywhere. Anytime. Pickup and delivery for eligible items
-              between people and places. Louisville is first. Lexington is next.
+              between people and places.
             </p>
-            <p className="mt-6 max-w-xs text-xs text-muted-foreground">
-              {SUPPORT_STATEMENT}
-              <br />
+            <p className="mt-6 max-w-xs text-xs leading-relaxed text-muted-foreground">
+              {PRE_LAUNCH_DISCLOSURE_SHORT}
+            </p>
+            <p className="mt-4 max-w-xs text-xs text-muted-foreground">
               <a className="text-foreground hover:text-gold" href={`tel:${SUPPORT_PHONE_TEL}`}>
                 {SUPPORT_PHONE_DISPLAY}
               </a>
-              <br />
-              {SUPPORT_EMAIL}
+              {" · "}
+              <a className="text-foreground hover:text-gold" href={`mailto:${SUPPORT_EMAIL}`}>
+                {SUPPORT_EMAIL}
+              </a>
             </p>
-            <p className="mt-4 max-w-xs text-xs text-muted-foreground">{CARGO_INSURANCE_STATEMENT}</p>
-            <p className="mt-4 max-w-xs text-xs text-muted-foreground">{DRIVER_SCREENING_STATEMENT}</p>
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {cols.map((c) => (
@@ -103,15 +104,13 @@ export function SiteFooter() {
           <p className="mt-3">Anything. Anywhere. Anytime.</p>
           <p className="mt-6">© {new Date().getFullYear()} MyRunner. All rights reserved.</p>
           <p className="mt-2 flex flex-wrap items-center gap-2">
-            A venture developed under the Toma Ventures Group{" "}
+            {VENTURE_STATEMENT}{" "}
             <img
               src="/toma-ventures-mark.jpg"
               alt="Toma Ventures Group"
               className="inline-block size-6 rounded-full object-cover"
             />
-            brand.
           </p>
-          <p className="mt-2">Building Ideas. Creating Opportunity.</p>
         </div>
       </div>
     </footer>

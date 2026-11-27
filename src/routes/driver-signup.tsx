@@ -13,7 +13,7 @@ import { attachDriverReferrer } from "@/lib/referral.functions";
 import { clearDriverReferralCode, readDriverReferralCode } from "@/lib/signup-intent";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { SSN_LAST4_CHECKR_STATEMENT } from "@/lib/public-facts";
+import { MARKET_LAUNCH_LINE, SSN_LAST4_CHECKR_STATEMENT } from "@/lib/public-facts";
 import { isPlayReviewerEmail } from "@/lib/reviewer-accounts";
 
 const DRIVER_APPROVED_KEY = "myrunner-driver-just-approved";
@@ -127,7 +127,7 @@ function DriverSignup() {
         <p className="text-xs uppercase tracking-widest text-gold">Driver application</p>
         <h1 className="mt-3 font-serif text-5xl">Apply to drive</h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
-          Coming to your city very soon!!! Takes about 5 minutes. After MyRunner launches in a city or state, drivers there can start driving after the application, a driver's license, and their own auto insurance are provided. Once MyRunner uses Checkr, a driver is deactivated if any disqualifying charges are found. Support is available 24/7 after that launch.
+          Takes about five minutes. {MARKET_LAUNCH_LINE} You will need a valid license and your own auto insurance. Background checks through Checkr activate when MyRunner turns that program on in your market.
         </p>
 
         <form

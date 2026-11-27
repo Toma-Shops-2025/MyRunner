@@ -12,7 +12,7 @@ import {
 export const SUPPORT_FAQ = [
   {
     q: "What can I send with MyRunner?",
-    a: "Eligible items you already own, if they are legal and a Runner can carry them. Examples: belongings sent to another person, forgotten keys or a phone, a store or office pickup, or a gift. The buyer, pickup contact, and recipient can be different people. Standard, multi-pickup, and multi-dropoff are available. See Community Guidelines for prohibited items. Coming to your city very soon!!! Louisville is first.",
+    a: "Eligible items you already own, if they are legal and a Runner can carry them. Examples: belongings sent to another person, forgotten keys or a phone, a store or office pickup, or a gift. The buyer, pickup contact, and recipient can be different people. Standard, multi-pickup, and multi-dropoff are available. See Community Guidelines for prohibited items. Launching first in Louisville, Kentucky; Lexington is next.",
   },
   {
     q: "How is pricing calculated?",
@@ -64,7 +64,7 @@ export const SUPPORT_POLICIES = `
 Contact email: support@myrunner.shop
 Support phone: (502) 812-2456
 Support: ${SUPPORT_STATEMENT} Phone ${SUPPORT_PHONE_DISPLAY}. Email ${SUPPORT_EMAIL}. Say support is 24/7 after launch in a city or state. Do not say there is no support line.
-Launch: Coming to your city very soon!!! Louisville, Kentucky is first. Lexington is next. Pricing, 24/7 support, cargo insurance, refunds, and driver rules apply after MyRunner launches in that city or state.
+Launch: Louisville, Kentucky is first; Lexington is next. Pricing, support hours, cargo insurance, refunds, and driver rules expand as each city goes live. See the Safety page for the compliance roadmap.
 Insurance: ${CARGO_INSURANCE_STATEMENT} Do not say cargo insurance is already included today. Runners carry their own auto insurance.
 Background checks: ${DRIVER_SCREENING_STATEMENT} Do not say a clean background check is required before a driver can start. Do not say every Runner has already passed Checkr. Do not limit the start rule to Louisville only.
 Refunds: ${REFUND_POLICY_STATEMENT} ${APPROVED_REFUND_STATEMENT} Do not say there is no refund button.
