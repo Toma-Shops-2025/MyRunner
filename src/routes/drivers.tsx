@@ -199,7 +199,7 @@ function Drivers() {
             Get approved now. Be ready when your city lights up.
           </h2>
           <p className="mt-4 max-w-lg text-muted-foreground">
-            Coming to your city very soon!!! Louisville is the first market. Approved Runners there get the first offers. Lexington opens after Louisville is ready. {DRIVER_SCREENING_STATEMENT} {SUPPORT_STATEMENT}
+            Louisville is first — approved Runners there receive the first offers. Lexington opens when Louisville operations are ready. Apply now so you are vetted before the city goes live.
           </p>
           <p className="mt-4 max-w-lg text-sm text-gold/90">
             <strong>$25 referral:</strong> invite a driver. When they complete 3 deliveries, you both get $25.

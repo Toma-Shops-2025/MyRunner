@@ -4,3 +4,4 @@ Disallow: /app/
 Disallow: /driver/
 Disallow: /login
 Disallow: /signup
+Disallow: /deploy.json

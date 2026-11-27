@@ -16,6 +16,7 @@ public/deploy.json
 .vinxi
 .tanstack/**
 .nitro
+.netlify
 *.local
 
 # Env (secrets / local overrides — keep .env.example if added)

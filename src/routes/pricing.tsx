@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2 } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
-import { CARGO_INSURANCE_STATEMENT, DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
+import { MARKET_LAUNCH_LINE } from "@/lib/public-facts";
+import { PreLaunchNotice } from "@/components/site/pre-launch-notice";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -51,9 +52,8 @@ function Pricing() {
                 "Photo proof of delivery",
                 "Stripe-secured payments",
                 "Price shown before you pay",
-                CARGO_INSURANCE_STATEMENT,
                 "Multi-pickup and multi-dropoff",
-                "Coming to your city very soon!!!",
+                MARKET_LAUNCH_LINE,
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-gold" />
@@ -64,13 +64,11 @@ function Pricing() {
           </div>
         </div>
         <p className="mt-8 max-w-2xl text-sm text-muted-foreground">
-          Standard, multi-pickup, and multi-dropoff are available. Multi-pickup asks
-          for every pickup address. Multi-dropoff asks for every drop-off address.
-          Each extra address adds $3.00. {CARGO_INSURANCE_STATEMENT} There is no promo
-          code and no loyalty discount yet. Runners keep 70% of the delivery fee and
-          100% of tips. MyRunner keeps the other 30% of the delivery fee. {SUPPORT_STATEMENT}{" "}
-          {DRIVER_SCREENING_STATEMENT}
+          Multi-pickup asks for every pickup address; multi-dropoff asks for every
+          drop-off. Each extra address adds $3.00. Runners keep 70% of the delivery
+          fee and 100% of tips; MyRunner keeps the other 30%.
         </p>
+        <PreLaunchNotice className="mt-8 max-w-2xl" />
         <div className="mt-12 text-center">
           <Button asChild size="lg" className="bg-gold text-primary-foreground hover:bg-gold/90">
             <Link to="/signup">Send a delivery</Link>

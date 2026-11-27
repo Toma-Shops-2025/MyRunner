@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/page-shell";
-import { CARGO_INSURANCE_STATEMENT, DRIVER_SCREENING_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
+import { LAUNCH_BADGE, MARKET_LAUNCH_LINE } from "@/lib/public-facts";
+import { PreLaunchNotice } from "@/components/site/pre-launch-notice";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -21,10 +22,20 @@ function About() {
     <PageShell>
       <section className="container-app py-20">
         <p className="text-xs uppercase tracking-widest text-gold">About</p>
+        <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-gold">{LAUNCH_BADGE}</p>
         <h1 className="mt-3 max-w-3xl font-serif text-6xl leading-[1.05]">
           A marketplace for moving what you already have.
         </h1>
         <div className="mt-10 max-w-2xl space-y-6 text-lg text-muted-foreground">
+          <div className="grid gap-4 rounded-2xl border border-border bg-card p-6 text-base text-foreground">
+            <p className="font-serif text-xl">What we are building</p>
+            <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
+              <li>Pickup-and-delivery marketplace for eligible items — not restaurants, not a traditional courier.</li>
+              <li>{MARKET_LAUNCH_LINE}</li>
+              <li>Live GPS, in-app chat, photo proof at drop-off, and Stripe payments.</li>
+              <li>Runners keep 70% of the delivery fee and 100% of tips.</li>
+            </ul>
+          </div>
           <p>
             MyRunner is a broad pickup-and-delivery marketplace. It is not a restaurant
             app and it is not a traditional courier company. Customers arrange
@@ -39,20 +50,10 @@ function About() {
             different people.
           </p>
           <p>
-            Coming to your city very soon!!! Louisville, Kentucky is the first market.
-            Lexington is prepared as the second market and will open after Louisville
-            shows enough demand and the operation is ready.
+            Every delivery stays subject to applicable law, community guidelines on
+            prohibited items, and what a Runner can safely carry.
           </p>
-          <p>
-            Orders use live GPS while a Runner is on the job, in-app messages between
-            the customer and the Runner, a photo at drop-off, and Stripe for payment.
-            Choose standard, multi-pickup, or multi-dropoff. {CARGO_INSURANCE_STATEMENT}{" "}
-            {SUPPORT_STATEMENT} {DRIVER_SCREENING_STATEMENT}
-          </p>
-          <p>
-            Every delivery stays subject to applicable law, the prohibited-item rules,
-            and what a Runner can carry.
-          </p>
+          <PreLaunchNotice />
           <p className="font-serif text-2xl italic text-foreground">
             Anything. Anywhere. Anytime.
           </p>

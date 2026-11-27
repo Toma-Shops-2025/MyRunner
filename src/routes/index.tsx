@@ -3,14 +3,8 @@ import { ArrowRight, Package, Clock, MapPin, Shield, Star, Zap, Smartphone, User
 import { PageShell } from "@/components/site/page-shell";
 import { HeroBackgroundVideo } from "@/components/site/hero-background-video";
 import { Button } from "@/components/ui/button";
-import {
-  CARGO_INSURANCE_STATEMENT,
-  DRIVER_SCREENING_STATEMENT,
-  SUPPORT_EMAIL,
-  SUPPORT_PHONE_DISPLAY,
-  SUPPORT_PHONE_TEL,
-  SUPPORT_STATEMENT,
-} from "@/lib/public-facts";
+import { LAUNCH_BADGE, MARKET_LAUNCH_LINE } from "@/lib/public-facts";
+import { PreLaunchNotice } from "@/components/site/pre-launch-notice";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,12 +28,12 @@ function Landing() {
             <div className="max-w-2xl text-white">
               <span className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs uppercase tracking-widest text-gold backdrop-blur-sm font-bold shadow-glow">
                 <span className="size-1.5 animate-pulse rounded-full bg-gold" />
-                Coming to your city very soon!!!
+                {LAUNCH_BADGE}
               </span>
-              <h1 className="mt-6 font-serif text-6xl leading-[1.02] sm:text-7xl lg:text-8xl drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] font-black">
+              <h1 className="mt-6 font-serif text-6xl leading-[1.05] sm:text-7xl lg:text-8xl drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] font-black">
                 Need it moved?
                 <br />
-                <span className="italic text-gold italic">We're already on it.</span>
+                <span className="italic text-gold">Built for launch.</span>
               </h1>
               <p className="mt-8 max-w-xl text-lg text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] font-bold">
                 MyRunner arranges pickup and delivery of eligible items between people and places.
@@ -111,10 +105,10 @@ function Landing() {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-6 max-w-2xl text-sm text-white/40">
-                  Coming to your city very soon!!! Louisville is the first market. Lexington is next, after Louisville shows enough demand and the operation is ready. Deliveries stay subject to the law, prohibited-item rules, and what a Runner can carry. {CARGO_INSURANCE_STATEMENT} {SUPPORT_STATEMENT}{" "}
-                  <a className="underline" href={`tel:${SUPPORT_PHONE_TEL}`}>{SUPPORT_PHONE_DISPLAY}</a> · {SUPPORT_EMAIL}. {DRIVER_SCREENING_STATEMENT}
+                <p className="mt-6 max-w-2xl text-sm text-white/50">
+                  {MARKET_LAUNCH_LINE} Deliveries stay subject to applicable law, prohibited-item rules, and what a Runner can safely carry.
                 </p>
+                <PreLaunchNotice className="mt-8 max-w-2xl border-white/10 bg-white/5 text-white/70 [&_a]:text-gold" />
             </div>
 
             {/* PRICING BLOCK */}
@@ -129,7 +123,7 @@ function Landing() {
                         </Button>
                     </div>
                     <div className="space-y-4">
-                       {["Base fee: $5.99", "Mileage: $1.50/mi", "Multi-stop add-on: $3.00", CARGO_INSURANCE_STATEMENT, "100% of tips to your Runner"].map(line => (
+                       {["Base fee: $5.99", "Mileage: $1.50/mi", "Multi-stop add-on: $3.00", "Louisville & Lexington rollout", "100% of tips to your Runner"].map(line => (
                           <div key={line} className="bg-white/2 border border-white/5 p-6 rounded-2xl flex items-center gap-4 text-white/80 font-black uppercase text-[10px] tracking-widest">
                              <CheckCircle2 className="size-5 text-green-500" /> {line}
                           </div>
@@ -141,29 +135,6 @@ function Landing() {
           </div>
         </div>
 
-        {/* FOOTER FIX - HIGH CONTRAST */}
-        <footer className="bg-[#111] border-t border-white/10 pt-32 pb-20 text-center relative z-20">
-           <div className="container-app">
-              <h2 className="text-gold font-serif text-4xl mb-3 italic tracking-tighter">MyRunner</h2>
-              <p className="mb-6 text-xs font-black uppercase tracking-[0.25em] text-gold">Coming to your city very soon!!!</p>
-              <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-12">
-                 <Link to="/pricing" className="hover:text-gold transition-colors">Pricing</Link>
-                 <Link to="/safety" className="hover:text-gold transition-colors">Safety</Link>
-                 <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
-              </div>
-              <p className="text-white/70">Anything. Anywhere. Anytime.</p>
-              <p className="mx-auto mt-6 max-w-xl text-sm normal-case tracking-normal text-white/60">{SUPPORT_STATEMENT} {SUPPORT_PHONE_DISPLAY} · {SUPPORT_EMAIL}</p>
-              <p className="mx-auto mt-3 max-w-xl text-sm normal-case tracking-normal text-white/60">{CARGO_INSURANCE_STATEMENT}</p>
-              <p className="mx-auto mt-3 max-w-xl text-sm normal-case tracking-normal text-white/60">{DRIVER_SCREENING_STATEMENT}</p>
-              <p className="mt-4 text-sm text-white/60">© {new Date().getFullYear()} MyRunner. All rights reserved.</p>
-              <p className="mt-2 flex flex-wrap items-center justify-center gap-2 text-sm text-white/60">
-                A venture developed under the Toma Ventures Group
-                <img src="/toma-ventures-mark.jpg" alt="Toma Ventures Group" className="inline-block size-6 rounded-full object-cover" />
-                brand.
-              </p>
-              <p className="mt-2 text-sm text-white/60">Building Ideas. Creating Opportunity.</p>
-           </div>
-        </footer>
       </div>
     </PageShell>
   );

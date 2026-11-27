@@ -1,5 +1,16 @@
 /** One wording for every public page. Do not paraphrase these on the site. */
 
+/** Short badge for hero, footer, and marketing headers. */
+export const LAUNCH_BADGE = "Launching in Louisville · Lexington next";
+
+/** One-line market statement (no triple exclamation). */
+export const MARKET_LAUNCH_LINE =
+  "Louisville, Kentucky is the first market. Lexington follows once Louisville operations are ready.";
+
+/** Footer / end-of-page only — replaces repeating insurance + support + screening blocks. */
+export const PRE_LAUNCH_DISCLOSURE_SHORT =
+  "MyRunner is in pre-launch in Kentucky. Commercial delivery, cargo insurance, Checkr screening, and 24/7 support expand as each city goes live. See Safety for the full roadmap.";
+
 export const SUPPORT_PHONE_DISPLAY = "(502) 812-2456";
 export const SUPPORT_PHONE_TEL = "+15028122456";
 export const SUPPORT_EMAIL = "support@myrunner.shop";

@@ -14,7 +14,6 @@ import { createOrder } from "@/lib/order.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useBgmVolume } from "@/components/bgm-provider";
-import { CARGO_INSURANCE_STATEMENT, SUPPORT_STATEMENT } from "@/lib/public-facts";
 
 export const Route = createFileRoute("/app/new-delivery")({
   head: () => ({ meta: [{ title: "New delivery — MyRunner" }, { name: "robots", content: "noindex" }] }),
@@ -70,7 +69,9 @@ function NewDelivery() {
     <div className="space-y-6">
       <div>
         <h1 className="font-serif text-4xl">Send a delivery</h1>
-        <p className="text-muted-foreground">Tell us what to move and where. Standard, multi-pickup, and multi-dropoff are available. Coming to your city very soon!!! {CARGO_INSURANCE_STATEMENT} {SUPPORT_STATEMENT}</p>
+        <p className="text-muted-foreground">
+          Tell us what to move and where. Standard, multi-pickup, and multi-dropoff are available.
+        </p>
       </div>
       <form
         onSubmit={async (e) => {
