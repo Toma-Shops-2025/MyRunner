@@ -528,6 +528,23 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      upsert_driver_application_for_signup: {
+        Args: {
+          p_background_check_status: string
+          p_id: string
+          p_insurance_provider: string
+          p_license_number: string
+          p_license_state: string
+          p_notes: string
+          p_status: Database["public"]["Enums"]["driver_status"]
+          p_user_id: string
+          p_vehicle_make: string
+          p_vehicle_model: string
+          p_vehicle_type: string
+          p_vehicle_year: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "customer" | "driver" | "admin"

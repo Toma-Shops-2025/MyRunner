@@ -69,28 +69,29 @@ export const activateDriverRole = createServerFn({ method: "POST" })
       .maybeSingle();
     if (appReadErr) throw new Error(appReadErr.message);
 
-    const applicationRow = {
-      id: existingApp?.id ?? crypto.randomUUID(),
-      user_id: userId,
-      vehicle_make: data.vehicleMake || null,
-      vehicle_model: data.vehicleModel || null,
-      vehicle_year: data.vehicleYear,
-      vehicle_type: vehicleTypeLabel,
-      license_number: data.licenseNumber || null,
-      license_state: data.licenseState.toUpperCase().slice(0, 2) || null,
-      insurance_provider: data.insuranceProvider || null,
-      background_check_status: "pending" as const,
-      status: (reviewerAccount ? "approved" : "pending") as "approved" | "pending",
-      notes: null,
-    };
+    const appId = existingApp?.id ?? crypto.randomUUID();
+    const appStatus = (reviewerAccount ? "approved" : "pending") as "approved" | "pending";
 
-    const { error: appUpsertErr } = await supabaseAdmin
-      .from("driver_applications")
-      .upsert(applicationRow, { onConflict: "user_id" });
+    const { error: appUpsertErr } = await supabaseAdmin.rpc("upsert_driver_application_for_signup", {
+      p_id: appId,
+      p_user_id: userId,
+      p_vehicle_make: data.vehicleMake || null,
+      p_vehicle_model: data.vehicleModel || null,
+      p_vehicle_year: data.vehicleYear,
+      p_vehicle_type: vehicleTypeLabel,
+      p_license_number: data.licenseNumber || null,
+      p_license_state: data.licenseState.toUpperCase().slice(0, 2) || null,
+      p_insurance_provider: data.insuranceProvider || null,
+      p_background_check_status: "pending",
+      p_status: appStatus,
+      p_notes: null,
+    });
     if (appUpsertErr) {
-      throw new Error(
-        `driver_applications: ${appUpsertErr.message}. If this mentions driver_status "n/a", run docs/SUPABASE_FIX_DRIVER_NA_ENUM.sql in Supabase.`,
-      );
+      const hint =
+        appUpsertErr.message.includes("upsert_driver_application_for_signup")
+          ? "Run supabase/migrations/20261127170000_driver_application_signup_rpc.sql in the Supabase SQL Editor, then NOTIFY pgrst, 'reload schema';"
+          : "If this mentions driver_status \"n/a\", run docs/SUPABASE_FIX_DRIVER_NA_ENUM.sql in Supabase.";
+      throw new Error(`driver_applications: ${appUpsertErr.message}. ${hint}`);
     }
 
     const { data: existingRole, error: roleReadErr } = await supabaseAdmin

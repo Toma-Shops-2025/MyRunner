@@ -90,3 +90,19 @@ WHERE table_schema = 'public'
   AND table_name = 'driver_applications'
   AND column_name IN ('vehicle_type', 'background_check_status', 'status')
 ORDER BY column_name;
+
+-- 4) If submit still fails with driver_status "n/a" after step 1 looks fine, PostgREST may still
+--    treat vehicle_type as driver_status when using .upsert(). Run the full file:
+--    supabase/migrations/20261127170000_driver_application_signup_rpc.sql
+--    (creates upsert_driver_application_for_signup + forces vehicle_type to text).
+
+-- 5) Authoritative column types (not information_schema cache):
+SELECT a.attname AS column_name,
+       pg_catalog.format_type(a.atttypid, a.atttypmod) AS pg_type,
+       pg_get_expr(d.adbin, d.adrelid) AS column_default
+FROM pg_catalog.pg_attribute a
+LEFT JOIN pg_catalog.pg_attrdef d ON a.attrelid = d.adrelid AND a.attnum = d.adnum
+WHERE a.attrelid = 'public.driver_applications'::regclass
+  AND a.attnum > 0
+  AND NOT a.attisdropped
+ORDER BY a.attnum;
