@@ -62,19 +62,6 @@ export const activateDriverRole = createServerFn({ method: "POST" })
     // Send non-null vehicle_type: PostgREST omits null keys and DB default "n/a" breaks driver_status enum.
     const vehicleTypeLabel =
       [data.vehicleMake, data.vehicleModel].filter(Boolean).join(" ").trim() || "car";
-    const applicationPayload = {
-      vehicle_make: data.vehicleMake,
-      vehicle_model: data.vehicleModel,
-      vehicle_year: data.vehicleYear,
-      vehicle_type: vehicleTypeLabel,
-      license_number: data.licenseNumber,
-      license_state: data.licenseState.toUpperCase().slice(0, 2),
-      insurance_provider: data.insuranceProvider,
-      // driver_applications.background_check_status is text (pending/clear/failed), not profiles enum
-      background_check_status: reviewerAccount ? "clear" : "pending",
-      status: (reviewerAccount ? "approved" : "pending") as "approved" | "pending",
-    };
-
     const { data: existingApp, error: appReadErr } = await supabaseAdmin
       .from("driver_applications")
       .select("id")
@@ -82,19 +69,28 @@ export const activateDriverRole = createServerFn({ method: "POST" })
       .maybeSingle();
     if (appReadErr) throw new Error(appReadErr.message);
 
-    if (existingApp) {
-      const { error } = await supabaseAdmin
-        .from("driver_applications")
-        .update(applicationPayload)
-        .eq("user_id", userId);
-      if (error) throw new Error(error.message);
-    } else {
-      const { error } = await supabaseAdmin.from("driver_applications").insert({
-        id: crypto.randomUUID(),
-        user_id: userId,
-        ...applicationPayload,
-      });
-      if (error) throw new Error(error.message);
+    const applicationRow = {
+      id: existingApp?.id ?? crypto.randomUUID(),
+      user_id: userId,
+      vehicle_make: data.vehicleMake || null,
+      vehicle_model: data.vehicleModel || null,
+      vehicle_year: data.vehicleYear,
+      vehicle_type: vehicleTypeLabel,
+      license_number: data.licenseNumber || null,
+      license_state: data.licenseState.toUpperCase().slice(0, 2) || null,
+      insurance_provider: data.insuranceProvider || null,
+      background_check_status: "pending" as const,
+      status: (reviewerAccount ? "approved" : "pending") as "approved" | "pending",
+      notes: null,
+    };
+
+    const { error: appUpsertErr } = await supabaseAdmin
+      .from("driver_applications")
+      .upsert(applicationRow, { onConflict: "user_id" });
+    if (appUpsertErr) {
+      throw new Error(
+        `driver_applications: ${appUpsertErr.message}. If this mentions driver_status "n/a", run docs/SUPABASE_FIX_DRIVER_NA_ENUM.sql in Supabase.`,
+      );
     }
 
     const { data: existingRole, error: roleReadErr } = await supabaseAdmin
