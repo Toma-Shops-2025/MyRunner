@@ -21,6 +21,12 @@ WHERE table_schema = 'public'
   AND table_name = 'driver_applications'
   AND (udt_name = 'driver_status' OR column_default::text ILIKE '%n/a%');
 
+-- 1b) Drop any legacy defaults before type changes
+ALTER TABLE public.driver_applications
+  ALTER COLUMN vehicle_type DROP DEFAULT,
+  ALTER COLUMN background_check_status DROP DEFAULT,
+  ALTER COLUMN status DROP DEFAULT;
+
 -- 2) vehicle_type must be text, not driver_status enum
 DO $$
 BEGIN
