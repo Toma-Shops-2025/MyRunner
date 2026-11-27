@@ -87,11 +87,16 @@ export const activateDriverRole = createServerFn({ method: "POST" })
       p_notes: null,
     });
     if (appUpsertErr) {
-      const hint =
-        appUpsertErr.message.includes("upsert_driver_application_for_signup")
-          ? "Run supabase/migrations/20261127170000_driver_application_signup_rpc.sql in the Supabase SQL Editor, then NOTIFY pgrst, 'reload schema';"
-          : "If this mentions driver_status \"n/a\", run docs/SUPABASE_FIX_DRIVER_NA_ENUM.sql in Supabase.";
-      throw new Error(`driver_applications: ${appUpsertErr.message}. ${hint}`);
+      const missingRpc =
+        /upsert_driver_application_for_signup|PGRST202|Could not find the function/i.test(
+          appUpsertErr.message,
+        );
+      const hint = missingRpc
+        ? "Run docs/SUPABASE_RUN_NOW_DRIVER_SIGNUP.sql in the Supabase SQL Editor (full file), then retry."
+        : appUpsertErr.message.includes("n/a")
+          ? "Run docs/SUPABASE_RUN_NOW_DRIVER_SIGNUP.sql in Supabase — a column still has default n/a or the RPC is outdated."
+          : `Run docs/SUPABASE_RUN_NOW_DRIVER_SIGNUP.sql if the problem persists. (${appUpsertErr.code ?? "no-code"})`;
+      throw new Error(`driver_applications [signup-rpc]: ${appUpsertErr.message}. ${hint}`);
     }
 
     const { data: existingRole, error: roleReadErr } = await supabaseAdmin
